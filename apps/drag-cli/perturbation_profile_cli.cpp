@@ -22,9 +22,13 @@
 #include "astroforces/forces/third_body.hpp"
 #include "astroforces/models/exponential_atmosphere.hpp"
 #include "astroforces/sc/spacecraft.hpp"
+#include "astroforces/srp/srp_perturbation.hpp"
 #include "astroforces/weather/celestrak_csv_provider.hpp"
 
 namespace {
+
+constexpr double kDtmOperationalMinAltKm = 120.0;
+constexpr double kDtmOperationalMaxAltKm = 1500.0;
 
 double circular_speed_mps(double radius_m) {
   return std::sqrt(astroforces::atmo::constants::kEarthMuM3S2 / radius_m);
@@ -94,7 +98,7 @@ int main(int argc, char** argv) {
       astroforces::adapters::Dtm2020AtmosphereAdapter::Config{.coeff_file = dtm_coeff_file});
   astroforces::models::ZeroWindModel wind;
   astroforces::sc::SpacecraftProperties sc{
-      .mass_kg = 600.0, .reference_area_m2 = 4.0, .cd = 2.25, .use_surface_model = false, .surfaces = {}};
+      .mass_kg = 600.0, .reference_area_m2 = 4.0, .cd = 2.25, .cr = 1.3, .use_surface_model = false, .surfaces = {}};
   if (!weather) {
     spdlog::error("failed to initialize CelesTrak weather provider");
     return 6;
@@ -108,6 +112,9 @@ int main(int argc, char** argv) {
     std::string label{};
     astroforces::atmo::Frame frame{astroforces::atmo::Frame::ECI};
     std::unique_ptr<astroforces::forces::IPerturbationModel> model{};
+    bool has_valid_altitude_band{};
+    double min_alt_km{};
+    double max_alt_km{};
   };
 
   std::vector<ComponentModel> components{};
@@ -115,9 +122,20 @@ int main(int argc, char** argv) {
       .label = "drag",
       .frame = astroforces::atmo::Frame::ECEF,
       .model = std::make_unique<astroforces::drag::DragPerturbationModel>(*weather, *atmosphere, wind, &sc, "drag"),
+      .has_valid_altitude_band = true,
+      .min_alt_km = kDtmOperationalMinAltKm,
+      .max_alt_km = kDtmOperationalMaxAltKm,
   });
 
   if (!eph_file.empty()) {
+    components.push_back(ComponentModel{
+        .label = "srp",
+        .frame = astroforces::atmo::Frame::ECI,
+        .model = std::make_unique<astroforces::srp::SrpPerturbationModel>(
+            astroforces::srp::SrpAccelerationModel::Create({.ephemeris_file = std::filesystem::path(eph_file), .use_eclipse = false}),
+            &sc,
+            "srp"),
+    });
     components.push_back(ComponentModel{
         .label = "third_body_sun",
         .frame = astroforces::atmo::Frame::ECI,
@@ -133,6 +151,9 @@ int main(int argc, char** argv) {
   } else {
     spdlog::warn("no ephemeris path provided; third-body component curves will be omitted");
   }
+  spdlog::warn("drag component is limited to DTM operational validity band: [{}, {}] km",
+               kDtmOperationalMinAltKm,
+               kDtmOperationalMaxAltKm);
 
   out << "altitude_km";
   for (const auto& comp : components) {
@@ -166,6 +187,10 @@ int main(int argc, char** argv) {
     double rss_sum = 0.0;
 
     for (const auto& comp : components) {
+      if (comp.has_valid_altitude_band && (alt_km < comp.min_alt_km || alt_km > comp.max_alt_km)) {
+        comp_mags.push_back(0.0);
+        continue;
+      }
       const auto& state = (comp.frame == astroforces::atmo::Frame::ECEF) ? drag_state : third_state;
       const auto c = comp.model->evaluate(astroforces::forces::PerturbationRequest{.state = state, .spacecraft = &sc});
       const double m = magnitude(c.acceleration_mps2);
