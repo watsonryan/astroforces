@@ -43,6 +43,11 @@ Drag area modes:
 - Macro-model: set `use_surface_model=true` with surfaces; projected area is computed from plate normals and flow direction in body frame.
 - Body-frame flow direction uses `StateVector::body_from_frame_dcm` (row-major DCM).
 
+General perturbation interface:
+- Use `dragcpp::forces::IPerturbationModel` for each force source.
+- Combine models with `dragcpp::forces::PerturbationStack`.
+- Drag is exposed as `dragcpp::drag::DragPerturbationModel` and plugs directly into the same stack used for future gravity/SRP/third-body models.
+
 ## Next Integration Steps
 1. Replace `models-basic` with adapter-backed model bundle wiring.
 2. Implement real space weather readers/interpolation in `libs/space-weather`.

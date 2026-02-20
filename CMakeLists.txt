@@ -52,7 +52,9 @@ target_include_directories(dragcpp_models_basic PUBLIC ${CMAKE_SOURCE_DIR}/libs/
 target_link_libraries(dragcpp_models_basic PUBLIC dragcpp_atmo_core)
 
 add_library(dragcpp_drag_core STATIC
-  libs/drag-core/src/drag_model.cpp)
+  libs/drag-core/src/drag_model.cpp
+  libs/drag-core/src/drag_perturbation.cpp
+  libs/drag-core/src/perturbation.cpp)
 target_include_directories(dragcpp_drag_core PUBLIC ${CMAKE_SOURCE_DIR}/libs/drag-core/include)
 target_link_libraries(dragcpp_drag_core PUBLIC dragcpp_atmo_core dragcpp_sc_props)
 if(DRAGCPP_EIGEN_TARGET)
@@ -167,4 +169,13 @@ if(DRAGCPP_BUILD_TESTS)
     dragcpp_space_weather)
   target_compile_definitions(dragcpp_test_space_weather_real_snippet PRIVATE DRAGCPP_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
   add_test(NAME SpaceWeatherCelesTrakRealSnippet COMMAND dragcpp_test_space_weather_real_snippet)
+
+  add_executable(dragcpp_test_perturbation_stack tests/test_perturbation_stack.cpp)
+  target_link_libraries(dragcpp_test_perturbation_stack PRIVATE
+    dragcpp_atmo_core
+    dragcpp_space_weather
+    dragcpp_sc_props
+    dragcpp_models_basic
+    dragcpp_drag_core)
+  add_test(NAME PerturbationStack COMMAND dragcpp_test_perturbation_stack)
 endif()
