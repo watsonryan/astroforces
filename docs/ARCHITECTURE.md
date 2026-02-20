@@ -6,15 +6,12 @@ flowchart LR
   A[atmo-core] --> B[space-weather]
   A --> C[sc-props]
   A --> D[adapters]
-  A --> E[drag-core]
-  A --> R[srp-core]
+  A --> E[forces-core]
   A --> F[forces]
   B --> E
   C --> E
-  C --> R
   D --> E
   E --> F
-  R --> F
   T[third-body via jplEphem] --> F
   F --> G[drag_cli]
   F --> H[drag_batch_cli]
@@ -32,8 +29,7 @@ flowchart LR
 - `models-basic`: temporary baseline models for integration tests
 - `adapters`: integration seam for NRLMSIS/DTM/HWM wrappers
 - `sc-props`: spacecraft macro geometry and drag-relevant properties
-- `drag-core`: drag acceleration pipeline + generic perturbation interfaces
-- `srp-core`: solar radiation pressure acceleration pipeline
+- `forces-core`: drag, SRP, third-body, and generic perturbation interfaces
 - `forces/surface_force`: shared surface-force kernel (cannonball + macro plate projection)
 - `apps/drag-cli`: single-state CLI
 - `apps/drag_batch_cli`: batched drag outputs (CSV/JSON)

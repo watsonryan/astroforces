@@ -8,15 +8,12 @@ flowchart LR
   A[atmo-core<br/>types, frames, interfaces] --> B[space-weather<br/>CelesTrak CSV]
   A --> C[sc-props<br/>cannonball + macro surfaces]
   A --> D[adapters<br/>NRLMSIS / DTM2020 / HWM14]
-  A --> E[drag-core<br/>DragAccelerationModel]
-  A --> R[srp-core<br/>SrpAccelerationModel]
+  A --> E[forces-core<br/>Drag/SRP/Third-Body]
   A --> F[forces<br/>IPerturbationModel + PerturbationStack]
   B --> E
   C --> E
-  C --> R
   D --> E
   E --> F
-  R --> F
   T[third-body<br/>Sun+Moon via jplEphem] --> F
   F --> G[apps/drag-cli]
   F --> H[apps/drag_batch_cli]
