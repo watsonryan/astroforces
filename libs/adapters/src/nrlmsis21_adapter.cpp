@@ -49,7 +49,7 @@ dragcpp::atmo::AtmosphereSample Nrlmsis21AtmosphereAdapter::evaluate(const dragc
   in.stl_hr = dragcpp::atmo::local_solar_time_hours(state.epoch.utc_seconds, geo.lon_deg);
   in.f107a = weather.f107a;
   in.f107 = weather.f107;
-  in.ap = weather.ap;
+  in.ap = weather.has_ap_msis_history ? weather.ap_msis_history[0] : weather.ap_3h_current;
 
   const auto out = impl_->model_.evaluate(in);
   if (out.status != msis21::Status::Ok) {

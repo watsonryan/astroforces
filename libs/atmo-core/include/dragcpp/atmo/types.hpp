@@ -5,6 +5,7 @@
  */
 #pragma once
 
+#include <array>
 #include <cmath>
 #include <cstdint>
 
@@ -40,6 +41,7 @@ struct StateVector {
   Vec3 position_m{};
   Vec3 velocity_mps{};
   Frame frame{Frame::ECI};
+  std::array<double, 9> body_from_frame_dcm{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
 };
 
 struct GeodeticPoint {
@@ -51,8 +53,16 @@ struct GeodeticPoint {
 struct WeatherIndices {
   double f107{};
   double f107a{};
-  double ap{};
-  double kp{};
+  double ap{};  // Daily AP average.
+  double kp{};  // Daily KP average (0-9 scale).
+  double ap_3h_current{};
+  double kp_3h_current{};
+  std::array<double, 8> ap_3h_utc{};
+  std::array<double, 8> kp_3h_utc{};  // 0-9 scale.
+  std::array<double, 7> ap_msis_history{};  // Current, -3h, -6h, -9h, avg12-33, avg36-57, avg60-81.
+  bool has_ap_msis_history{};
+  bool f107_observed{true};
+  bool geomagnetic_observed{true};
   WeatherSource source{WeatherSource::Unknown};
   bool interpolated{};
   bool extrapolated{};

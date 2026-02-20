@@ -53,5 +53,37 @@ int main() {
     return 3;
   }
 
+  sc::SpacecraftProperties macro_sc{
+      .mass_kg = 1000.0,
+      .reference_area_m2 = 99.0,
+      .cd = 2.0,
+      .use_surface_model = true,
+      .surfaces = {
+          sc::Surface{.normal_body = atmo::Vec3{-1.0, 0.0, 0.0}, .area_m2 = 2.0, .cd = 2.0},
+          sc::Surface{.normal_body = atmo::Vec3{0.0, -1.0, 0.0}, .area_m2 = 4.0, .cd = 2.0},
+      },
+  };
+
+  atmo::StateVector state_identity = state;
+  state_identity.body_from_frame_dcm = {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
+  const auto macro_identity = model.evaluate(state_identity, macro_sc);
+  if (macro_identity.status != atmo::Status::Ok || !approx(macro_identity.area_m2, 2.0, 1e-12)) {
+    std::cerr << "macro identity area mismatch\n";
+    return 4;
+  }
+
+  atmo::StateVector state_rot = state;
+  state_rot.body_from_frame_dcm = {0.0, -1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0};  // +90deg yaw
+  const auto macro_rot = model.evaluate(state_rot, macro_sc);
+  if (macro_rot.status != atmo::Status::Ok || !approx(macro_rot.area_m2, 4.0, 1e-12)) {
+    std::cerr << "macro rotated area mismatch\n";
+    return 5;
+  }
+
+  if (!approx(out.area_m2, 10.0, 1e-12)) {
+    std::cerr << "cannonball area mismatch\n";
+    return 6;
+  }
+
   return 0;
 }

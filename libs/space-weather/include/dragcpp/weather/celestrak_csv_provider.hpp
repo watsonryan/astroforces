@@ -5,6 +5,7 @@
  */
 #pragma once
 
+#include <array>
 #include <filesystem>
 #include <memory>
 #include <vector>
@@ -21,6 +22,10 @@ class CelesTrakCsvSpaceWeatherProvider final : public dragcpp::atmo::ISpaceWeath
     double f107_obs_center81{};
     double ap_avg{};
     double kp_avg{};
+    std::array<double, 8> ap_3h_utc{};
+    std::array<double, 8> kp_3h_utc{};
+    bool f107_observed{true};
+    bool geomagnetic_observed{true};
   };
 
   struct Config {

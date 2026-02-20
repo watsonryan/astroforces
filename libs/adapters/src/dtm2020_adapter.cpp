@@ -51,7 +51,7 @@ dragcpp::atmo::AtmosphereSample Dtm2020AtmosphereAdapter::evaluate(const dragcpp
   in.day_of_year = static_cast<double>(doy);
   in.f107 = weather.f107;
   in.f107m = weather.f107a;
-  in.kp_delayed_3h = weather.kp;
+  in.kp_delayed_3h = weather.kp_3h_current;
   in.kp_mean_24h = weather.kp;
 
   const auto out = impl_->model_.Evaluate(in);

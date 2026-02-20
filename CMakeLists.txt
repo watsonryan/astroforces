@@ -15,6 +15,21 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 include(${CMAKE_SOURCE_DIR}/cmake/CPM.cmake)
+set(DRAGCPP_EIGEN_REPO "https://gitlab.com/libeigen/eigen.git" CACHE STRING "Eigen repository URL")
+set(DRAGCPP_EIGEN_TAG "5.0.0" CACHE STRING "Eigen git tag")
+
+CPMAddPackage(
+  NAME eigen
+  GIT_REPOSITORY ${DRAGCPP_EIGEN_REPO}
+  GIT_TAG ${DRAGCPP_EIGEN_TAG}
+)
+
+set(DRAGCPP_EIGEN_TARGET "")
+if(TARGET Eigen3::Eigen)
+  set(DRAGCPP_EIGEN_TARGET Eigen3::Eigen)
+elseif(TARGET eigen)
+  set(DRAGCPP_EIGEN_TARGET eigen)
+endif()
 
 add_library(dragcpp_atmo_core INTERFACE)
 target_include_directories(dragcpp_atmo_core INTERFACE ${CMAKE_SOURCE_DIR}/libs/atmo-core/include)
@@ -40,6 +55,9 @@ add_library(dragcpp_drag_core STATIC
   libs/drag-core/src/drag_model.cpp)
 target_include_directories(dragcpp_drag_core PUBLIC ${CMAKE_SOURCE_DIR}/libs/drag-core/include)
 target_link_libraries(dragcpp_drag_core PUBLIC dragcpp_atmo_core dragcpp_sc_props)
+if(DRAGCPP_EIGEN_TARGET)
+  target_link_libraries(dragcpp_drag_core PRIVATE ${DRAGCPP_EIGEN_TARGET})
+endif()
 
 add_library(dragcpp_adapters STATIC
   libs/adapters/src/placeholders.cpp
@@ -142,4 +160,11 @@ if(DRAGCPP_BUILD_TESTS)
     dragcpp_atmo_core
     dragcpp_space_weather)
   add_test(NAME SpaceWeatherCelesTrak COMMAND dragcpp_test_space_weather)
+
+  add_executable(dragcpp_test_space_weather_real_snippet tests/test_space_weather_celestrak_real_snippet.cpp)
+  target_link_libraries(dragcpp_test_space_weather_real_snippet PRIVATE
+    dragcpp_atmo_core
+    dragcpp_space_weather)
+  target_compile_definitions(dragcpp_test_space_weather_real_snippet PRIVATE DRAGCPP_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+  add_test(NAME SpaceWeatherCelesTrakRealSnippet COMMAND dragcpp_test_space_weather_real_snippet)
 endif()

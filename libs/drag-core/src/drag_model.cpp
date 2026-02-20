@@ -8,6 +8,8 @@
 
 #include <cmath>
 
+#include <Eigen/Dense>
+
 namespace dragcpp::drag {
 
 DragResult DragAccelerationModel::evaluate(const dragcpp::atmo::StateVector& state,
@@ -37,7 +39,13 @@ DragResult DragAccelerationModel::evaluate(const dragcpp::atmo::StateVector& sta
     return DragResult{.status = dragcpp::atmo::Status::NumericalError};
   }
 
-  const dragcpp::atmo::Vec3 flow_dir_body = (speed > 0.0) ? (vrel / speed) : dragcpp::atmo::Vec3{};
+  dragcpp::atmo::Vec3 flow_dir_body{};
+  if (speed > 0.0) {
+    const Eigen::Vector3d flow_frame(vrel.x / speed, vrel.y / speed, vrel.z / speed);
+    const Eigen::Map<const Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> body_from_frame(state.body_from_frame_dcm.data());
+    const Eigen::Vector3d flow_body = body_from_frame * flow_frame;
+    flow_dir_body = dragcpp::atmo::Vec3{flow_body.x(), flow_body.y(), flow_body.z()};
+  }
   const double area = dragcpp::sc::projected_area_m2(sc, flow_dir_body);
   const double cd = sc.cd;
 
