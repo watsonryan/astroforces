@@ -46,17 +46,23 @@ DragResult DragAccelerationModel::evaluate(const dragcpp::atmo::StateVector& sta
     const Eigen::Vector3d flow_body = body_from_frame * flow_frame;
     flow_dir_body = dragcpp::atmo::Vec3{flow_body.x(), flow_body.y(), flow_body.z()};
   }
-  const double area = dragcpp::sc::projected_area_m2(sc, flow_dir_body);
-  const double cd = sc.cd;
+  const auto aero = dragcpp::sc::projected_area_and_cd(sc, flow_dir_body);
+  const double area = aero.area_m2;
+  const double cd = aero.cd_effective;
 
   const double coeff = -0.5 * a.density_kg_m3 * cd * area / sc.mass_kg;
   const auto accel = coeff * speed * vrel;
+  const double q_pa = 0.5 * a.density_kg_m3 * speed * speed;
 
   return DragResult{.acceleration_mps2 = accel,
                     .relative_velocity_mps = vrel,
                     .density_kg_m3 = a.density_kg_m3,
+                    .temperature_k = a.temperature_k,
+                    .relative_speed_mps = speed,
+                    .dynamic_pressure_pa = q_pa,
                     .area_m2 = area,
                     .cd = cd,
+                    .weather = w,
                     .status = dragcpp::atmo::Status::Ok};
 }
 

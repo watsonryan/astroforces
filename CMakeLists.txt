@@ -1,6 +1,6 @@
 # Author: Watosn
 cmake_minimum_required(VERSION 3.25)
-project(drag_cpp VERSION 0.1.0 LANGUAGES CXX)
+project(astrodynamics_forces_cpp VERSION 0.1.0 LANGUAGES CXX)
 
 option(DRAGCPP_BUILD_TESTS "Build tests" ON)
 option(DRAGCPP_WARNINGS_AS_ERRORS "Treat warnings as errors" ON)
@@ -109,7 +109,16 @@ target_link_libraries(drag_cli PRIVATE
   dragcpp_models_basic
   dragcpp_drag_core)
 
-foreach(tgt dragcpp_space_weather dragcpp_sc_props dragcpp_models_basic dragcpp_drag_core dragcpp_adapters drag_cli)
+add_executable(drag_batch_cli apps/drag-cli/drag_batch_cli.cpp)
+target_link_libraries(drag_batch_cli PRIVATE
+  dragcpp_atmo_core
+  dragcpp_space_weather
+  dragcpp_sc_props
+  dragcpp_adapters
+  dragcpp_models_basic
+  dragcpp_drag_core)
+
+foreach(tgt dragcpp_space_weather dragcpp_sc_props dragcpp_models_basic dragcpp_drag_core dragcpp_adapters drag_cli drag_batch_cli)
   if(MSVC)
     target_compile_options(${tgt} PRIVATE /W4)
     if(DRAGCPP_WARNINGS_AS_ERRORS)
@@ -178,4 +187,12 @@ if(DRAGCPP_BUILD_TESTS)
     dragcpp_models_basic
     dragcpp_drag_core)
   add_test(NAME PerturbationStack COMMAND dragcpp_test_perturbation_stack)
+
+  add_executable(dragcpp_perf_benchmark tests/drag_perf_benchmark.cpp)
+  target_link_libraries(dragcpp_perf_benchmark PRIVATE
+    dragcpp_atmo_core
+    dragcpp_space_weather
+    dragcpp_sc_props
+    dragcpp_models_basic
+    dragcpp_drag_core)
 endif()

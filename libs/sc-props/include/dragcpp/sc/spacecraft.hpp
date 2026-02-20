@@ -27,7 +27,14 @@ struct SpacecraftProperties {
   std::vector<Surface> surfaces{};
 };
 
+struct AeroProjection {
+  double area_m2{};
+  double cd_effective{};
+};
+
 [[nodiscard]] double projected_area_m2(const SpacecraftProperties& sc,
                                        const dragcpp::atmo::Vec3& flow_dir_body);
+[[nodiscard]] AeroProjection projected_area_and_cd(const SpacecraftProperties& sc,
+                                                   const dragcpp::atmo::Vec3& flow_dir_body);
 
 }  // namespace dragcpp::sc

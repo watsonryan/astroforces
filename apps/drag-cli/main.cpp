@@ -1,6 +1,6 @@
 /**
  * @file main.cpp
- * @brief drag-cpp command-line entrypoint.
+ * @brief astrodynamics-forces-cpp drag command-line entrypoint.
  * @author Watosn
  */
 
@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
   const std::string model_name = (argc >= 9) ? argv[8] : "basic";
   const std::string model_data = (argc >= 10) ? argv[9] : "";
   const std::string wind_name = (argc >= 11) ? argv[10] : "zero";
-  const std::string wind_data = (argc >= 12) ? argv[11] : "";
+const std::string wind_data = (argc >= 12) ? argv[11] : "";
 
   std::unique_ptr<dragcpp::atmo::ISpaceWeatherProvider> weather{};
   if (!weather_csv.empty()) {
@@ -83,6 +83,11 @@ int main(int argc, char** argv) {
 
   std::cout << "ax=" << result.acceleration_mps2.x << " ay=" << result.acceleration_mps2.y
             << " az=" << result.acceleration_mps2.z << "\n";
-  std::cout << "rho=" << result.density_kg_m3 << " area=" << result.area_m2 << " cd=" << result.cd << "\n";
+  std::cout << "rho=" << result.density_kg_m3 << " temp_k=" << result.temperature_k << " vrel_mps=" << result.relative_speed_mps
+            << " q_pa=" << result.dynamic_pressure_pa << " area=" << result.area_m2 << " cd_eff=" << result.cd << "\n";
+  std::cout << "wx_source=" << static_cast<int>(result.weather.source) << " wx_interp=" << (result.weather.interpolated ? 1 : 0)
+            << " wx_extrap=" << (result.weather.extrapolated ? 1 : 0) << " f107=" << result.weather.f107
+            << " f107a=" << result.weather.f107a << " ap=" << result.weather.ap << " kp=" << result.weather.kp
+            << " ap3h=" << result.weather.ap_3h_current << " kp3h=" << result.weather.kp_3h_current << "\n";
   return 0;
 }

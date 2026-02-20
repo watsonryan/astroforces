@@ -14,8 +14,12 @@ struct DragResult {
   dragcpp::atmo::Vec3 acceleration_mps2{};
   dragcpp::atmo::Vec3 relative_velocity_mps{};
   double density_kg_m3{};
+  double temperature_k{};
+  double relative_speed_mps{};
+  double dynamic_pressure_pa{};
   double area_m2{};
   double cd{};
+  dragcpp::atmo::WeatherIndices weather{};
   dragcpp::atmo::Status status{dragcpp::atmo::Status::Ok};
 };
 
