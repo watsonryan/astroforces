@@ -50,6 +50,12 @@ int main() {
       {.ephemeris_file = eph_path, .use_sun = true, .use_moon = false, .name = "third_sun"});
   const auto moon = astroforces::forces::ThirdBodyPerturbationModel::Create(
       {.ephemeris_file = eph_path, .use_sun = false, .use_moon = true, .name = "third_moon"});
+  const auto both_no_eq79 = astroforces::forces::ThirdBodyPerturbationModel::Create(
+      {.ephemeris_file = eph_path,
+       .use_sun = true,
+       .use_moon = true,
+       .use_goce_eq79_indirect_j2 = false,
+       .name = "third_both_no_eq79"});
 
   const auto req = astroforces::forces::PerturbationRequest{.state = state, .spacecraft = nullptr};
   const auto c_both = both->evaluate(req);
@@ -78,11 +84,25 @@ int main() {
     return 4;
   }
 
+  const auto c_both_no_eq79 = both_no_eq79->evaluate(req);
+  if (c_both_no_eq79.status != astroforces::atmo::Status::Ok) {
+    std::cerr << "third-body evaluation without eq79 failed\n";
+    return 5;
+  }
+  const auto eq79_delta = astroforces::atmo::Vec3{
+      c_both.acceleration_mps2.x - c_both_no_eq79.acceleration_mps2.x,
+      c_both.acceleration_mps2.y - c_both_no_eq79.acceleration_mps2.y,
+      c_both.acceleration_mps2.z - c_both_no_eq79.acceleration_mps2.z};
+  if (!(astroforces::atmo::norm(eq79_delta) > 0.0)) {
+    std::cerr << "goce eq79 indirect j2 term was not applied\n";
+    return 6;
+  }
+
   state.frame = astroforces::atmo::Frame::ECEF;
   const auto c_bad_frame = both->evaluate(astroforces::forces::PerturbationRequest{.state = state, .spacecraft = nullptr});
   if (c_bad_frame.status != astroforces::atmo::Status::InvalidInput) {
     std::cerr << "expected invalid frame error\n";
-    return 5;
+    return 7;
   }
 
   return 0;

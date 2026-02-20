@@ -24,6 +24,7 @@ class ThirdBodyPerturbationModel final : public IPerturbationModel {
     std::filesystem::path ephemeris_file{};
     bool use_sun{true};
     bool use_moon{true};
+    bool use_goce_eq79_indirect_j2{true};
     double mu_sun_m3_s2{1.32712440018e20};
     double mu_moon_m3_s2{4.9048695e12};
     std::string name{"third_body"};
