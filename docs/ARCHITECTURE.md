@@ -17,6 +17,8 @@ flowchart LR
   F --> H[drag_batch_cli]
   F --> X[third_body_cli]
   F --> Y[third_body_batch_cli]
+  F --> R[erp_cli]
+  F --> V[erp_batch_cli]
   F --> S[srp_cli]
   F --> U[srp_batch_cli]
   F --> P[perturbation_profile_cli]
@@ -29,12 +31,14 @@ flowchart LR
 - `models-basic`: temporary baseline models for integration tests
 - `adapters`: integration seam for NRLMSIS/DTM/HWM wrappers
 - `sc-props`: spacecraft macro geometry and drag-relevant properties
-- `forces-core`: drag, SRP, third-body, and generic perturbation interfaces
+- `forces-core`: drag, ERP, SRP, third-body, and generic perturbation interfaces
 - `forces/surface_force`: shared surface-force kernel (cannonball + macro plate projection)
 - `apps/drag-cli`: single-state CLI
 - `apps/drag_batch_cli`: batched drag outputs (CSV/JSON)
 - `apps/third_body_cli`: single-state Sun/Moon third-body evaluation
 - `apps/third_body_batch_cli`: batched Sun/Moon third-body outputs
+- `apps/erp_cli`: single-state ERP evaluation
+- `apps/erp_batch_cli`: batched ERP outputs
 - `apps/srp_cli`: single-state SRP evaluation
 - `apps/srp_batch_cli`: batched SRP outputs
 - `apps/perturbation_profile_cli`: altitude sweep profiler with per-component outputs
@@ -45,6 +49,7 @@ flowchart LR
 - `astroforces::forces::PerturbationStack`: additive combiner for all perturbation models.
 - `astroforces::drag::DragPerturbationModel`: drag implementation of the generic interface.
 - `astroforces::forces::ThirdBodyPerturbationModel`: configurable Sun/Moon third-body model.
+- `astroforces::erp::ErpPerturbationModel`: ERP implementation of the generic interface.
 - `astroforces::srp::SrpPerturbationModel`: SRP implementation of the generic interface.
 
 ## Design Rules

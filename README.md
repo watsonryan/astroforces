@@ -8,7 +8,7 @@ flowchart LR
   A[atmo-core<br/>types, frames, interfaces] --> B[space-weather<br/>CelesTrak CSV]
   A --> C[sc-props<br/>cannonball + macro surfaces]
   A --> D[adapters<br/>NRLMSIS / DTM2020 / HWM14]
-  A --> E[forces-core<br/>Drag/SRP/Third-Body]
+  A --> E[forces-core<br/>Drag/ERP/SRP/Third-Body]
   A --> F[forces<br/>IPerturbationModel + PerturbationStack]
   B --> E
   C --> E
@@ -21,6 +21,8 @@ flowchart LR
   F --> Y[apps/third_body_batch_cli]
   F --> S[apps/srp_cli]
   F --> U[apps/srp_batch_cli]
+  F --> R[apps/erp_cli]
+  F --> V[apps/erp_batch_cli]
   F --> P[apps/perturbation_profile_cli]
   P --> Q[scripts/plot_perturbation_profile.py]
   I[external repos via CPM] --> D
@@ -95,8 +97,20 @@ General perturbation interface:
 - Combine models with `astroforces::forces::PerturbationStack`.
 - Drag is exposed as `astroforces::drag::DragPerturbationModel` and plugs directly into the same stack used for future gravity/SRP/third-body models.
 - Third-body is exposed as `astroforces::forces::ThirdBodyPerturbationModel` (Sun/Moon direct + indirect terms via JPL ephemerides).
+- ERP is exposed via `astroforces::erp::ErpAccelerationModel` and `astroforces::erp::ErpPerturbationModel`.
 - SRP is exposed via `astroforces::srp::SrpAccelerationModel` and `astroforces::srp::SrpPerturbationModel`.
-- Drag and SRP both use the shared surface-force kernel (`astroforces::forces::evaluate_surface_force`) for cannonball/macro area+coefficient handling.
+- Drag, ERP, and SRP all use the shared surface-force kernel (`astroforces::forces::evaluate_surface_force`) for cannonball/macro area+coefficient handling.
+
+ERP single-state CLI:
+```bash
+./build/macos-debug/erp_cli 6778137 0 0 0 7670 0 1000000000 600 4 1.3
+```
+
+ERP batch CLI:
+```bash
+./build/macos-debug/erp_batch_cli input_eci.csv erp_output.csv 600 4 1.3
+```
+Output schema reference: `docs/ERP_OUTPUT_SCHEMA.md`
 
 SRP single-state CLI:
 ```bash
@@ -112,7 +126,7 @@ Output schema reference: `docs/SRP_OUTPUT_SCHEMA.md`
 Perturbation-vs-altitude profiling:
 ```bash
 ./build/macos-debug/perturbation_profile_cli perturbation_profile.csv 200 20000 500 \
-  /path/to/operational_regression_coeff.dat \
+  /path/to/DTM_2020_F107_Kp.dat \
   /path/to/SW-Last5Years.csv \
   /path/to/linux_p1550p2650.440 \
   1000000000
@@ -121,12 +135,15 @@ python3 scripts/plot_perturbation_profile.py perturbation_profile.csv --output-s
 This generates publication-ready IEEE-style PDF/PNG plots of acceleration magnitude by perturbation component versus altitude.
 Output columns include:
 - `drag_mps2`
+- `erp_mps2`
+- `srp_mps2` (if ephemeris provided)
 - `third_body_sun_mps2`
 - `third_body_moon_mps2`
 - `total_mps2`
 
 Notes:
 - Third-body columns are component-based and extensible for future bodies (additional `*_mps2` columns).
+- Plot output intentionally omits the `total_mps2` curve and focuses on component lines.
 - Output schema reference: `docs/PERTURBATION_PROFILE_SCHEMA.md`.
 
 Performance benchmark:

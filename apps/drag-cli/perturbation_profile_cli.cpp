@@ -18,6 +18,7 @@
 #include "astroforces/atmo/conversions.hpp"
 #include "astroforces/atmo/constants.hpp"
 #include "astroforces/drag/drag_perturbation.hpp"
+#include "astroforces/forces/erp_perturbation.hpp"
 #include "astroforces/forces/perturbation.hpp"
 #include "astroforces/forces/third_body.hpp"
 #include "astroforces/models/exponential_atmosphere.hpp"
@@ -29,6 +30,9 @@ namespace {
 
 constexpr double kDtmOperationalMinAltKm = 120.0;
 constexpr double kDtmOperationalMaxAltKm = 1500.0;
+constexpr const char* kRequiredDtmCoeffFilename = "DTM_2020_F107_Kp.dat";
+
+bool is_required_dtm_coeff_file(const std::filesystem::path& path) { return path.filename() == kRequiredDtmCoeffFilename; }
 
 double circular_speed_mps(double radius_m) {
   return std::sqrt(astroforces::atmo::constants::kEarthMuM3S2 / radius_m);
@@ -81,6 +85,10 @@ int main(int argc, char** argv) {
     spdlog::error("dtm coeff file not found: {}", dtm_coeff_file.string());
     return 4;
   }
+  if (!is_required_dtm_coeff_file(dtm_coeff_file)) {
+    spdlog::error("dtm coeff file must be {} (received: {})", kRequiredDtmCoeffFilename, dtm_coeff_file.filename().string());
+    return 8;
+  }
   if (!std::filesystem::exists(space_weather_csv)) {
     spdlog::error("space weather csv not found: {}", space_weather_csv.string());
     return 5;
@@ -125,6 +133,11 @@ int main(int argc, char** argv) {
       .has_valid_altitude_band = true,
       .min_alt_km = kDtmOperationalMinAltKm,
       .max_alt_km = kDtmOperationalMaxAltKm,
+  });
+  components.push_back(ComponentModel{
+      .label = "erp",
+      .frame = astroforces::atmo::Frame::ECI,
+      .model = std::make_unique<astroforces::erp::ErpPerturbationModel>(astroforces::erp::ErpAccelerationModel{}, &sc, "erp"),
   });
 
   if (!eph_file.empty()) {

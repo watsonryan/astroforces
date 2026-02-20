@@ -60,7 +60,8 @@ def load_csv(path: Path):
 def pretty_label(key: str) -> str:
     core = key.replace("_mps2", "")
     parts = core.split("_")
-    return " ".join(p.capitalize() for p in parts)
+    acronyms = {"srp": "SRP", "erp": "ERP"}
+    return " ".join(acronyms.get(p, p.capitalize()) for p in parts)
 
 
 def apply_ieee_style(column: str) -> tuple[float, float]:
@@ -93,15 +94,31 @@ def main() -> None:
     width_in, height_in = apply_ieee_style(args.column)
 
     fig, ax = plt.subplots(figsize=(width_in, height_in))
+    lines = []
     for key, vals in series.items():
-        ax.semilogy(alt_km, vals, label=pretty_label(key))
-    ax.semilogy(alt_km, total, label="Total", color="#000000", linestyle="--")
-
+        line = ax.semilogy(alt_km, vals, label=pretty_label(key))[0]
+        lines.append((pretty_label(key), line, vals))
     ax.set_xlabel("Altitude [km]")
     ax.set_ylabel("Acceleration Magnitude [m/s$^2$]")
     ax.grid(True, which="major", linestyle="-", linewidth=0.4, alpha=0.35)
     ax.grid(True, which="minor", linestyle=":", linewidth=0.3, alpha=0.25)
-    ax.legend(loc="best", frameon=True, framealpha=0.9, edgecolor="0.2")
+    handles = [line for _, line, _ in lines]
+    labels = [name for name, _, _ in lines]
+    legend = ax.legend(
+        handles,
+        labels,
+        loc="upper left",
+        bbox_to_anchor=(1.02, 1.0),
+        borderaxespad=0.0,
+        frameon=False,
+        fontsize=6.0,
+        handlelength=0.0,
+        handletextpad=0.25,
+    )
+    for h in legend.legend_handles:
+        h.set_visible(False)
+    for text, (_, line, _) in zip(legend.get_texts(), lines):
+        text.set_color(line.get_color())
 
     out_pdf = args.output_stem.with_suffix(".pdf")
     out_png = args.output_stem.with_suffix(".png")

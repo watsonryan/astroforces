@@ -22,6 +22,7 @@ Then one or more component columns:
 
 Current default components:
 - `drag_mps2`
+- `erp_mps2`
 - `third_body_sun_mps2` (if ephemeris provided)
 - `third_body_moon_mps2` (if ephemeris provided)
 
@@ -32,4 +33,3 @@ Final columns:
 ## Extensibility
 New perturbation components can be added without schema break by appending additional
 `<component_name>_mps2` columns before `total_mps2,status`.
-

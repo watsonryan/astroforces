@@ -15,5 +15,6 @@ inline constexpr double kMoonMuM3S2 = 4.9048695e12;
 inline constexpr double kEarthC20FullyNormalized = -4.84165143790815e-4;
 inline constexpr double kAstronomicalUnitM = 149597870700.0;
 inline constexpr double kSolarRadiationPressureAt1AuPa = 4.56e-6;
+inline constexpr double kEarthRadiationPressureAtEarthRadiusPa = 8.0e-7;
 
 }  // namespace astroforces::atmo::constants
