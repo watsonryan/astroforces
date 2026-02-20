@@ -11,6 +11,7 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <ctime>
 #include <vector>
 
 #include "dragcpp/adapters/dtm2020_adapter.hpp"
@@ -66,7 +67,12 @@ bool parse_sample_row(const std::string& line, SampleRow& out) {
     if (tok.empty()) {
       return false;
     }
-    values.push_back(std::strtod(tok.c_str(), nullptr));
+    char* end = nullptr;
+    const double v = std::strtod(tok.c_str(), &end);
+    if (end == tok.c_str() || *end != '\0') {
+      return false;
+    }
+    values.push_back(v);
   }
   if (values.size() != 7U) {
     return false;
@@ -95,6 +101,10 @@ int main(int argc, char** argv) {
   const std::string wind_name = (argc >= 7) ? argv[6] : "zero";
   const std::string wind_data = (argc >= 8) ? argv[7] : "";
   const std::string weather_csv = (argc >= 9) ? argv[8] : "";
+  if (format != "csv" && format != "json") {
+    std::cerr << "format must be csv or json\n";
+    return 4;
+  }
 
   std::ifstream in(input_path);
   if (!in) {
@@ -140,9 +150,18 @@ int main(int argc, char** argv) {
       .mass_kg = 1200.0, .reference_area_m2 = 12.0, .cd = 2.2, .use_surface_model = false, .surfaces = {}};
   dragcpp::drag::DragAccelerationModel drag(*weather, *atmosphere, *wind);
 
+  std::time_t now = std::time(nullptr);
   if (format == "csv") {
+    out << "#record_type=metadata,schema=drag_batch_v1,project=astrodynamics-forces-cpp,generated_unix_utc=" << now
+        << ",model=" << model_name << ",model_data=" << model_data << ",wind=" << wind_name << ",wind_data=" << wind_data
+        << ",weather_csv=" << weather_csv << "\n";
     out << "epoch_utc_s,ax_mps2,ay_mps2,az_mps2,rho_kg_m3,temp_k,vrel_mps,q_pa,area_m2,cd_eff,"
            "wx_source,wx_interp,wx_extrap,f107,f107a,ap_daily,kp_daily,ap_3h,kp_3h,status\n";
+  } else {
+    out << "{\"record_type\":\"metadata\",\"schema\":\"drag_batch_v1\",\"project\":\"astrodynamics-forces-cpp\","
+           "\"generated_unix_utc\":" << now << ",\"model\":\"" << model_name << "\",\"model_data\":\"" << model_data
+        << "\",\"wind\":\"" << wind_name << "\",\"wind_data\":\"" << wind_data << "\",\"weather_csv\":\"" << weather_csv
+        << "\"}\n";
   }
 
   std::string line;
@@ -169,7 +188,8 @@ int main(int argc, char** argv) {
 
     const auto r = drag.evaluate(state, sc);
     if (format == "json") {
-      out << "{\"epoch_utc_s\":" << row.epoch_utc_s << ",\"ax_mps2\":" << r.acceleration_mps2.x
+      out << "{\"record_type\":\"sample\",\"schema\":\"drag_batch_v1\",\"epoch_utc_s\":" << row.epoch_utc_s
+          << ",\"ax_mps2\":" << r.acceleration_mps2.x
           << ",\"ay_mps2\":" << r.acceleration_mps2.y << ",\"az_mps2\":" << r.acceleration_mps2.z
           << ",\"rho_kg_m3\":" << r.density_kg_m3 << ",\"temp_k\":" << r.temperature_k
           << ",\"vrel_mps\":" << r.relative_speed_mps << ",\"q_pa\":" << r.dynamic_pressure_pa

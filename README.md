@@ -32,6 +32,7 @@ Batch CLI:
 ```
 Input row format:
 - `epoch_utc_s,x_m,y_m,z_m,vx_mps,vy_mps,vz_mps`
+- Output schema reference: `docs/DRAG_OUTPUT_SCHEMA.md`
 
 Optional weather input:
 - Pass CelesTrak 5-year CSV as final arg:

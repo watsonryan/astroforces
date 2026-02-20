@@ -11,6 +11,7 @@
 - Cross-model consistency checks on shared scenarios
 - NRLMSIS Ap-history adapter plumbing validation
 - Drag batch output schema checks (CSV/JSON rows)
+- Direct adapter-vs-model parity assertion for NRLMSIS `ap_history` mode
 
 ## Stage 3 (Operational)
 - Golden trajectory drag acceleration regressions
