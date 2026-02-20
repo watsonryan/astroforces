@@ -5,7 +5,7 @@ Unified C++20 astrodynamics perturbation modeling platform, with drag implemente
 ## Architecture
 ```mermaid
 flowchart LR
-  A[atmo-core<br/>types, frames, interfaces] --> B[space-weather<br/>static + CelesTrak CSV]
+  A[atmo-core<br/>types, frames, interfaces] --> B[space-weather<br/>CelesTrak CSV]
   A --> C[sc-props<br/>cannonball + macro surfaces]
   A --> D[adapters<br/>NRLMSIS / DTM2020 / HWM14]
   A --> E[drag-core<br/>DragAccelerationModel]
@@ -17,6 +17,8 @@ flowchart LR
   T[third-body<br/>Sun+Moon via jplEphem] --> F
   F --> G[apps/drag-cli]
   F --> H[apps/drag_batch_cli]
+  F --> P[apps/perturbation_profile_cli]
+  P --> Q[scripts/plot_perturbation_profile.py]
   I[external repos via CPM] --> D
   I --> T
   I --> B
@@ -79,14 +81,23 @@ General perturbation interface:
 
 Perturbation-vs-altitude profiling:
 ```bash
-./build/macos-debug/perturbation_profile_cli perturbation_profile.csv 200 1000 200 \
+./build/macos-debug/perturbation_profile_cli perturbation_profile.csv 200 20000 500 \
   /path/to/operational_regression_coeff.dat \
   /path/to/SW-Last5Years.csv \
   /path/to/linux_p1550p2650.440 \
   1000000000
 python3 scripts/plot_perturbation_profile.py perturbation_profile.csv --output-stem perturbation_vs_altitude --column single
 ```
-This generates publication-ready IEEE-style PDF/PNG plots of acceleration magnitude by perturbation type versus altitude.
+This generates publication-ready IEEE-style PDF/PNG plots of acceleration magnitude by perturbation component versus altitude.
+Output columns include:
+- `drag_mps2`
+- `third_body_sun_mps2`
+- `third_body_moon_mps2`
+- `total_mps2`
+
+Notes:
+- Third-body columns are component-based and extensible for future bodies (additional `*_mps2` columns).
+- Output schema reference: `docs/PERTURBATION_PROFILE_SCHEMA.md`.
 
 Performance benchmark:
 ```bash

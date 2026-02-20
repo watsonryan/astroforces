@@ -9,6 +9,7 @@
 #include <fstream>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <fmt/format.h>
 #include <spdlog/spdlog.h>
@@ -103,19 +104,42 @@ int main(int argc, char** argv) {
     return 7;
   }
 
-  auto drag_model = std::make_unique<astroforces::drag::DragPerturbationModel>(*weather, *atmosphere, wind, &sc, "drag");
-  std::unique_ptr<astroforces::forces::ThirdBodyPerturbationModel> third_body_model{};
+  struct ComponentModel {
+    std::string label{};
+    astroforces::atmo::Frame frame{astroforces::atmo::Frame::ECI};
+    std::unique_ptr<astroforces::forces::IPerturbationModel> model{};
+  };
 
-  bool third_body_enabled = false;
+  std::vector<ComponentModel> components{};
+  components.push_back(ComponentModel{
+      .label = "drag",
+      .frame = astroforces::atmo::Frame::ECEF,
+      .model = std::make_unique<astroforces::drag::DragPerturbationModel>(*weather, *atmosphere, wind, &sc, "drag"),
+  });
+
   if (!eph_file.empty()) {
-    third_body_model = astroforces::forces::ThirdBodyPerturbationModel::Create(
-        {.ephemeris_file = std::filesystem::path(eph_file), .use_sun = true, .use_moon = true, .name = "third_body"});
-    third_body_enabled = true;
+    components.push_back(ComponentModel{
+        .label = "third_body_sun",
+        .frame = astroforces::atmo::Frame::ECI,
+        .model = astroforces::forces::ThirdBodyPerturbationModel::Create(
+            {.ephemeris_file = std::filesystem::path(eph_file), .use_sun = true, .use_moon = false, .name = "third_body_sun"}),
+    });
+    components.push_back(ComponentModel{
+        .label = "third_body_moon",
+        .frame = astroforces::atmo::Frame::ECI,
+        .model = astroforces::forces::ThirdBodyPerturbationModel::Create(
+            {.ephemeris_file = std::filesystem::path(eph_file), .use_sun = false, .use_moon = true, .name = "third_body_moon"}),
+    });
   } else {
-    spdlog::warn("no ephemeris path provided; third-body curve will be zero");
+    spdlog::warn("no ephemeris path provided; third-body component curves will be omitted");
   }
 
-  out << "altitude_km,drag_mps2,third_body_mps2,total_mps2,status\n";
+  out << "altitude_km";
+  for (const auto& comp : components) {
+    out << "," << comp.label << "_mps2";
+  }
+  out << ",total_mps2,status\n";
+
   for (int i = 0; i < samples; ++i) {
     const double u = static_cast<double>(i) / static_cast<double>(samples - 1);
     const double alt_km = alt_min_km + (alt_max_km - alt_min_km) * u;
@@ -130,33 +154,32 @@ int main(int argc, char** argv) {
     drag_state.position_m = r_ecef_m;
     drag_state.velocity_mps = v_ecef_mps;
 
-    const auto drag_c =
-        drag_model->evaluate(astroforces::forces::PerturbationRequest{.state = drag_state, .spacecraft = &sc});
-    const double drag_mag = magnitude(drag_c.acceleration_mps2);
+    astroforces::atmo::StateVector third_state{};
+    third_state.epoch.utc_seconds = epoch_utc_s;
+    third_state.frame = astroforces::atmo::Frame::ECI;
+    third_state.position_m = ecef_to_eci(r_ecef_m, epoch_utc_s);
+    third_state.velocity_mps = astroforces::atmo::Vec3{};
 
-    double third_body_mag = 0.0;
-    astroforces::atmo::Status status = drag_c.status;
-    if (third_body_enabled && third_body_model) {
-      astroforces::atmo::StateVector third_state{};
-      third_state.epoch.utc_seconds = epoch_utc_s;
-      third_state.frame = astroforces::atmo::Frame::ECI;
-      third_state.position_m = ecef_to_eci(r_ecef_m, epoch_utc_s);
-      third_state.velocity_mps = astroforces::atmo::Vec3{};
-      const auto third_c =
-          third_body_model->evaluate(astroforces::forces::PerturbationRequest{.state = third_state, .spacecraft = &sc});
-      third_body_mag = magnitude(third_c.acceleration_mps2);
-      if (status == astroforces::atmo::Status::Ok && third_c.status != astroforces::atmo::Status::Ok) {
-        status = third_c.status;
+    std::vector<double> comp_mags{};
+    comp_mags.reserve(components.size());
+    astroforces::atmo::Status status = astroforces::atmo::Status::Ok;
+    double rss_sum = 0.0;
+
+    for (const auto& comp : components) {
+      const auto& state = (comp.frame == astroforces::atmo::Frame::ECEF) ? drag_state : third_state;
+      const auto c = comp.model->evaluate(astroforces::forces::PerturbationRequest{.state = state, .spacecraft = &sc});
+      const double m = magnitude(c.acceleration_mps2);
+      comp_mags.push_back(m);
+      rss_sum += m * m;
+      if (status == astroforces::atmo::Status::Ok && c.status != astroforces::atmo::Status::Ok) {
+        status = c.status;
       }
     }
-    const double total_mag = std::sqrt(drag_mag * drag_mag + third_body_mag * third_body_mag);
-
-    out << fmt::format("{:.6f},{:.12e},{:.12e},{:.12e},{}\n",
-                       alt_km,
-                       drag_mag,
-                       third_body_mag,
-                       total_mag,
-                       static_cast<int>(status));
+    out << fmt::format("{:.6f}", alt_km);
+    for (const double m : comp_mags) {
+      out << fmt::format(",{:.12e}", m);
+    }
+    out << fmt::format(",{:.12e},{}\n", std::sqrt(rss_sum), static_cast<int>(status));
   }
 
   spdlog::info("wrote perturbation profile: {}", out_csv.string());

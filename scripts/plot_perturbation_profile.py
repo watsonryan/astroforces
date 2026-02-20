@@ -35,17 +35,32 @@ def parse_args() -> argparse.Namespace:
 
 def load_csv(path: Path):
     alt_km = []
-    drag = []
-    third_body = []
     total = []
+    component_keys = []
+    series = {}
     with path.open("r", newline="") as f:
         reader = csv.DictReader(f)
+        if reader.fieldnames is None:
+            raise RuntimeError("CSV has no header")
+        component_keys = [
+            k
+            for k in reader.fieldnames
+            if k.endswith("_mps2") and k not in ("total_mps2",)
+        ]
+        for k in component_keys:
+            series[k] = []
         for row in reader:
             alt_km.append(float(row["altitude_km"]))
-            drag.append(float(row["drag_mps2"]))
-            third_body.append(float(row["third_body_mps2"]))
+            for k in component_keys:
+                series[k].append(float(row[k]))
             total.append(float(row["total_mps2"]))
-    return alt_km, drag, third_body, total
+    return alt_km, series, total
+
+
+def pretty_label(key: str) -> str:
+    core = key.replace("_mps2", "")
+    parts = core.split("_")
+    return " ".join(p.capitalize() for p in parts)
 
 
 def apply_ieee_style(column: str) -> tuple[float, float]:
@@ -74,12 +89,12 @@ def apply_ieee_style(column: str) -> tuple[float, float]:
 
 def main() -> None:
     args = parse_args()
-    alt_km, drag, third_body, total = load_csv(args.input_csv)
+    alt_km, series, total = load_csv(args.input_csv)
     width_in, height_in = apply_ieee_style(args.column)
 
     fig, ax = plt.subplots(figsize=(width_in, height_in))
-    ax.semilogy(alt_km, drag, label="Drag", color="#1f77b4")
-    ax.semilogy(alt_km, third_body, label="Third-Body", color="#d62728")
+    for key, vals in series.items():
+        ax.semilogy(alt_km, vals, label=pretty_label(key))
     ax.semilogy(alt_km, total, label="Total", color="#000000", linestyle="--")
 
     ax.set_xlabel("Altitude [km]")
@@ -98,4 +113,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
