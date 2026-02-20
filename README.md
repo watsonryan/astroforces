@@ -2,6 +2,24 @@
 
 Unified C++20 astrodynamics perturbation modeling platform, with drag implemented first.
 
+## Architecture
+```mermaid
+flowchart LR
+  A[atmo-core<br/>types, frames, interfaces] --> B[space-weather<br/>static + CelesTrak CSV]
+  A --> C[sc-props<br/>cannonball + macro surfaces]
+  A --> D[adapters<br/>NRLMSIS / DTM2020 / HWM14]
+  A --> E[drag-core<br/>DragAccelerationModel]
+  A --> F[forces<br/>IPerturbationModel + PerturbationStack]
+  B --> E
+  C --> E
+  D --> E
+  E --> F
+  F --> G[apps/drag-cli]
+  F --> H[apps/drag_batch_cli]
+  I[external repos via CPM] --> D
+  I --> B
+```
+
 ## Scope
 - Shared force interfaces (`IPerturbationModel`, `PerturbationStack`)
 - Drag acceleration core (relative velocity + ballistic term)
