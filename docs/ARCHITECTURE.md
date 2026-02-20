@@ -15,6 +15,8 @@ flowchart LR
   T[third-body via jplEphem] --> F
   F --> G[drag_cli]
   F --> H[drag_batch_cli]
+  F --> X[third_body_cli]
+  F --> Y[third_body_batch_cli]
   F --> P[perturbation_profile_cli]
   P --> Q[plot_perturbation_profile.py]
 ```
@@ -28,6 +30,8 @@ flowchart LR
 - `drag-core`: drag acceleration pipeline + generic perturbation interfaces
 - `apps/drag-cli`: single-state CLI
 - `apps/drag_batch_cli`: batched drag outputs (CSV/JSON)
+- `apps/third_body_cli`: single-state Sun/Moon third-body evaluation
+- `apps/third_body_batch_cli`: batched Sun/Moon third-body outputs
 - `apps/perturbation_profile_cli`: altitude sweep profiler with per-component outputs
 - `scripts/plot_perturbation_profile.py`: publication-style plot generation for profile CSV
 

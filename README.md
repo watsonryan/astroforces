@@ -17,6 +17,8 @@ flowchart LR
   T[third-body<br/>Sun+Moon via jplEphem] --> F
   F --> G[apps/drag-cli]
   F --> H[apps/drag_batch_cli]
+  F --> X[apps/third_body_cli]
+  F --> Y[apps/third_body_batch_cli]
   F --> P[apps/perturbation_profile_cli]
   P --> Q[scripts/plot_perturbation_profile.py]
   I[external repos via CPM] --> D
@@ -61,6 +63,19 @@ Optional weather input:
 ```bash
 ./build/macos-debug/drag_cli 6778137 0 0 0 7670 0 1000000000 nrlmsis /path/to/msis21.parm zero "" /path/to/SW-Last5Years.csv
 ```
+
+Third-body single-state CLI:
+```bash
+./build/macos-debug/third_body_cli 6778137 0 0 0 7670 0 1000000000 /path/to/linux_p1550p2650.440 1 1
+```
+
+Third-body batch CLI:
+```bash
+./build/macos-debug/third_body_batch_cli input_eci.csv third_body_output.csv /path/to/linux_p1550p2650.440 1 1
+```
+Input row format:
+- `epoch_utc_s,x_eci_m,y_eci_m,z_eci_m,vx_eci_mps,vy_eci_mps,vz_eci_mps`
+- Output schema reference: `docs/THIRD_BODY_OUTPUT_SCHEMA.md`
 
 Weather mapping notes:
 - CelesTrak KP columns are parsed in tenths and converted to 0-9 scale.

@@ -154,7 +154,17 @@ target_link_libraries(perturbation_profile_cli PRIVATE
   dragcpp_models_basic
   dragcpp_drag_core)
 
-foreach(tgt dragcpp_space_weather dragcpp_sc_props dragcpp_models_basic dragcpp_drag_core dragcpp_adapters drag_cli drag_batch_cli perturbation_profile_cli)
+add_executable(third_body_cli apps/forces-cli/third_body_cli.cpp)
+target_link_libraries(third_body_cli PRIVATE
+  dragcpp_atmo_core
+  dragcpp_drag_core)
+
+add_executable(third_body_batch_cli apps/forces-cli/third_body_batch_cli.cpp)
+target_link_libraries(third_body_batch_cli PRIVATE
+  dragcpp_atmo_core
+  dragcpp_drag_core)
+
+foreach(tgt dragcpp_space_weather dragcpp_sc_props dragcpp_models_basic dragcpp_drag_core dragcpp_adapters drag_cli drag_batch_cli perturbation_profile_cli third_body_cli third_body_batch_cli)
   if(MSVC)
     target_compile_options(${tgt} PRIVATE /W4)
     if(DRAGCPP_WARNINGS_AS_ERRORS)
