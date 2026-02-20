@@ -77,6 +77,13 @@ General perturbation interface:
 - Drag is exposed as `astroforces::drag::DragPerturbationModel` and plugs directly into the same stack used for future gravity/SRP/third-body models.
 - Third-body is exposed as `astroforces::forces::ThirdBodyPerturbationModel` (Sun/Moon direct + indirect terms via JPL ephemerides).
 
+Perturbation-vs-altitude profiling:
+```bash
+./build/macos-debug/perturbation_profile_cli perturbation_profile.csv 200 1000 200 /path/to/linux_p1550p2650.440 1000000000
+python3 scripts/plot_perturbation_profile.py perturbation_profile.csv --output-stem perturbation_vs_altitude --column single
+```
+This generates publication-ready IEEE-style PDF/PNG plots of acceleration magnitude by perturbation type versus altitude.
+
 Performance benchmark:
 ```bash
 ./build/macos-debug/dragcpp_perf_benchmark

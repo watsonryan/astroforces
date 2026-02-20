@@ -145,7 +145,16 @@ target_link_libraries(drag_batch_cli PRIVATE
   dragcpp_models_basic
   dragcpp_drag_core)
 
-foreach(tgt dragcpp_space_weather dragcpp_sc_props dragcpp_models_basic dragcpp_drag_core dragcpp_adapters drag_cli drag_batch_cli)
+add_executable(perturbation_profile_cli apps/drag-cli/perturbation_profile_cli.cpp)
+target_link_libraries(perturbation_profile_cli PRIVATE
+  dragcpp_atmo_core
+  dragcpp_space_weather
+  dragcpp_sc_props
+  dragcpp_adapters
+  dragcpp_models_basic
+  dragcpp_drag_core)
+
+foreach(tgt dragcpp_space_weather dragcpp_sc_props dragcpp_models_basic dragcpp_drag_core dragcpp_adapters drag_cli drag_batch_cli perturbation_profile_cli)
   if(MSVC)
     target_compile_options(${tgt} PRIVATE /W4)
     if(DRAGCPP_WARNINGS_AS_ERRORS)
