@@ -8,7 +8,7 @@ flowchart LR
   A[atmo-core<br/>types, frames, interfaces] --> B[space-weather<br/>CelesTrak CSV]
   A --> C[sc-props<br/>cannonball + macro surfaces]
   A --> D[adapters<br/>NRLMSIS / DTM2020 / HWM14]
-  A --> E[forces-core<br/>Drag/ERP/SRP/Third-Body]
+  A --> E[forces-core<br/>Drag/ERP/SRP/Relativity/Third-Body]
   A --> F[forces<br/>IPerturbationModel + PerturbationStack]
   B --> E
   C --> E
@@ -23,6 +23,7 @@ flowchart LR
   F --> U[apps/srp_batch_cli]
   F --> R[apps/erp_cli]
   F --> V[apps/erp_batch_cli]
+  F --> W[apps/relativity_cli]
   F --> P[apps/perturbation_profile_cli]
   P --> Q[scripts/plot_perturbation_profile.py]
   I[external repos via CPM] --> D
@@ -99,6 +100,7 @@ General perturbation interface:
 - Third-body is exposed as `astroforces::forces::ThirdBodyPerturbationModel` (Sun/Moon direct + indirect terms via JPL ephemerides).
 - ERP is exposed via `astroforces::erp::ErpAccelerationModel` and `astroforces::erp::ErpPerturbationModel`.
 - SRP is exposed via `astroforces::srp::SrpAccelerationModel` and `astroforces::srp::SrpPerturbationModel`.
+- Relativity is exposed via `astroforces::forces::RelativityAccelerationModel` and `astroforces::forces::RelativityPerturbationModel`.
 - Drag, ERP, and SRP all use the shared surface-force kernel (`astroforces::forces::evaluate_surface_force`) for cannonball/macro area+coefficient handling.
 
 ERP single-state CLI:
@@ -111,6 +113,13 @@ ERP batch CLI:
 ./build/macos-debug/erp_batch_cli input_eci.csv erp_output.csv 600 4 1.3
 ```
 Output schema reference: `docs/ERP_OUTPUT_SCHEMA.md`
+
+Relativity single-state CLI:
+```bash
+./build/macos-debug/relativity_cli 6778137 0 0 0 7670 0 1000000000 /path/to/linux_p1550p2650.440 1
+```
+Output schema reference: `docs/RELATIVITY_OUTPUT_SCHEMA.md`
+Model notes reference: `docs/RELATIVITY_MODEL_NOTES.md`
 
 SRP single-state CLI:
 ```bash
@@ -136,6 +145,7 @@ This generates publication-ready IEEE-style PDF/PNG plots of acceleration magnit
 Output columns include:
 - `drag_mps2`
 - `erp_mps2`
+- `relativity_mps2`
 - `srp_mps2` (if ephemeris provided)
 - `third_body_sun_mps2`
 - `third_body_moon_mps2`

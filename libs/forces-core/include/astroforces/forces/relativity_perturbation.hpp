@@ -1,0 +1,30 @@
+/**
+ * @file relativity_perturbation.hpp
+ * @brief Relativity perturbation wrapper for generic force stack.
+ * @author Watosn
+ */
+#pragma once
+
+#include <memory>
+#include <string>
+
+#include "astroforces/forces/perturbation.hpp"
+#include "astroforces/forces/relativity_model.hpp"
+
+namespace astroforces::forces {
+
+class RelativityPerturbationModel final : public IPerturbationModel {
+ public:
+  explicit RelativityPerturbationModel(std::unique_ptr<RelativityAccelerationModel> relativity,
+                                       std::string name = "relativity")
+      : relativity_(std::move(relativity)), name_(std::move(name)) {}
+
+  [[nodiscard]] PerturbationContribution evaluate(const PerturbationRequest& request) const override;
+
+ private:
+  std::unique_ptr<RelativityAccelerationModel> relativity_{};
+  std::string name_{};
+};
+
+}  // namespace astroforces::forces
+

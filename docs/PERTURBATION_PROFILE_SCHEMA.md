@@ -23,6 +23,7 @@ Then one or more component columns:
 Current default components:
 - `drag_mps2`
 - `erp_mps2`
+- `relativity_mps2`
 - `third_body_sun_mps2` (if ephemeris provided)
 - `third_body_moon_mps2` (if ephemeris provided)
 

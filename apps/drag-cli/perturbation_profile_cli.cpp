@@ -20,6 +20,8 @@
 #include "astroforces/drag/drag_perturbation.hpp"
 #include "astroforces/forces/erp_perturbation.hpp"
 #include "astroforces/forces/perturbation.hpp"
+#include "astroforces/forces/relativity_perturbation.hpp"
+#include "astroforces/forces/relativity_model.hpp"
 #include "astroforces/forces/third_body.hpp"
 #include "astroforces/models/exponential_atmosphere.hpp"
 #include "astroforces/sc/spacecraft.hpp"
@@ -138,6 +140,14 @@ int main(int argc, char** argv) {
       .label = "erp",
       .frame = astroforces::atmo::Frame::ECI,
       .model = std::make_unique<astroforces::erp::ErpPerturbationModel>(astroforces::erp::ErpAccelerationModel{}, &sc, "erp"),
+  });
+  components.push_back(ComponentModel{
+      .label = "relativity",
+      .frame = astroforces::atmo::Frame::ECI,
+      .model = std::make_unique<astroforces::forces::RelativityPerturbationModel>(
+          astroforces::forces::RelativityAccelerationModel::Create(
+              {.ephemeris_file = std::filesystem::path(eph_file), .use_geodesic_precession = !eph_file.empty()}),
+          "relativity"),
   });
 
   if (!eph_file.empty()) {

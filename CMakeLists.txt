@@ -72,6 +72,8 @@ add_library(dragcpp_drag_core STATIC
   libs/forces-core/src/third_body.cpp
   libs/forces-core/src/erp_model.cpp
   libs/forces-core/src/erp_perturbation.cpp
+  libs/forces-core/src/relativity_model.cpp
+  libs/forces-core/src/relativity_perturbation.cpp
   libs/forces-core/src/srp_model.cpp
   libs/forces-core/src/srp_perturbation.cpp)
 target_include_directories(dragcpp_drag_core PUBLIC ${CMAKE_SOURCE_DIR}/libs/forces-core/include)
@@ -192,7 +194,12 @@ target_link_libraries(erp_batch_cli PRIVATE
   dragcpp_sc_props
   dragcpp_drag_core)
 
-foreach(tgt dragcpp_space_weather dragcpp_sc_props dragcpp_models_basic dragcpp_drag_core dragcpp_adapters drag_cli drag_batch_cli perturbation_profile_cli third_body_cli third_body_batch_cli srp_cli srp_batch_cli erp_cli erp_batch_cli)
+add_executable(relativity_cli apps/forces-cli/relativity_cli.cpp)
+target_link_libraries(relativity_cli PRIVATE
+  dragcpp_atmo_core
+  dragcpp_drag_core)
+
+foreach(tgt dragcpp_space_weather dragcpp_sc_props dragcpp_models_basic dragcpp_drag_core dragcpp_adapters drag_cli drag_batch_cli perturbation_profile_cli third_body_cli third_body_batch_cli srp_cli srp_batch_cli erp_cli erp_batch_cli relativity_cli)
   if(MSVC)
     target_compile_options(${tgt} PRIVATE /W4)
     if(DRAGCPP_WARNINGS_AS_ERRORS)
@@ -292,4 +299,11 @@ if(DRAGCPP_BUILD_TESTS)
     dragcpp_sc_props
     dragcpp_drag_core)
   add_test(NAME ERP COMMAND dragcpp_test_erp)
+
+  add_executable(dragcpp_test_relativity tests/test_relativity.cpp)
+  target_link_libraries(dragcpp_test_relativity PRIVATE
+    dragcpp_atmo_core
+    dragcpp_drag_core)
+  target_compile_definitions(dragcpp_test_relativity PRIVATE DRAGCPP_JPL_EPH_SOURCE_DIR="${jpl_eph_ext_SOURCE_DIR}")
+  add_test(NAME Relativity COMMAND dragcpp_test_relativity)
 endif()
