@@ -1,6 +1,6 @@
 /**
  * @file main.cpp
- * @brief astrodynamics-forces-cpp drag command-line entrypoint.
+ * @brief astroforces drag command-line entrypoint.
  * @author Watosn
  */
 

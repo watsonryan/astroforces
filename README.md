@@ -1,4 +1,4 @@
-# astrodynamics-forces-cpp
+# astroforces
 
 Unified C++20 astrodynamics perturbation modeling platform.
 

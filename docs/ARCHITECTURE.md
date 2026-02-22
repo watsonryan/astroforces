@@ -1,4 +1,4 @@
-# astrodynamics-forces-cpp Architecture
+# astroforces Architecture
 
 ## System View
 ```mermaid

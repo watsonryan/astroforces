@@ -152,13 +152,13 @@ int main(int argc, char** argv) {
 
   std::time_t now = std::time(nullptr);
   if (format == "csv") {
-    out << "#record_type=metadata,schema=drag_batch_v1,project=astrodynamics-forces-cpp,generated_unix_utc=" << now
+    out << "#record_type=metadata,schema=drag_batch_v1,project=astroforces,generated_unix_utc=" << now
         << ",model=" << model_name << ",model_data=" << model_data << ",wind=" << wind_name << ",wind_data=" << wind_data
         << ",weather_csv=" << weather_csv << "\n";
     out << "epoch_utc_s,ax_mps2,ay_mps2,az_mps2,rho_kg_m3,temp_k,vrel_mps,q_pa,area_m2,cd_eff,"
            "wx_source,wx_interp,wx_extrap,f107,f107a,ap_daily,kp_daily,ap_3h,kp_3h,status\n";
   } else {
-    out << "{\"record_type\":\"metadata\",\"schema\":\"drag_batch_v1\",\"project\":\"astrodynamics-forces-cpp\","
+    out << "{\"record_type\":\"metadata\",\"schema\":\"drag_batch_v1\",\"project\":\"astroforces\","
            "\"generated_unix_utc\":" << now << ",\"model\":\"" << model_name << "\",\"model_data\":\"" << model_data
         << "\",\"wind\":\"" << wind_name << "\",\"wind_data\":\"" << wind_data << "\",\"weather_csv\":\"" << weather_csv
         << "\"}\n";

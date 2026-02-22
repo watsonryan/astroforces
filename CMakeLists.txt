@@ -1,6 +1,6 @@
 # Author: Watosn
 cmake_minimum_required(VERSION 3.25)
-project(astrodynamics_forces_cpp VERSION 0.1.0 LANGUAGES CXX)
+project(astroforces VERSION 0.1.0 LANGUAGES CXX)
 
 option(ASTROFORCES_BUILD_TESTS "Build tests" ON)
 option(ASTROFORCES_WARNINGS_AS_ERRORS "Treat warnings as errors" ON)

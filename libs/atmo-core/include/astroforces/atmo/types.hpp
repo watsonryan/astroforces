@@ -1,6 +1,6 @@
 /**
  * @file types.hpp
- * @brief Core domain types for astrodynamics-forces-cpp.
+ * @brief Core domain types for astroforces.
  * @author Watosn
  */
 #pragma once

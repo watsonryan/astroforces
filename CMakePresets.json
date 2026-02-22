@@ -9,7 +9,7 @@
       "binaryDir": "${sourceDir}/build/${presetName}",
       "cacheVariables": {
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
-        "DRAGCPP_BUILD_TESTS": "ON"
+        "ASTROFORCES_BUILD_TESTS": "ON"
       }
     },
     {
