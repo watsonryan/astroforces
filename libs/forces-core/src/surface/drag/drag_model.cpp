@@ -49,8 +49,8 @@ DragResult DragAccelerationModel::evaluate(const astroforces::core::StateVector&
   astroforces::core::StateVector eval_state = state;
   if (state.frame == astroforces::core::Frame::ECI) {
     eval_state.frame = astroforces::core::Frame::ECEF;
-    eval_state.position_m = astroforces::core::eci_to_ecef_position(state.position_m, get_frame_ctx());
-    eval_state.velocity_mps = astroforces::core::eci_to_ecef_velocity(state.position_m, state.velocity_mps, get_frame_ctx());
+    eval_state.position_m = astroforces::core::approx_eci_to_ecef_position(state.position_m, get_frame_ctx());
+    eval_state.velocity_mps = astroforces::core::approx_eci_to_ecef_velocity(state.position_m, state.velocity_mps, get_frame_ctx());
   }
 
   const auto a = atmosphere_.evaluate(eval_state, w);
@@ -68,8 +68,8 @@ DragResult DragAccelerationModel::evaluate(const astroforces::core::StateVector&
     if (wind.frame == astroforces::core::Frame::ECEF) {
       wind_state_mps = wind.velocity_mps;
     } else if (wind.frame == astroforces::core::Frame::ECI) {
-      const auto r_eci = astroforces::core::ecef_to_eci_position(eval_state.position_m, get_frame_ctx());
-      wind_state_mps = astroforces::core::eci_to_ecef_velocity(r_eci, wind.velocity_mps, get_frame_ctx());
+      const auto r_eci = astroforces::core::approx_ecef_to_eci_position(eval_state.position_m, get_frame_ctx());
+      wind_state_mps = astroforces::core::approx_eci_to_ecef_velocity(r_eci, wind.velocity_mps, get_frame_ctx());
     } else {
       return DragResult{.status = astroforces::core::Status::InvalidInput};
     }
@@ -77,7 +77,7 @@ DragResult DragAccelerationModel::evaluate(const astroforces::core::StateVector&
     if (wind.frame == astroforces::core::Frame::ECI) {
       wind_state_mps = wind.velocity_mps;
     } else if (wind.frame == astroforces::core::Frame::ECEF) {
-      wind_state_mps = astroforces::core::ecef_to_eci_velocity(eval_state.position_m, wind.velocity_mps, get_frame_ctx());
+      wind_state_mps = astroforces::core::approx_ecef_to_eci_velocity(eval_state.position_m, wind.velocity_mps, get_frame_ctx());
     } else {
       return DragResult{.status = astroforces::core::Status::InvalidInput};
     }

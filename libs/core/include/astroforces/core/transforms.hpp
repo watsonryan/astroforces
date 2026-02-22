@@ -12,6 +12,7 @@
 #include <utility>
 
 #include "astroforces/core/constants.hpp"
+#include "astroforces/core/leap_seconds.hpp"
 #include "astroforces/core/types.hpp"
 #include "astroforces/core/math_utils.hpp"
 #include "astroforces/core/sofa_utils.hpp"
@@ -77,47 +78,7 @@ inline double utc_seconds_to_julian_date_utc(double utc_seconds) {
 }
 
 inline double tai_minus_utc_seconds(const double utc_seconds) {
-  // Leap-second epochs (UTC) and resulting TAI-UTC seconds.
-  constexpr std::array<std::pair<double, double>, 28> kLeapTable{{
-      {63072000.0, 10.0},     // 1972-01-01
-      {78796800.0, 11.0},     // 1972-07-01
-      {94694400.0, 12.0},     // 1973-01-01
-      {126230400.0, 13.0},    // 1974-01-01
-      {157766400.0, 14.0},    // 1975-01-01
-      {189302400.0, 15.0},    // 1976-01-01
-      {220924800.0, 16.0},    // 1977-01-01
-      {252460800.0, 17.0},    // 1978-01-01
-      {283996800.0, 18.0},    // 1979-01-01
-      {315532800.0, 19.0},    // 1980-01-01
-      {362793600.0, 20.0},    // 1981-07-01
-      {394329600.0, 21.0},    // 1982-07-01
-      {425865600.0, 22.0},    // 1983-07-01
-      {489024000.0, 23.0},    // 1985-07-01
-      {567993600.0, 24.0},    // 1988-01-01
-      {631152000.0, 25.0},    // 1990-01-01
-      {662688000.0, 26.0},    // 1991-01-01
-      {709948800.0, 27.0},    // 1992-07-01
-      {741484800.0, 28.0},    // 1993-07-01
-      {773020800.0, 29.0},    // 1994-07-01
-      {820454400.0, 30.0},    // 1996-01-01
-      {867715200.0, 31.0},    // 1997-07-01
-      {915148800.0, 32.0},    // 1999-01-01
-      {1136073600.0, 33.0},   // 2006-01-01
-      {1230768000.0, 34.0},   // 2009-01-01
-      {1341100800.0, 35.0},   // 2012-07-01
-      {1435708800.0, 36.0},   // 2015-07-01
-      {1483228800.0, 37.0},   // 2017-01-01
-  }};
-
-  double tai_utc = 10.0;
-  for (const auto& [epoch_utc_s, delta] : kLeapTable) {
-    if (utc_seconds >= epoch_utc_s) {
-      tai_utc = delta;
-    } else {
-      break;
-    }
-  }
-  return tai_utc;
+  return leap_seconds::tai_minus_utc_seconds(utc_seconds);
 }
 
 inline double tt_minus_utc_seconds(const double utc_seconds) {
@@ -153,22 +114,22 @@ inline ApproxEciEcefContext build_approx_eci_ecef_context(double utc_seconds) {
   };
 }
 
-inline Vec3 eci_to_ecef_position(const Vec3& r_eci_m, const ApproxEciEcefContext& ctx) {
+inline Vec3 approx_eci_to_ecef_position(const Vec3& r_eci_m, const ApproxEciEcefContext& ctx) {
   return rotate_z(ctx.gmst_rad, r_eci_m);
 }
 
-inline Vec3 ecef_to_eci_position(const Vec3& r_ecef_m, const ApproxEciEcefContext& ctx) {
+inline Vec3 approx_ecef_to_eci_position(const Vec3& r_ecef_m, const ApproxEciEcefContext& ctx) {
   return rotate_z(-ctx.gmst_rad, r_ecef_m);
 }
 
-inline Vec3 eci_to_ecef_velocity(const Vec3& r_eci_m, const Vec3& v_eci_mps, const ApproxEciEcefContext& ctx) {
+inline Vec3 approx_eci_to_ecef_velocity(const Vec3& r_eci_m, const Vec3& v_eci_mps, const ApproxEciEcefContext& ctx) {
   const Vec3 omega_cross_r_eci{-constants::kEarthRotationRateRadPerSec * r_eci_m.y,
                                 constants::kEarthRotationRateRadPerSec * r_eci_m.x,
                                 0.0};
   return rotate_z(ctx.gmst_rad, v_eci_mps - omega_cross_r_eci);
 }
 
-inline Vec3 ecef_to_eci_velocity(const Vec3& r_ecef_m, const Vec3& v_ecef_mps, const ApproxEciEcefContext& ctx) {
+inline Vec3 approx_ecef_to_eci_velocity(const Vec3& r_ecef_m, const Vec3& v_ecef_mps, const ApproxEciEcefContext& ctx) {
   const Vec3 r_eci_m = rotate_z(-ctx.gmst_rad, r_ecef_m);
   const Vec3 omega_cross_r_eci{-constants::kEarthRotationRateRadPerSec * r_eci_m.y,
                                 constants::kEarthRotationRateRadPerSec * r_eci_m.x,
@@ -178,22 +139,22 @@ inline Vec3 ecef_to_eci_velocity(const Vec3& r_ecef_m, const Vec3& v_ecef_mps, c
 
 // Approximate GMST-only transform (no precession/nutation/polar motion). Use
 // gcrf_to_itrf_* with EOP/CIP inputs for production-quality navigation.
-inline Vec3 eci_to_ecef_position(const Vec3& r_eci_m, double utc_seconds) {
-  return eci_to_ecef_position(r_eci_m, build_approx_eci_ecef_context(utc_seconds));
+inline Vec3 approx_eci_to_ecef_position(const Vec3& r_eci_m, double utc_seconds) {
+  return approx_eci_to_ecef_position(r_eci_m, build_approx_eci_ecef_context(utc_seconds));
 }
 
 // Approximate GMST-only transform (no precession/nutation/polar motion). Use
 // itrf_to_gcrf_* with EOP/CIP inputs for production-quality navigation.
-inline Vec3 ecef_to_eci_position(const Vec3& r_ecef_m, double utc_seconds) {
-  return ecef_to_eci_position(r_ecef_m, build_approx_eci_ecef_context(utc_seconds));
+inline Vec3 approx_ecef_to_eci_position(const Vec3& r_ecef_m, double utc_seconds) {
+  return approx_ecef_to_eci_position(r_ecef_m, build_approx_eci_ecef_context(utc_seconds));
 }
 
-inline Vec3 eci_to_ecef_velocity(const Vec3& r_eci_m, const Vec3& v_eci_mps, double utc_seconds) {
-  return eci_to_ecef_velocity(r_eci_m, v_eci_mps, build_approx_eci_ecef_context(utc_seconds));
+inline Vec3 approx_eci_to_ecef_velocity(const Vec3& r_eci_m, const Vec3& v_eci_mps, double utc_seconds) {
+  return approx_eci_to_ecef_velocity(r_eci_m, v_eci_mps, build_approx_eci_ecef_context(utc_seconds));
 }
 
-inline Vec3 ecef_to_eci_velocity(const Vec3& r_ecef_m, const Vec3& v_ecef_mps, double utc_seconds) {
-  return ecef_to_eci_velocity(r_ecef_m, v_ecef_mps, build_approx_eci_ecef_context(utc_seconds));
+inline Vec3 approx_ecef_to_eci_velocity(const Vec3& r_ecef_m, const Vec3& v_ecef_mps, double utc_seconds) {
+  return approx_ecef_to_eci_velocity(r_ecef_m, v_ecef_mps, build_approx_eci_ecef_context(utc_seconds));
 }
 
 inline double tio_locator_sp_rad(const double jd_tt) {
