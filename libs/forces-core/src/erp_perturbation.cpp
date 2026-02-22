@@ -4,7 +4,7 @@
  * @author Watosn
  */
 
-#include "astroforces/forces/erp_perturbation.hpp"
+#include "astroforces/forces/surface/erp/erp_perturbation.hpp"
 
 namespace astroforces::erp {
 
@@ -16,7 +16,7 @@ astroforces::forces::PerturbationContribution ErpPerturbationModel::evaluate(
 
   const auto* sc = request.spacecraft ? request.spacecraft : default_spacecraft_;
   if (!sc) {
-    out.status = astroforces::atmo::Status::InvalidInput;
+    out.status = astroforces::core::Status::InvalidInput;
     return out;
   }
 

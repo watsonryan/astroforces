@@ -9,7 +9,7 @@
 #include <memory>
 #include <string>
 
-#include "astroforces/forces/perturbation.hpp"
+#include "astroforces/forces/core/perturbation.hpp"
 
 namespace jpl::eph {
 class Ephemeris;

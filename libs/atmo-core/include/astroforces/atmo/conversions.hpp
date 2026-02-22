@@ -12,7 +12,7 @@
 #include "astroforces/atmo/constants.hpp"
 #include "astroforces/atmo/types.hpp"
 
-namespace astroforces::atmo {
+namespace astroforces::core {
 
 inline GeodeticPoint spherical_geodetic_from_ecef(const Vec3& ecef_m) {
   constexpr double kPi = 3.1415926535897932384626433832795;
@@ -54,4 +54,4 @@ inline double utc_seconds_to_julian_date_utc(double utc_seconds) {
   return utc_seconds / 86400.0 + 2440587.5;
 }
 
-}  // namespace astroforces::atmo
+}  // namespace astroforces::core

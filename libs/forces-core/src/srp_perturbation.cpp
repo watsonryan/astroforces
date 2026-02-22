@@ -4,7 +4,7 @@
  * @author Watosn
  */
 
-#include "astroforces/srp/srp_perturbation.hpp"
+#include "astroforces/forces/surface/srp/srp_perturbation.hpp"
 
 namespace astroforces::srp {
 
@@ -15,13 +15,13 @@ astroforces::forces::PerturbationContribution SrpPerturbationModel::evaluate(
   out.type = astroforces::forces::PerturbationType::SRP;
 
   if (!srp_) {
-    out.status = astroforces::atmo::Status::DataUnavailable;
+    out.status = astroforces::core::Status::DataUnavailable;
     return out;
   }
 
   const auto* sc = request.spacecraft ? request.spacecraft : default_spacecraft_;
   if (!sc) {
-    out.status = astroforces::atmo::Status::InvalidInput;
+    out.status = astroforces::core::Status::InvalidInput;
     return out;
   }
 

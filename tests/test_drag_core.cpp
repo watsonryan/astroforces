@@ -8,7 +8,7 @@
 
 #include <spdlog/spdlog.h>
 
-#include "astroforces/drag/drag_model.hpp"
+#include "astroforces/forces/surface/drag/drag_model.hpp"
 #include "astroforces/models/exponential_atmosphere.hpp"
 #include "astroforces/sc/spacecraft.hpp"
 #include "astroforces/weather/static_provider.hpp"
@@ -25,21 +25,21 @@ bool approx(double a, double b, double rel) {
 
 int main() {
   using namespace astroforces;
-  const atmo::WeatherIndices wx{.f107 = 150.0, .f107a = 150.0, .ap = 4.0, .kp = 2.0, .status = atmo::Status::Ok};
+  const core::WeatherIndices wx{.f107 = 150.0, .f107a = 150.0, .ap = 4.0, .kp = 2.0, .status = core::Status::Ok};
   weather::StaticSpaceWeatherProvider weather(wx);
   models::ExponentialAtmosphereModel atmosphere(1.225, 0.0, 7000.0, 1000.0);
   models::ZeroWindModel wind;
   drag::DragAccelerationModel model(weather, atmosphere, wind);
 
-  atmo::StateVector state{};
-  state.frame = atmo::Frame::ECI;
-  state.position_m = atmo::Vec3{6378137.0, 0.0, 0.0};
-  state.velocity_mps = atmo::Vec3{7500.0, 0.0, 0.0};
+  core::StateVector state{};
+  state.frame = core::Frame::ECI;
+  state.position_m = core::Vec3{6378137.0, 0.0, 0.0};
+  state.velocity_mps = core::Vec3{7500.0, 0.0, 0.0};
 
   sc::SpacecraftProperties sc{.mass_kg = 1000.0, .reference_area_m2 = 10.0, .cd = 2.0, .use_surface_model = false};
 
   const auto out = model.evaluate(state, sc);
-  if (out.status != atmo::Status::Ok) {
+  if (out.status != core::Status::Ok) {
     spdlog::error("status failed");
     return 1;
   }
@@ -64,23 +64,23 @@ int main() {
       .cd = 2.0,
       .use_surface_model = true,
       .surfaces = {
-          sc::Surface{.normal_body = atmo::Vec3{-1.0, 0.0, 0.0}, .area_m2 = 2.0, .cd = 2.5},
-          sc::Surface{.normal_body = atmo::Vec3{0.0, -1.0, 0.0}, .area_m2 = 4.0, .cd = 3.5},
+          sc::Surface{.normal_body = core::Vec3{-1.0, 0.0, 0.0}, .area_m2 = 2.0, .cd = 2.5},
+          sc::Surface{.normal_body = core::Vec3{0.0, -1.0, 0.0}, .area_m2 = 4.0, .cd = 3.5},
       },
   };
 
-  atmo::StateVector state_identity = state;
+  core::StateVector state_identity = state;
   state_identity.body_from_frame_dcm = {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
   const auto macro_identity = model.evaluate(state_identity, macro_sc);
-  if (macro_identity.status != atmo::Status::Ok || !approx(macro_identity.area_m2, 2.0, 1e-12) || !approx(macro_identity.cd, 2.5, 1e-12)) {
+  if (macro_identity.status != core::Status::Ok || !approx(macro_identity.area_m2, 2.0, 1e-12) || !approx(macro_identity.cd, 2.5, 1e-12)) {
     spdlog::error("macro identity area mismatch");
     return 4;
   }
 
-  atmo::StateVector state_rot = state;
+  core::StateVector state_rot = state;
   state_rot.body_from_frame_dcm = {0.0, -1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0};  // +90deg yaw
   const auto macro_rot = model.evaluate(state_rot, macro_sc);
-  if (macro_rot.status != atmo::Status::Ok || !approx(macro_rot.area_m2, 4.0, 1e-12) || !approx(macro_rot.cd, 3.5, 1e-12)) {
+  if (macro_rot.status != core::Status::Ok || !approx(macro_rot.area_m2, 4.0, 1e-12) || !approx(macro_rot.cd, 3.5, 1e-12)) {
     spdlog::error("macro rotated area mismatch");
     return 5;
   }
@@ -96,11 +96,11 @@ int main() {
       .cd = 2.0,
       .use_surface_model = true,
       .surfaces = {
-          sc::Surface{.normal_body = atmo::Vec3{-1.0, 0.0, 0.0}, .area_m2 = 2.0, .cd = 2.0, .specularity = 0.0, .accommodation = 1.0},
+          sc::Surface{.normal_body = core::Vec3{-1.0, 0.0, 0.0}, .area_m2 = 2.0, .cd = 2.0, .specularity = 0.0, .accommodation = 1.0},
       },
   };
   const auto aero_out = model.evaluate(state_identity, aero_sc);
-  if (aero_out.status != atmo::Status::Ok || !(aero_out.cd > 2.0)) {
+  if (aero_out.status != core::Status::Ok || !(aero_out.cd > 2.0)) {
     spdlog::error("surface aero modifier mismatch");
     return 8;
   }

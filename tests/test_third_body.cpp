@@ -12,16 +12,16 @@
 #include <spdlog/spdlog.h>
 
 #include "astroforces/atmo/types.hpp"
-#include "astroforces/forces/third_body.hpp"
+#include "astroforces/forces/gravity/third_body.hpp"
 
 namespace {
 
-bool finite_vec(const astroforces::atmo::Vec3& v) {
+bool finite_vec(const astroforces::core::Vec3& v) {
   return std::isfinite(v.x) && std::isfinite(v.y) && std::isfinite(v.z);
 }
 
-astroforces::atmo::Vec3 add(const astroforces::atmo::Vec3& a, const astroforces::atmo::Vec3& b) {
-  return astroforces::atmo::Vec3{a.x + b.x, a.y + b.y, a.z + b.z};
+astroforces::core::Vec3 add(const astroforces::core::Vec3& a, const astroforces::core::Vec3& b) {
+  return astroforces::core::Vec3{a.x + b.x, a.y + b.y, a.z + b.z};
 }
 
 }  // namespace
@@ -39,11 +39,11 @@ int main() {
     return 0;
   }
 
-  astroforces::atmo::StateVector state{};
-  state.frame = astroforces::atmo::Frame::ECI;
+  astroforces::core::StateVector state{};
+  state.frame = astroforces::core::Frame::ECI;
   state.epoch.utc_seconds = 1.0e9;
-  state.position_m = astroforces::atmo::Vec3{6778137.0, 0.0, 0.0};
-  state.velocity_mps = astroforces::atmo::Vec3{0.0, 7670.0, 0.0};
+  state.position_m = astroforces::core::Vec3{6778137.0, 0.0, 0.0};
+  state.velocity_mps = astroforces::core::Vec3{0.0, 7670.0, 0.0};
 
   const auto both = astroforces::forces::ThirdBodyPerturbationModel::Create(
       {.ephemeris_file = eph_path, .use_sun = true, .use_moon = true, .name = "third_both"});
@@ -62,8 +62,8 @@ int main() {
   const auto c_both = both->evaluate(req);
   const auto c_sun = sun->evaluate(req);
   const auto c_moon = moon->evaluate(req);
-  if (c_both.status != astroforces::atmo::Status::Ok || c_sun.status != astroforces::atmo::Status::Ok ||
-      c_moon.status != astroforces::atmo::Status::Ok) {
+  if (c_both.status != astroforces::core::Status::Ok || c_sun.status != astroforces::core::Status::Ok ||
+      c_moon.status != astroforces::core::Status::Ok) {
     spdlog::error("third-body evaluation failed");
     return 1;
   }
@@ -71,37 +71,37 @@ int main() {
     spdlog::error("third-body acceleration not finite");
     return 2;
   }
-  if (!(astroforces::atmo::norm(c_both.acceleration_mps2) > 0.0) || !(astroforces::atmo::norm(c_sun.acceleration_mps2) > 0.0) ||
-      !(astroforces::atmo::norm(c_moon.acceleration_mps2) > 0.0)) {
+  if (!(astroforces::core::norm(c_both.acceleration_mps2) > 0.0) || !(astroforces::core::norm(c_sun.acceleration_mps2) > 0.0) ||
+      !(astroforces::core::norm(c_moon.acceleration_mps2) > 0.0)) {
     spdlog::error("third-body acceleration unexpectedly zero");
     return 3;
   }
 
   const auto sum = add(c_sun.acceleration_mps2, c_moon.acceleration_mps2);
-  const auto diff = astroforces::atmo::Vec3{c_both.acceleration_mps2.x - sum.x, c_both.acceleration_mps2.y - sum.y,
+  const auto diff = astroforces::core::Vec3{c_both.acceleration_mps2.x - sum.x, c_both.acceleration_mps2.y - sum.y,
                                         c_both.acceleration_mps2.z - sum.z};
-  if (!(astroforces::atmo::norm(diff) <= 1e-16 * std::max(1.0, astroforces::atmo::norm(c_both.acceleration_mps2)))) {
+  if (!(astroforces::core::norm(diff) <= 1e-16 * std::max(1.0, astroforces::core::norm(c_both.acceleration_mps2)))) {
     spdlog::error("third-body superposition mismatch");
     return 4;
   }
 
   const auto c_both_no_eq79 = both_no_eq79->evaluate(req);
-  if (c_both_no_eq79.status != astroforces::atmo::Status::Ok) {
+  if (c_both_no_eq79.status != astroforces::core::Status::Ok) {
     spdlog::error("third-body evaluation without eq79 failed");
     return 5;
   }
-  const auto eq79_delta = astroforces::atmo::Vec3{
+  const auto eq79_delta = astroforces::core::Vec3{
       c_both.acceleration_mps2.x - c_both_no_eq79.acceleration_mps2.x,
       c_both.acceleration_mps2.y - c_both_no_eq79.acceleration_mps2.y,
       c_both.acceleration_mps2.z - c_both_no_eq79.acceleration_mps2.z};
-  if (!(astroforces::atmo::norm(eq79_delta) > 0.0)) {
+  if (!(astroforces::core::norm(eq79_delta) > 0.0)) {
     spdlog::error("goce eq79 indirect j2 term was not applied");
     return 6;
   }
 
-  state.frame = astroforces::atmo::Frame::ECEF;
+  state.frame = astroforces::core::Frame::ECEF;
   const auto c_bad_frame = both->evaluate(astroforces::forces::PerturbationRequest{.state = state, .spacecraft = nullptr});
-  if (c_bad_frame.status != astroforces::atmo::Status::InvalidInput) {
+  if (c_bad_frame.status != astroforces::core::Status::InvalidInput) {
     spdlog::error("expected invalid frame error");
     return 7;
   }

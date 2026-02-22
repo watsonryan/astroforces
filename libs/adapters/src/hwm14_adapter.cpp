@@ -32,17 +32,17 @@ std::unique_ptr<Hwm14WindAdapter> Hwm14WindAdapter::Create(const Config& config)
   return ptr;
 }
 
-astroforces::atmo::WindSample Hwm14WindAdapter::evaluate(const astroforces::atmo::StateVector& state,
-                                                      const astroforces::atmo::WeatherIndices& weather) const {
+astroforces::core::WindSample Hwm14WindAdapter::evaluate(const astroforces::core::StateVector& state,
+                                                      const astroforces::core::WeatherIndices& weather) const {
   if (!impl_) {
-    return astroforces::atmo::WindSample{.status = astroforces::atmo::Status::DataUnavailable};
+    return astroforces::core::WindSample{.status = astroforces::core::Status::DataUnavailable};
   }
-  if (state.frame != astroforces::atmo::Frame::ECEF) {
-    return astroforces::atmo::WindSample{.status = astroforces::atmo::Status::InvalidInput};
+  if (state.frame != astroforces::core::Frame::ECEF) {
+    return astroforces::core::WindSample{.status = astroforces::core::Status::InvalidInput};
   }
 
-  const auto geo = astroforces::atmo::spherical_geodetic_from_ecef(state.position_m);
-  const auto iyd_sec = astroforces::atmo::utc_seconds_to_iyd_sec(state.epoch.utc_seconds);
+  const auto geo = astroforces::core::spherical_geodetic_from_ecef(state.position_m);
+  const auto iyd_sec = astroforces::core::utc_seconds_to_iyd_sec(state.epoch.utc_seconds);
 
   hwm14::Inputs in{};
   in.yyddd = iyd_sec.first;
@@ -54,7 +54,7 @@ astroforces::atmo::WindSample Hwm14WindAdapter::evaluate(const astroforces::atmo
 
   const auto out = impl_->model_.TotalWinds(in);
   if (!out.has_value()) {
-    return astroforces::atmo::WindSample{.status = astroforces::atmo::Status::NumericalError};
+    return astroforces::core::WindSample{.status = astroforces::core::Status::NumericalError};
   }
 
   constexpr double kPi = 3.1415926535897932384626433832795;
@@ -67,10 +67,10 @@ astroforces::atmo::WindSample Hwm14WindAdapter::evaluate(const astroforces::atmo
   const double vy = -std::sin(lat) * std::sin(lon) * v_n + std::cos(lon) * v_e;
   const double vz = std::cos(lat) * v_n;
 
-  return astroforces::atmo::WindSample{
-      .velocity_mps = astroforces::atmo::Vec3{vx, vy, vz},
-      .frame = astroforces::atmo::Frame::ECEF,
-      .status = astroforces::atmo::Status::Ok};
+  return astroforces::core::WindSample{
+      .velocity_mps = astroforces::core::Vec3{vx, vy, vz},
+      .frame = astroforces::core::Frame::ECEF,
+      .status = astroforces::core::Status::Ok};
 }
 
 }  // namespace astroforces::adapters

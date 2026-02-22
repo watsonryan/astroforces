@@ -16,7 +16,7 @@ class Dtm2020Operational;
 
 namespace astroforces::adapters {
 
-class Dtm2020AtmosphereAdapter final : public astroforces::atmo::IAtmosphereModel {
+class Dtm2020AtmosphereAdapter final : public astroforces::core::IAtmosphereModel {
  public:
   struct Config {
     std::filesystem::path coeff_file{};
@@ -24,8 +24,8 @@ class Dtm2020AtmosphereAdapter final : public astroforces::atmo::IAtmosphereMode
 
   static std::unique_ptr<Dtm2020AtmosphereAdapter> Create(const Config& config);
 
-  [[nodiscard]] astroforces::atmo::AtmosphereSample evaluate(const astroforces::atmo::StateVector& state,
-                                                          const astroforces::atmo::WeatherIndices& weather) const override;
+  [[nodiscard]] astroforces::core::AtmosphereSample evaluate(const astroforces::core::StateVector& state,
+                                                          const astroforces::core::WeatherIndices& weather) const override;
 
  private:
   class Impl;

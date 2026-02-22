@@ -23,8 +23,8 @@ int main() {
   const auto csv = fs::path(DRAGCPP_SOURCE_DIR) / "tests" / "data" / "celestrak_real_snippet.csv";
   const auto provider = astroforces::weather::CelesTrakCsvSpaceWeatherProvider::Create({.csv_file = csv});
 
-  const astroforces::atmo::WeatherIndices w = provider->at(astroforces::atmo::Epoch{.utc_seconds = 946684800.0});  // 2000-01-01
-  if (w.status != astroforces::atmo::Status::Ok) {
+  const astroforces::core::WeatherIndices w = provider->at(astroforces::core::Epoch{.utc_seconds = 946684800.0});  // 2000-01-01
+  if (w.status != astroforces::core::Status::Ok) {
     spdlog::error("status");
     return 1;
   }

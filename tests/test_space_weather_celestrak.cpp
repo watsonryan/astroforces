@@ -43,32 +43,32 @@ int main() {
 
   const auto provider = astroforces::weather::CelesTrakCsvSpaceWeatherProvider::Create({.csv_file = csv});
 
-  const astroforces::atmo::WeatherIndices w0 = provider->at(astroforces::atmo::Epoch{.utc_seconds = 1767225600.0});  // 2026-01-01
-  if (w0.status != astroforces::atmo::Status::Ok || !approx(w0.f107, 120.0, 1e-12) || !approx(w0.f107a, 130.0, 1e-12) ||
+  const astroforces::core::WeatherIndices w0 = provider->at(astroforces::core::Epoch{.utc_seconds = 1767225600.0});  // 2026-01-01
+  if (w0.status != astroforces::core::Status::Ok || !approx(w0.f107, 120.0, 1e-12) || !approx(w0.f107a, 130.0, 1e-12) ||
       !approx(w0.ap, 6.0, 1e-12) || !approx(w0.kp, 1.0, 1e-12) || !approx(w0.kp_3h_current, 1.0, 1e-12) ||
       !approx(w0.ap_3h_current, 6.0, 1e-12) || w0.has_ap_msis_history || !w0.f107_observed ||
-      w0.source != astroforces::atmo::WeatherSource::CelesTrakLast5YearsCsv) {
+      w0.source != astroforces::core::WeatherSource::CelesTrakLast5YearsCsv) {
     spdlog::error("exact day lookup failed");
     return 1;
   }
 
-  const astroforces::atmo::WeatherIndices wm =
-      provider->at(astroforces::atmo::Epoch{.utc_seconds = 1767268800.0});  // 2026-01-01 12:00:00
-  if (wm.status != astroforces::atmo::Status::Ok || !wm.interpolated || wm.extrapolated || !approx(wm.f107, 130.0, 1e-12) ||
+  const astroforces::core::WeatherIndices wm =
+      provider->at(astroforces::core::Epoch{.utc_seconds = 1767268800.0});  // 2026-01-01 12:00:00
+  if (wm.status != astroforces::core::Status::Ok || !wm.interpolated || wm.extrapolated || !approx(wm.f107, 130.0, 1e-12) ||
       !approx(wm.f107a, 140.0, 1e-12) || !approx(wm.ap, 6.5, 1e-12) || !approx(wm.kp, 1.5, 1e-12) ||
       !approx(wm.kp_3h_current, 1.0, 1e-12)) {
     spdlog::error("interpolation failed");
     return 2;
   }
 
-  const astroforces::atmo::WeatherIndices wb = provider->at(astroforces::atmo::Epoch{.utc_seconds = 1767139200.0});  // 2025-12-31
-  if (wb.status != astroforces::atmo::Status::Ok || !wb.extrapolated || !approx(wb.f107, 120.0, 1e-12)) {
+  const astroforces::core::WeatherIndices wb = provider->at(astroforces::core::Epoch{.utc_seconds = 1767139200.0});  // 2025-12-31
+  if (wb.status != astroforces::core::Status::Ok || !wb.extrapolated || !approx(wb.f107, 120.0, 1e-12)) {
     spdlog::error("low-side clamp failed");
     return 3;
   }
 
-  const astroforces::atmo::WeatherIndices wa = provider->at(astroforces::atmo::Epoch{.utc_seconds = 1767603600.0});  // 2026-01-05 09:00:00
-  if (wa.status != astroforces::atmo::Status::Ok || wa.extrapolated || !wa.has_ap_msis_history ||
+  const astroforces::core::WeatherIndices wa = provider->at(astroforces::core::Epoch{.utc_seconds = 1767603600.0});  // 2026-01-05 09:00:00
+  if (wa.status != astroforces::core::Status::Ok || wa.extrapolated || !wa.has_ap_msis_history ||
       !approx(wa.ap_msis_history[0], 10.0, 1e-12) || !approx(wa.kp_3h_current, 5.0, 1e-12) || wa.f107_observed) {
     spdlog::error("high-side clamp failed");
     return 4;

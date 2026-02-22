@@ -12,6 +12,8 @@ Schema id: `perturbation_profile_v1`
 - `space_weather_csv`
 - `jpl_ephemeris_file` (optional)
 - `epoch_utc_s` (optional)
+- `gravity_gfc_file` (optional)
+- `gravity_max_degree` (optional)
 
 ## CSV Output
 Header starts with:
@@ -22,6 +24,10 @@ Then one or more component columns:
 
 Current default components:
 - `drag_mps2`
+- `gravity_central_mps2` (if gravity file provided)
+- `gravity_sph_mps2` (if gravity file provided)
+- `gravity_tide_sun_mps2` (if gravity file + ephemeris provided)
+- `gravity_tide_moon_mps2` (if gravity file + ephemeris provided)
 - `erp_mps2`
 - `relativity_mps2`
 - `third_body_sun_mps2` (if ephemeris provided)
@@ -29,7 +35,7 @@ Current default components:
 
 Final columns:
 - `total_mps2` (root-sum-square of component magnitudes)
-- `status` (`astroforces::atmo::Status` enum as integer)
+- `status` (`astroforces::core::Status` enum as integer)
 
 ## Extensibility
 New perturbation components can be added without schema break by appending additional

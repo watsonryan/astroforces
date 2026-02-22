@@ -10,11 +10,11 @@
 #include <fmt/format.h>
 #include <spdlog/spdlog.h>
 
-#include "astroforces/forces/third_body.hpp"
+#include "astroforces/forces/gravity/third_body.hpp"
 
 namespace {
 
-double magnitude(const astroforces::atmo::Vec3& v) { return astroforces::atmo::norm(v); }
+double magnitude(const astroforces::core::Vec3& v) { return astroforces::core::norm(v); }
 
 }  // namespace
 
@@ -25,11 +25,11 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  astroforces::atmo::StateVector state{};
-  state.position_m = astroforces::atmo::Vec3{std::atof(argv[1]), std::atof(argv[2]), std::atof(argv[3])};
-  state.velocity_mps = astroforces::atmo::Vec3{std::atof(argv[4]), std::atof(argv[5]), std::atof(argv[6])};
+  astroforces::core::StateVector state{};
+  state.position_m = astroforces::core::Vec3{std::atof(argv[1]), std::atof(argv[2]), std::atof(argv[3])};
+  state.velocity_mps = astroforces::core::Vec3{std::atof(argv[4]), std::atof(argv[5]), std::atof(argv[6])};
   state.epoch.utc_seconds = std::atof(argv[7]);
-  state.frame = astroforces::atmo::Frame::ECI;
+  state.frame = astroforces::core::Frame::ECI;
 
   const std::filesystem::path eph_file = argv[8];
   if (!std::filesystem::exists(eph_file)) {
@@ -52,8 +52,8 @@ int main(int argc, char** argv) {
   const auto moon_c = moon->evaluate(req);
   const auto total_c = total->evaluate(req);
 
-  if (sun_c.status != astroforces::atmo::Status::Ok || moon_c.status != astroforces::atmo::Status::Ok ||
-      total_c.status != astroforces::atmo::Status::Ok) {
+  if (sun_c.status != astroforces::core::Status::Ok || moon_c.status != astroforces::core::Status::Ok ||
+      total_c.status != astroforces::core::Status::Ok) {
     spdlog::error("third-body evaluation failed: sun={}, moon={}, total={}", static_cast<int>(sun_c.status),
                   static_cast<int>(moon_c.status), static_cast<int>(total_c.status));
     return 3;

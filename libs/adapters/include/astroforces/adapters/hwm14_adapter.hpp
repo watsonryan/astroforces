@@ -16,7 +16,7 @@ class Model;
 
 namespace astroforces::adapters {
 
-class Hwm14WindAdapter final : public astroforces::atmo::IWindModel {
+class Hwm14WindAdapter final : public astroforces::core::IWindModel {
  public:
   struct Config {
     std::filesystem::path data_dir{};
@@ -24,8 +24,8 @@ class Hwm14WindAdapter final : public astroforces::atmo::IWindModel {
 
   static std::unique_ptr<Hwm14WindAdapter> Create(const Config& config);
 
-  [[nodiscard]] astroforces::atmo::WindSample evaluate(const astroforces::atmo::StateVector& state,
-                                                    const astroforces::atmo::WeatherIndices& weather) const override;
+  [[nodiscard]] astroforces::core::WindSample evaluate(const astroforces::core::StateVector& state,
+                                                    const astroforces::core::WeatherIndices& weather) const override;
 
  private:
   class Impl;

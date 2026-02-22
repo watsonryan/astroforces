@@ -9,13 +9,13 @@
 
 namespace astroforces::models {
 
-class ExponentialAtmosphereModel final : public astroforces::atmo::IAtmosphereModel {
+class ExponentialAtmosphereModel final : public astroforces::core::IAtmosphereModel {
  public:
   ExponentialAtmosphereModel(double rho0_kg_m3, double h0_m, double scale_height_m, double temperature_k)
       : rho0_(rho0_kg_m3), h0_(h0_m), hs_(scale_height_m), t_(temperature_k) {}
 
-  [[nodiscard]] astroforces::atmo::AtmosphereSample evaluate(const astroforces::atmo::StateVector& state,
-                                                          const astroforces::atmo::WeatherIndices& weather) const override;
+  [[nodiscard]] astroforces::core::AtmosphereSample evaluate(const astroforces::core::StateVector& state,
+                                                          const astroforces::core::WeatherIndices& weather) const override;
 
  private:
   double rho0_{};
@@ -24,10 +24,10 @@ class ExponentialAtmosphereModel final : public astroforces::atmo::IAtmosphereMo
   double t_{};
 };
 
-class ZeroWindModel final : public astroforces::atmo::IWindModel {
+class ZeroWindModel final : public astroforces::core::IWindModel {
  public:
-  [[nodiscard]] astroforces::atmo::WindSample evaluate(const astroforces::atmo::StateVector& state,
-                                                    const astroforces::atmo::WeatherIndices& weather) const override;
+  [[nodiscard]] astroforces::core::WindSample evaluate(const astroforces::core::StateVector& state,
+                                                    const astroforces::core::WeatherIndices& weather) const override;
 };
 
 }  // namespace astroforces::models

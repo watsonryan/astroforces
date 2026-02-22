@@ -8,8 +8,8 @@
 #include <memory>
 #include <string>
 
-#include "astroforces/forces/perturbation.hpp"
-#include "astroforces/forces/relativity_model.hpp"
+#include "astroforces/forces/core/perturbation.hpp"
+#include "astroforces/forces/gravity/relativity_model.hpp"
 
 namespace astroforces::forces {
 

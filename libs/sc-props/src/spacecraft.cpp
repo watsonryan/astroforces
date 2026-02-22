@@ -11,7 +11,7 @@
 namespace astroforces::sc {
 
 ForceProjection projected_area_and_coeff(const SpacecraftProperties& sc,
-                                         const astroforces::atmo::Vec3& flow_dir_body,
+                                         const astroforces::core::Vec3& flow_dir_body,
                                          double reference_coeff,
                                          SurfaceCoeffModel coeff_model) {
   if (!sc.use_surface_model || sc.surfaces.empty()) {
@@ -21,7 +21,7 @@ ForceProjection projected_area_and_coeff(const SpacecraftProperties& sc,
   double area = 0.0;
   double weighted_coeff = 0.0;
   for (const auto& s : sc.surfaces) {
-    const double c = -astroforces::atmo::dot(s.normal_body, flow_dir_body);
+    const double c = -astroforces::core::dot(s.normal_body, flow_dir_body);
     const double proj = s.area_m2 * std::max(0.0, c);
     area += proj;
     double coeff_surface = reference_coeff;
@@ -44,16 +44,16 @@ ForceProjection projected_area_and_coeff(const SpacecraftProperties& sc,
   return ForceProjection{.area_m2 = area, .coeff_effective = coeff_effective};
 }
 
-AeroProjection projected_area_and_cd(const SpacecraftProperties& sc, const astroforces::atmo::Vec3& flow_dir_body) {
+AeroProjection projected_area_and_cd(const SpacecraftProperties& sc, const astroforces::core::Vec3& flow_dir_body) {
   const auto p = projected_area_and_coeff(sc, flow_dir_body, sc.cd, SurfaceCoeffModel::Drag);
   return AeroProjection{.area_m2 = p.area_m2, .cd_effective = p.coeff_effective};
 }
 
-ForceProjection projected_area_and_cr(const SpacecraftProperties& sc, const astroforces::atmo::Vec3& flow_dir_body) {
+ForceProjection projected_area_and_cr(const SpacecraftProperties& sc, const astroforces::core::Vec3& flow_dir_body) {
   return projected_area_and_coeff(sc, flow_dir_body, sc.cr, SurfaceCoeffModel::RadiationPressure);
 }
 
-double projected_area_m2(const SpacecraftProperties& sc, const astroforces::atmo::Vec3& flow_dir_body) {
+double projected_area_m2(const SpacecraftProperties& sc, const astroforces::core::Vec3& flow_dir_body) {
   return projected_area_and_cd(sc, flow_dir_body).area_m2;
 }
 

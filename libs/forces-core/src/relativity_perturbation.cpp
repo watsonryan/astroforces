@@ -4,7 +4,7 @@
  * @author Watosn
  */
 
-#include "astroforces/forces/relativity_perturbation.hpp"
+#include "astroforces/forces/gravity/relativity_perturbation.hpp"
 
 namespace astroforces::forces {
 
@@ -14,7 +14,7 @@ PerturbationContribution RelativityPerturbationModel::evaluate(const Perturbatio
   out.type = PerturbationType::Relativity;
 
   if (!relativity_) {
-    out.status = astroforces::atmo::Status::DataUnavailable;
+    out.status = astroforces::core::Status::DataUnavailable;
     return out;
   }
 

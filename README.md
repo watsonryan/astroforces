@@ -8,7 +8,7 @@ flowchart LR
   A[atmo-core<br/>types, frames, interfaces] --> B[space-weather<br/>CelesTrak CSV]
   A --> C[sc-props<br/>cannonball + macro surfaces]
   A --> D[adapters<br/>NRLMSIS / DTM2020 / HWM14]
-  A --> E[forces-core<br/>Drag/ERP/SRP/Relativity/Third-Body]
+  A --> E[forces-core<br/>Drag/Gravity/ERP/SRP/Relativity/Third-Body]
   A --> F[forces<br/>IPerturbationModel + PerturbationStack]
   B --> E
   C --> E
@@ -24,6 +24,7 @@ flowchart LR
   F --> R[apps/erp_cli]
   F --> V[apps/erp_batch_cli]
   F --> W[apps/relativity_cli]
+  F --> K[apps/gravity_sph_cli]
   F --> P[apps/perturbation_profile_cli]
   P --> Q[scripts/plot_perturbation_profile.py]
   I[external repos via CPM] --> D
@@ -96,12 +97,19 @@ Drag area modes:
 General perturbation interface:
 - Use `astroforces::forces::IPerturbationModel` for each force source.
 - Combine models with `astroforces::forces::PerturbationStack`.
-- Drag is exposed as `astroforces::drag::DragPerturbationModel` and plugs directly into the same stack used for future gravity/SRP/third-body models.
+- Drag is exposed as `astroforces::drag::DragPerturbationModel` and plugs directly into the same stack as gravity/SRP/third-body models.
 - Third-body is exposed as `astroforces::forces::ThirdBodyPerturbationModel` (Sun/Moon direct + indirect terms via JPL ephemerides).
 - ERP is exposed via `astroforces::erp::ErpAccelerationModel` and `astroforces::erp::ErpPerturbationModel`.
 - SRP is exposed via `astroforces::srp::SrpAccelerationModel` and `astroforces::srp::SrpPerturbationModel`.
 - Relativity is exposed via `astroforces::forces::RelativityAccelerationModel` and `astroforces::forces::RelativityPerturbationModel`.
+- Gravity+tides is exposed via `astroforces::forces::GravitySphAccelerationModel` and `astroforces::forces::GravitySphPerturbationModel`.
 - Drag, ERP, and SRP all use the shared surface-force kernel (`astroforces::forces::evaluate_surface_force`) for cannonball/macro area+coefficient handling.
+
+Gravity+tides single-state CLI:
+```bash
+./build/macos-debug/gravity_sph_cli 6778137 0 0 0 7670 0 1000000000 /path/to/EGM2008.gfc 120 eci /path/to/linux_p1550p2650.440 1
+```
+Model notes reference: `docs/GRAVITY_MODEL_NOTES.md`
 
 ERP single-state CLI:
 ```bash
@@ -138,12 +146,18 @@ Perturbation-vs-altitude profiling:
   /path/to/DTM_2020_F107_Kp.dat \
   /path/to/SW-Last5Years.csv \
   /path/to/linux_p1550p2650.440 \
-  1000000000
+  1000000000 \
+  /path/to/EIGEN-6S4.gfc \
+  120
 python3 scripts/plot_perturbation_profile.py perturbation_profile.csv --output-stem perturbation_vs_altitude --column single
 ```
 This generates publication-ready IEEE-style PDF/PNG plots of acceleration magnitude by perturbation component versus altitude.
 Output columns include:
 - `drag_mps2`
+- `gravity_central_mps2`
+- `gravity_sph_mps2`
+- `gravity_tide_sun_mps2`
+- `gravity_tide_moon_mps2`
 - `erp_mps2`
 - `relativity_mps2`
 - `srp_mps2` (if ephemeris provided)
@@ -155,6 +169,11 @@ Notes:
 - Third-body columns are component-based and extensible for future bodies (additional `*_mps2` columns).
 - Plot output intentionally omits the `total_mps2` curve and focuses on component lines.
 - Output schema reference: `docs/PERTURBATION_PROFILE_SCHEMA.md`.
+
+Gravity coefficient sources:
+- Primary catalog/download portal: `https://icgem.gfz.de/tom_longtime`
+- Recommended reference model for comparison: `EIGEN-6S4 (Version 2)` (GFZ/GRGS), DOI `10.5880/icgem.2016.008`.
+- Repo-local example path (ignored by git): `data/local/EIGEN-6S4.gfc`.
 
 Performance benchmark:
 ```bash

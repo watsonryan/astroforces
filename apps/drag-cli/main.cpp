@@ -14,7 +14,7 @@
 #include "astroforces/adapters/dtm2020_adapter.hpp"
 #include "astroforces/adapters/hwm14_adapter.hpp"
 #include "astroforces/adapters/nrlmsis21_adapter.hpp"
-#include "astroforces/drag/drag_model.hpp"
+#include "astroforces/forces/surface/drag/drag_model.hpp"
 #include "astroforces/models/exponential_atmosphere.hpp"
 #include "astroforces/sc/spacecraft.hpp"
 #include "astroforces/weather/celestrak_csv_provider.hpp"
@@ -29,11 +29,11 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  astroforces::atmo::StateVector state{};
-  state.position_m = astroforces::atmo::Vec3{std::atof(argv[1]), std::atof(argv[2]), std::atof(argv[3])};
-  state.velocity_mps = astroforces::atmo::Vec3{std::atof(argv[4]), std::atof(argv[5]), std::atof(argv[6])};
+  astroforces::core::StateVector state{};
+  state.position_m = astroforces::core::Vec3{std::atof(argv[1]), std::atof(argv[2]), std::atof(argv[3])};
+  state.velocity_mps = astroforces::core::Vec3{std::atof(argv[4]), std::atof(argv[5]), std::atof(argv[6])};
   state.epoch.utc_seconds = std::atof(argv[7]);
-  state.frame = astroforces::atmo::Frame::ECEF;
+  state.frame = astroforces::core::Frame::ECEF;
 
   const std::string weather_csv = (argc >= 13) ? argv[12] : "";
   const std::string model_name = (argc >= 9) ? argv[8] : "basic";
@@ -41,17 +41,17 @@ int main(int argc, char** argv) {
   const std::string wind_name = (argc >= 11) ? argv[10] : "zero";
 const std::string wind_data = (argc >= 12) ? argv[11] : "";
 
-  std::unique_ptr<astroforces::atmo::ISpaceWeatherProvider> weather{};
+  std::unique_ptr<astroforces::core::ISpaceWeatherProvider> weather{};
   if (!weather_csv.empty()) {
     weather = astroforces::weather::CelesTrakCsvSpaceWeatherProvider::Create(
         astroforces::weather::CelesTrakCsvSpaceWeatherProvider::Config{.csv_file = weather_csv});
   } else {
-    const astroforces::atmo::WeatherIndices wx{.f107 = 150.0, .f107a = 150.0, .ap = 4.0, .kp = 2.0,
-                                            .status = astroforces::atmo::Status::Ok};
+    const astroforces::core::WeatherIndices wx{.f107 = 150.0, .f107a = 150.0, .ap = 4.0, .kp = 2.0,
+                                            .status = astroforces::core::Status::Ok};
     weather = std::make_unique<astroforces::weather::StaticSpaceWeatherProvider>(wx);
   }
 
-  std::unique_ptr<astroforces::atmo::IAtmosphereModel> atmosphere{};
+  std::unique_ptr<astroforces::core::IAtmosphereModel> atmosphere{};
   if (model_name == "nrlmsis") {
     atmosphere = astroforces::adapters::Nrlmsis21AtmosphereAdapter::Create(
         astroforces::adapters::Nrlmsis21AtmosphereAdapter::Config{.parm_file = model_data});
@@ -61,7 +61,7 @@ const std::string wind_data = (argc >= 12) ? argv[11] : "";
   } else {
     atmosphere = std::make_unique<astroforces::models::ExponentialAtmosphereModel>(1.225, 0.0, 7000.0, 1000.0);
   }
-  std::unique_ptr<astroforces::atmo::IWindModel> wind{};
+  std::unique_ptr<astroforces::core::IWindModel> wind{};
   if (wind_name == "hwm14") {
     wind = astroforces::adapters::Hwm14WindAdapter::Create(
         astroforces::adapters::Hwm14WindAdapter::Config{.data_dir = wind_data});
@@ -78,7 +78,7 @@ const std::string wind_data = (argc >= 12) ? argv[11] : "";
   astroforces::drag::DragAccelerationModel model(*weather, *atmosphere, *wind);
   const auto result = model.evaluate(state, sc);
 
-  if (result.status != astroforces::atmo::Status::Ok) {
+  if (result.status != astroforces::core::Status::Ok) {
     spdlog::error("drag eval failed");
     return 2;
   }

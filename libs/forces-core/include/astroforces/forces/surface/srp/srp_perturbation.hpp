@@ -8,8 +8,8 @@
 #include <memory>
 #include <string>
 
-#include "astroforces/forces/perturbation.hpp"
-#include "astroforces/srp/srp_model.hpp"
+#include "astroforces/forces/core/perturbation.hpp"
+#include "astroforces/forces/surface/srp/srp_model.hpp"
 
 namespace astroforces::srp {
 

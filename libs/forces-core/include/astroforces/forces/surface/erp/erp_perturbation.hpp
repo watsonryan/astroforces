@@ -7,8 +7,8 @@
 
 #include <string>
 
-#include "astroforces/forces/erp_model.hpp"
-#include "astroforces/forces/perturbation.hpp"
+#include "astroforces/forces/surface/erp/erp_model.hpp"
+#include "astroforces/forces/core/perturbation.hpp"
 
 namespace astroforces::erp {
 

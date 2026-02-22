@@ -14,14 +14,14 @@
 #include "astroforces/adapters/hwm14_adapter.hpp"
 #include "astroforces/adapters/nrlmsis21_adapter.hpp"
 #include "astroforces/atmo/conversions.hpp"
-#include "astroforces/drag/drag_model.hpp"
+#include "astroforces/forces/surface/drag/drag_model.hpp"
 #include "astroforces/sc/spacecraft.hpp"
 #include "astroforces/weather/static_provider.hpp"
 #include "msis21/msis21.hpp"
 
 namespace {
 
-bool finite(const astroforces::atmo::Vec3& v) {
+bool finite(const astroforces::core::Vec3& v) {
   return std::isfinite(v.x) && std::isfinite(v.y) && std::isfinite(v.z);
 }
 
@@ -46,44 +46,44 @@ int main() {
     return 10;
   }
 
-  const atmo::WeatherIndices wx{.f107 = 150.0, .f107a = 150.0, .ap = 4.0, .kp = 2.0, .status = atmo::Status::Ok};
+  const core::WeatherIndices wx{.f107 = 150.0, .f107a = 150.0, .ap = 4.0, .kp = 2.0, .status = core::Status::Ok};
 
-  atmo::StateVector state{};
+  core::StateVector state{};
   state.epoch.utc_seconds = 1.0e9;
-  state.frame = atmo::Frame::ECEF;
-  state.position_m = atmo::Vec3{6778137.0, 0.0, 0.0};
-  state.velocity_mps = atmo::Vec3{0.0, 7670.0, 0.0};
+  state.frame = core::Frame::ECEF;
+  state.position_m = core::Vec3{6778137.0, 0.0, 0.0};
+  state.velocity_mps = core::Vec3{0.0, 7670.0, 0.0};
 
   const auto nrl = adapters::Nrlmsis21AtmosphereAdapter::Create({.parm_file = nrl_parm});
   const auto nrl_out = nrl->evaluate(state, wx);
-  if (nrl_out.status != atmo::Status::Ok || !(nrl_out.density_kg_m3 > 0.0) || !std::isfinite(nrl_out.temperature_k)) {
+  if (nrl_out.status != core::Status::Ok || !(nrl_out.density_kg_m3 > 0.0) || !std::isfinite(nrl_out.temperature_k)) {
     spdlog::error("nrlmsis adapter evaluation failed");
     return 1;
   }
 
-  atmo::WeatherIndices wx_hist = wx;
+  core::WeatherIndices wx_hist = wx;
   wx_hist.ap = 18.0;
   wx_hist.ap_3h_current = 40.0;
   wx_hist.kp_3h_current = 5.0;
   wx_hist.ap_msis_history = {40.0, 36.0, 32.0, 28.0, 22.0, 16.0, 10.0};
   wx_hist.has_ap_msis_history = true;
   const auto nrl_hist_out = nrl->evaluate(state, wx_hist);
-  if (nrl_hist_out.status != atmo::Status::Ok) {
+  if (nrl_hist_out.status != core::Status::Ok) {
     spdlog::error("nrlmsis adapter history evaluation failed");
     return 11;
   }
 
   msis21::Options msis_options{};
   auto msis_model = msis21::Model::load_from_file(nrl_parm, msis_options);
-  const auto geo = atmo::spherical_geodetic_from_ecef(state.position_m);
-  const auto iyd_sec = atmo::utc_seconds_to_iyd_sec(state.epoch.utc_seconds);
+  const auto geo = core::spherical_geodetic_from_ecef(state.position_m);
+  const auto iyd_sec = core::utc_seconds_to_iyd_sec(state.epoch.utc_seconds);
   msis21::Input msis_in{};
   msis_in.iyd = iyd_sec.first;
   msis_in.sec = iyd_sec.second;
   msis_in.alt_km = geo.alt_m * 1.0e-3;
   msis_in.glat_deg = geo.lat_deg;
   msis_in.glon_deg = geo.lon_deg;
-  msis_in.stl_hr = atmo::local_solar_time_hours(state.epoch.utc_seconds, geo.lon_deg);
+  msis_in.stl_hr = core::local_solar_time_hours(state.epoch.utc_seconds, geo.lon_deg);
   msis_in.f107a = wx_hist.f107a;
   msis_in.f107 = wx_hist.f107;
   msis_in.ap = wx_hist.ap_3h_current;
@@ -109,14 +109,14 @@ int main() {
 
   const auto dtm = adapters::Dtm2020AtmosphereAdapter::Create({.coeff_file = dtm_coeff});
   const auto dtm_out = dtm->evaluate(state, wx);
-  if (dtm_out.status != atmo::Status::Ok || !(dtm_out.density_kg_m3 > 0.0) || !std::isfinite(dtm_out.temperature_k)) {
+  if (dtm_out.status != core::Status::Ok || !(dtm_out.density_kg_m3 > 0.0) || !std::isfinite(dtm_out.temperature_k)) {
     spdlog::error("dtm2020 adapter evaluation failed");
     return 2;
   }
 
   const auto hwm = adapters::Hwm14WindAdapter::Create({.data_dir = hwm_data_dir});
   const auto hwm_out = hwm->evaluate(state, wx);
-  if (hwm_out.status != atmo::Status::Ok || hwm_out.frame != atmo::Frame::ECEF || !finite(hwm_out.velocity_mps)) {
+  if (hwm_out.status != core::Status::Ok || hwm_out.frame != core::Frame::ECEF || !finite(hwm_out.velocity_mps)) {
     spdlog::error("hwm14 adapter evaluation failed");
     return 3;
   }
@@ -125,7 +125,7 @@ int main() {
   sc::SpacecraftProperties sc{.mass_kg = 600.0, .reference_area_m2 = 4.0, .cd = 2.25, .use_surface_model = false};
   drag::DragAccelerationModel drag_model(weather, *nrl, *hwm);
   const auto drag_out = drag_model.evaluate(state, sc);
-  if (drag_out.status != atmo::Status::Ok || !(drag_out.density_kg_m3 > 0.0) || !finite(drag_out.acceleration_mps2)) {
+  if (drag_out.status != core::Status::Ok || !(drag_out.density_kg_m3 > 0.0) || !finite(drag_out.acceleration_mps2)) {
     spdlog::error("adapter-backed drag pipeline failed");
     return 4;
   }

@@ -4,7 +4,7 @@
  * @author Watosn
  */
 
-#include "astroforces/forces/perturbation.hpp"
+#include "astroforces/forces/core/perturbation.hpp"
 
 namespace astroforces::forces {
 
@@ -20,7 +20,7 @@ PerturbationResult PerturbationStack::evaluate(const PerturbationRequest& reques
   for (const auto& model : models_) {
     const auto c = model->evaluate(request);
     out.contributions.push_back(c);
-    if (c.status != astroforces::atmo::Status::Ok && out.status == astroforces::atmo::Status::Ok) {
+    if (c.status != astroforces::core::Status::Ok && out.status == astroforces::core::Status::Ok) {
       out.status = c.status;
     }
     out.total_acceleration_mps2 = out.total_acceleration_mps2 + c.acceleration_mps2;

@@ -14,7 +14,7 @@
 
 namespace astroforces::weather {
 
-class CelesTrakCsvSpaceWeatherProvider final : public astroforces::atmo::ISpaceWeatherProvider {
+class CelesTrakCsvSpaceWeatherProvider final : public astroforces::core::ISpaceWeatherProvider {
  public:
   struct DailySample {
     double day_start_utc_s{};
@@ -34,7 +34,7 @@ class CelesTrakCsvSpaceWeatherProvider final : public astroforces::atmo::ISpaceW
 
   static std::unique_ptr<CelesTrakCsvSpaceWeatherProvider> Create(const Config& config);
 
-  [[nodiscard]] astroforces::atmo::WeatherIndices at(const astroforces::atmo::Epoch& epoch) const override;
+  [[nodiscard]] astroforces::core::WeatherIndices at(const astroforces::core::Epoch& epoch) const override;
 
  private:
   explicit CelesTrakCsvSpaceWeatherProvider(std::vector<DailySample> samples) : samples_(std::move(samples)) {}

@@ -16,7 +16,7 @@ class Model;
 
 namespace astroforces::adapters {
 
-class Nrlmsis21AtmosphereAdapter final : public astroforces::atmo::IAtmosphereModel {
+class Nrlmsis21AtmosphereAdapter final : public astroforces::core::IAtmosphereModel {
  public:
   struct Config {
     std::filesystem::path parm_file{};
@@ -24,8 +24,8 @@ class Nrlmsis21AtmosphereAdapter final : public astroforces::atmo::IAtmosphereMo
 
   static std::unique_ptr<Nrlmsis21AtmosphereAdapter> Create(const Config& config);
 
-  [[nodiscard]] astroforces::atmo::AtmosphereSample evaluate(const astroforces::atmo::StateVector& state,
-                                                          const astroforces::atmo::WeatherIndices& weather) const override;
+  [[nodiscard]] astroforces::core::AtmosphereSample evaluate(const astroforces::core::StateVector& state,
+                                                          const astroforces::core::WeatherIndices& weather) const override;
 
  private:
   class Impl;

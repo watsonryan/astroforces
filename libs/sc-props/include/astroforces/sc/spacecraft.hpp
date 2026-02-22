@@ -12,7 +12,7 @@
 namespace astroforces::sc {
 
 struct Surface {
-  astroforces::atmo::Vec3 normal_body{};
+  astroforces::core::Vec3 normal_body{};
   double area_m2{};
   double cd{};
   double cr{1.0};
@@ -42,14 +42,14 @@ struct ForceProjection {
 };
 
 [[nodiscard]] double projected_area_m2(const SpacecraftProperties& sc,
-                                       const astroforces::atmo::Vec3& flow_dir_body);
+                                       const astroforces::core::Vec3& flow_dir_body);
 [[nodiscard]] AeroProjection projected_area_and_cd(const SpacecraftProperties& sc,
-                                                   const astroforces::atmo::Vec3& flow_dir_body);
+                                                   const astroforces::core::Vec3& flow_dir_body);
 [[nodiscard]] ForceProjection projected_area_and_coeff(const SpacecraftProperties& sc,
-                                                       const astroforces::atmo::Vec3& flow_dir_body,
+                                                       const astroforces::core::Vec3& flow_dir_body,
                                                        double reference_coeff,
                                                        SurfaceCoeffModel coeff_model);
 [[nodiscard]] ForceProjection projected_area_and_cr(const SpacecraftProperties& sc,
-                                                    const astroforces::atmo::Vec3& flow_dir_body);
+                                                    const astroforces::core::Vec3& flow_dir_body);
 
 }  // namespace astroforces::sc

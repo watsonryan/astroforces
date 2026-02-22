@@ -14,14 +14,14 @@
 #include <fmt/format.h>
 #include <spdlog/spdlog.h>
 
-#include "astroforces/forces/third_body.hpp"
+#include "astroforces/forces/gravity/third_body.hpp"
 
 namespace {
 
 struct SampleRow {
   double epoch_utc_s{};
-  astroforces::atmo::Vec3 position_eci_m{};
-  astroforces::atmo::Vec3 velocity_eci_mps{};
+  astroforces::core::Vec3 position_eci_m{};
+  astroforces::core::Vec3 velocity_eci_mps{};
 };
 
 bool parse_sample_row(const std::string& line, SampleRow& out) {
@@ -43,12 +43,12 @@ bool parse_sample_row(const std::string& line, SampleRow& out) {
     return false;
   }
   out.epoch_utc_s = values[0];
-  out.position_eci_m = astroforces::atmo::Vec3{values[1], values[2], values[3]};
-  out.velocity_eci_mps = astroforces::atmo::Vec3{values[4], values[5], values[6]};
+  out.position_eci_m = astroforces::core::Vec3{values[1], values[2], values[3]};
+  out.velocity_eci_mps = astroforces::core::Vec3{values[4], values[5], values[6]};
   return true;
 }
 
-double magnitude(const astroforces::atmo::Vec3& v) { return astroforces::atmo::norm(v); }
+double magnitude(const astroforces::core::Vec3& v) { return astroforces::core::norm(v); }
 
 }  // namespace
 
@@ -110,25 +110,25 @@ int main(int argc, char** argv) {
       continue;
     }
 
-    astroforces::atmo::StateVector state{};
+    astroforces::core::StateVector state{};
     state.epoch.utc_seconds = row.epoch_utc_s;
     state.position_m = row.position_eci_m;
     state.velocity_mps = row.velocity_eci_mps;
-    state.frame = astroforces::atmo::Frame::ECI;
+    state.frame = astroforces::core::Frame::ECI;
 
     const auto req = astroforces::forces::PerturbationRequest{.state = state, .spacecraft = nullptr};
     const auto sun_c = sun->evaluate(req);
     const auto moon_c = moon->evaluate(req);
     const auto total_c = total->evaluate(req);
 
-    astroforces::atmo::Status status = astroforces::atmo::Status::Ok;
-    if (sun_c.status != astroforces::atmo::Status::Ok) {
+    astroforces::core::Status status = astroforces::core::Status::Ok;
+    if (sun_c.status != astroforces::core::Status::Ok) {
       status = sun_c.status;
     }
-    if (status == astroforces::atmo::Status::Ok && moon_c.status != astroforces::atmo::Status::Ok) {
+    if (status == astroforces::core::Status::Ok && moon_c.status != astroforces::core::Status::Ok) {
       status = moon_c.status;
     }
-    if (status == astroforces::atmo::Status::Ok && total_c.status != astroforces::atmo::Status::Ok) {
+    if (status == astroforces::core::Status::Ok && total_c.status != astroforces::core::Status::Ok) {
       status = total_c.status;
     }
 

@@ -10,7 +10,7 @@
 
 #include <spdlog/spdlog.h>
 
-#include "astroforces/drag/drag_model.hpp"
+#include "astroforces/forces/surface/drag/drag_model.hpp"
 #include "astroforces/models/exponential_atmosphere.hpp"
 #include "astroforces/sc/spacecraft.hpp"
 #include "astroforces/weather/static_provider.hpp"
@@ -38,21 +38,21 @@ int main() {
     return 1;
   }
 
-  const atmo::WeatherIndices wx{.f107 = 150.0, .f107a = 150.0, .ap = 4.0, .kp = 2.0, .status = atmo::Status::Ok};
+  const core::WeatherIndices wx{.f107 = 150.0, .f107a = 150.0, .ap = 4.0, .kp = 2.0, .status = core::Status::Ok};
   weather::StaticSpaceWeatherProvider weather(wx);
   models::ExponentialAtmosphereModel atmosphere(3.0e-11, 400e3, 65e3, 900.0);
   models::ZeroWindModel wind;
   drag::DragAccelerationModel model(weather, atmosphere, wind);
   sc::SpacecraftProperties sc{.mass_kg = 600.0, .reference_area_m2 = 4.0, .cd = 2.25, .use_surface_model = false};
 
-  std::vector<atmo::StateVector> states;
+  std::vector<core::StateVector> states;
   states.reserve(64);
   for (int i = 0; i < 64; ++i) {
-    atmo::StateVector s{};
+    core::StateVector s{};
     s.epoch.utc_seconds = 1.0e9 + static_cast<double>(i) * 60.0;
-    s.frame = atmo::Frame::ECEF;
-    s.position_m = atmo::Vec3{6778137.0 + static_cast<double>(i), 10.0 * static_cast<double>(i), -5.0 * static_cast<double>(i)};
-    s.velocity_mps = atmo::Vec3{20.0, 7670.0, -2.0};
+    s.frame = core::Frame::ECEF;
+    s.position_m = core::Vec3{6778137.0 + static_cast<double>(i), 10.0 * static_cast<double>(i), -5.0 * static_cast<double>(i)};
+    s.velocity_mps = core::Vec3{20.0, 7670.0, -2.0};
     states.push_back(s);
   }
 

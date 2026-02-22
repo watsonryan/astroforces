@@ -7,16 +7,16 @@
 
 #include <string>
 
-#include "astroforces/drag/drag_model.hpp"
-#include "astroforces/forces/perturbation.hpp"
+#include "astroforces/forces/surface/drag/drag_model.hpp"
+#include "astroforces/forces/core/perturbation.hpp"
 
 namespace astroforces::drag {
 
 class DragPerturbationModel final : public astroforces::forces::IPerturbationModel {
  public:
-  DragPerturbationModel(const astroforces::atmo::ISpaceWeatherProvider& weather,
-                        const astroforces::atmo::IAtmosphereModel& atmosphere,
-                        const astroforces::atmo::IWindModel& wind,
+  DragPerturbationModel(const astroforces::core::ISpaceWeatherProvider& weather,
+                        const astroforces::core::IAtmosphereModel& atmosphere,
+                        const astroforces::core::IWindModel& wind,
                         const astroforces::sc::SpacecraftProperties* default_spacecraft = nullptr,
                         std::string name = "drag")
       : drag_(weather, atmosphere, wind), default_spacecraft_(default_spacecraft), name_(std::move(name)) {}

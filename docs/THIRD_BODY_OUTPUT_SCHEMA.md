@@ -21,5 +21,5 @@ Output CSV columns:
 - `sun_ax_mps2`, `sun_ay_mps2`, `sun_az_mps2`, `sun_mag_mps2`
 - `moon_ax_mps2`, `moon_ay_mps2`, `moon_az_mps2`, `moon_mag_mps2`
 - `total_ax_mps2`, `total_ay_mps2`, `total_az_mps2`, `total_mag_mps2`
-- `status` (`astroforces::atmo::Status` enum value as integer)
+- `status` (`astroforces::core::Status` enum value as integer)
 

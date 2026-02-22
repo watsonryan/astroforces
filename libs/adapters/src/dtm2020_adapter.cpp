@@ -30,24 +30,24 @@ std::unique_ptr<Dtm2020AtmosphereAdapter> Dtm2020AtmosphereAdapter::Create(const
   return ptr;
 }
 
-astroforces::atmo::AtmosphereSample Dtm2020AtmosphereAdapter::evaluate(const astroforces::atmo::StateVector& state,
-                                                                    const astroforces::atmo::WeatherIndices& weather) const {
+astroforces::core::AtmosphereSample Dtm2020AtmosphereAdapter::evaluate(const astroforces::core::StateVector& state,
+                                                                    const astroforces::core::WeatherIndices& weather) const {
   if (!impl_) {
-    return astroforces::atmo::AtmosphereSample{.status = astroforces::atmo::Status::DataUnavailable};
+    return astroforces::core::AtmosphereSample{.status = astroforces::core::Status::DataUnavailable};
   }
-  if (weather.status != astroforces::atmo::Status::Ok) {
-    return astroforces::atmo::AtmosphereSample{.status = weather.status};
+  if (weather.status != astroforces::core::Status::Ok) {
+    return astroforces::core::AtmosphereSample{.status = weather.status};
   }
 
-  const auto geo = astroforces::atmo::spherical_geodetic_from_ecef(state.position_m);
-  const auto iyd_sec = astroforces::atmo::utc_seconds_to_iyd_sec(state.epoch.utc_seconds);
+  const auto geo = astroforces::core::spherical_geodetic_from_ecef(state.position_m);
+  const auto iyd_sec = astroforces::core::utc_seconds_to_iyd_sec(state.epoch.utc_seconds);
   const int doy = iyd_sec.first % 1000;
 
   dtm2020::OperationalInputs in{};
   in.altitude_km = geo.alt_m * 1e-3;
   in.latitude_deg = geo.lat_deg;
   in.longitude_deg = geo.lon_deg;
-  in.local_time_h = astroforces::atmo::local_solar_time_hours(state.epoch.utc_seconds, geo.lon_deg);
+  in.local_time_h = astroforces::core::local_solar_time_hours(state.epoch.utc_seconds, geo.lon_deg);
   in.day_of_year = static_cast<double>(doy);
   in.f107 = weather.f107;
   in.f107m = weather.f107a;
@@ -56,13 +56,13 @@ astroforces::atmo::AtmosphereSample Dtm2020AtmosphereAdapter::evaluate(const ast
 
   const auto out = impl_->model_.Evaluate(in);
   if (!out.has_value()) {
-    return astroforces::atmo::AtmosphereSample{.status = astroforces::atmo::Status::NumericalError};
+    return astroforces::core::AtmosphereSample{.status = astroforces::core::Status::NumericalError};
   }
 
-  return astroforces::atmo::AtmosphereSample{
+  return astroforces::core::AtmosphereSample{
       .density_kg_m3 = out.value().density_g_cm3 * 1000.0,
       .temperature_k = out.value().temperature_k,
-      .status = astroforces::atmo::Status::Ok};
+      .status = astroforces::core::Status::Ok};
 }
 
 }  // namespace astroforces::adapters

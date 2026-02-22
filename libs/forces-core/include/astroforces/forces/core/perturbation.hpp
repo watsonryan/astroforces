@@ -17,21 +17,21 @@ namespace astroforces::forces {
 enum class PerturbationType : unsigned char { Unknown, Drag, Gravity, SRP, ERP, Relativity, ThirdBody };
 
 struct PerturbationRequest {
-  astroforces::atmo::StateVector state{};
+  astroforces::core::StateVector state{};
   const astroforces::sc::SpacecraftProperties* spacecraft{nullptr};
 };
 
 struct PerturbationContribution {
   std::string name{};
   PerturbationType type{PerturbationType::Unknown};
-  astroforces::atmo::Vec3 acceleration_mps2{};
-  astroforces::atmo::Status status{astroforces::atmo::Status::Ok};
+  astroforces::core::Vec3 acceleration_mps2{};
+  astroforces::core::Status status{astroforces::core::Status::Ok};
 };
 
 struct PerturbationResult {
-  astroforces::atmo::Vec3 total_acceleration_mps2{};
+  astroforces::core::Vec3 total_acceleration_mps2{};
   std::vector<PerturbationContribution> contributions{};
-  astroforces::atmo::Status status{astroforces::atmo::Status::Ok};
+  astroforces::core::Status status{astroforces::core::Status::Ok};
 };
 
 class IPerturbationModel {

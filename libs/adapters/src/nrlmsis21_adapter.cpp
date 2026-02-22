@@ -28,17 +28,17 @@ std::unique_ptr<Nrlmsis21AtmosphereAdapter> Nrlmsis21AtmosphereAdapter::Create(c
   return ptr;
 }
 
-astroforces::atmo::AtmosphereSample Nrlmsis21AtmosphereAdapter::evaluate(const astroforces::atmo::StateVector& state,
-                                                                      const astroforces::atmo::WeatherIndices& weather) const {
+astroforces::core::AtmosphereSample Nrlmsis21AtmosphereAdapter::evaluate(const astroforces::core::StateVector& state,
+                                                                      const astroforces::core::WeatherIndices& weather) const {
   if (!impl_) {
-    return astroforces::atmo::AtmosphereSample{.status = astroforces::atmo::Status::DataUnavailable};
+    return astroforces::core::AtmosphereSample{.status = astroforces::core::Status::DataUnavailable};
   }
-  if (weather.status != astroforces::atmo::Status::Ok) {
-    return astroforces::atmo::AtmosphereSample{.status = weather.status};
+  if (weather.status != astroforces::core::Status::Ok) {
+    return astroforces::core::AtmosphereSample{.status = weather.status};
   }
 
-  const auto geo = astroforces::atmo::spherical_geodetic_from_ecef(state.position_m);
-  const auto iyd_sec = astroforces::atmo::utc_seconds_to_iyd_sec(state.epoch.utc_seconds);
+  const auto geo = astroforces::core::spherical_geodetic_from_ecef(state.position_m);
+  const auto iyd_sec = astroforces::core::utc_seconds_to_iyd_sec(state.epoch.utc_seconds);
 
   msis21::Input in{};
   in.iyd = iyd_sec.first;
@@ -46,7 +46,7 @@ astroforces::atmo::AtmosphereSample Nrlmsis21AtmosphereAdapter::evaluate(const a
   in.alt_km = geo.alt_m * 1e-3;
   in.glat_deg = geo.lat_deg;
   in.glon_deg = geo.lon_deg;
-  in.stl_hr = astroforces::atmo::local_solar_time_hours(state.epoch.utc_seconds, geo.lon_deg);
+  in.stl_hr = astroforces::core::local_solar_time_hours(state.epoch.utc_seconds, geo.lon_deg);
   in.f107a = weather.f107a;
   in.f107 = weather.f107;
   in.ap = weather.ap_3h_current;
@@ -55,13 +55,13 @@ astroforces::atmo::AtmosphereSample Nrlmsis21AtmosphereAdapter::evaluate(const a
 
   const auto out = impl_->model_.evaluate(in);
   if (out.status != msis21::Status::Ok) {
-    return astroforces::atmo::AtmosphereSample{.status = astroforces::atmo::Status::NumericalError};
+    return astroforces::core::AtmosphereSample{.status = astroforces::core::Status::NumericalError};
   }
 
-  return astroforces::atmo::AtmosphereSample{
+  return astroforces::core::AtmosphereSample{
       .density_kg_m3 = out.out.rho * 1000.0,
       .temperature_k = out.out.t,
-      .status = astroforces::atmo::Status::Ok};
+      .status = astroforces::core::Status::Ok};
 }
 
 }  // namespace astroforces::adapters

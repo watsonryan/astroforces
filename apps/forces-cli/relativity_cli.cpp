@@ -10,11 +10,11 @@
 #include <fmt/format.h>
 #include <spdlog/spdlog.h>
 
-#include "astroforces/forces/relativity_model.hpp"
+#include "astroforces/forces/gravity/relativity_model.hpp"
 
 namespace {
 
-double magnitude(const astroforces::atmo::Vec3& v) { return astroforces::atmo::norm(v); }
+double magnitude(const astroforces::core::Vec3& v) { return astroforces::core::norm(v); }
 
 }  // namespace
 
@@ -25,11 +25,11 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  astroforces::atmo::StateVector state{};
-  state.position_m = astroforces::atmo::Vec3{std::atof(argv[1]), std::atof(argv[2]), std::atof(argv[3])};
-  state.velocity_mps = astroforces::atmo::Vec3{std::atof(argv[4]), std::atof(argv[5]), std::atof(argv[6])};
+  astroforces::core::StateVector state{};
+  state.position_m = astroforces::core::Vec3{std::atof(argv[1]), std::atof(argv[2]), std::atof(argv[3])};
+  state.velocity_mps = astroforces::core::Vec3{std::atof(argv[4]), std::atof(argv[5]), std::atof(argv[6])};
   state.epoch.utc_seconds = std::atof(argv[7]);
-  state.frame = astroforces::atmo::Frame::ECI;
+  state.frame = astroforces::core::Frame::ECI;
 
   const std::filesystem::path eph_file = argv[8];
   const bool use_geodesic = (argc >= 10) ? (std::atoi(argv[9]) != 0) : true;
@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
   const auto rel = astroforces::forces::RelativityAccelerationModel::Create(
       {.ephemeris_file = eph_file, .use_geodesic_precession = use_geodesic});
   const auto out = rel->evaluate(state);
-  if (out.status != astroforces::atmo::Status::Ok) {
+  if (out.status != astroforces::core::Status::Ok) {
     spdlog::error("relativity evaluation failed: status={}", static_cast<int>(out.status));
     return 3;
   }

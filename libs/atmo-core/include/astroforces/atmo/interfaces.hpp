@@ -7,7 +7,7 @@
 
 #include "astroforces/atmo/types.hpp"
 
-namespace astroforces::atmo {
+namespace astroforces::core {
 
 class ISpaceWeatherProvider {
  public:
@@ -29,4 +29,4 @@ class IWindModel {
                                             const WeatherIndices& weather) const = 0;
 };
 
-}  // namespace astroforces::atmo
+}  // namespace astroforces::core

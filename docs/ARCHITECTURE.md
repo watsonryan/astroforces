@@ -20,6 +20,7 @@ flowchart LR
   F --> R[erp_cli]
   F --> V[erp_batch_cli]
   F --> W[relativity_cli]
+  F --> K[gravity_sph_cli]
   F --> S[srp_cli]
   F --> U[srp_batch_cli]
   F --> P[perturbation_profile_cli]
@@ -32,7 +33,7 @@ flowchart LR
 - `models-basic`: temporary baseline models for integration tests
 - `adapters`: integration seam for NRLMSIS/DTM/HWM wrappers
 - `sc-props`: spacecraft macro geometry and drag-relevant properties
-- `forces-core`: drag, ERP, SRP, relativity, third-body, and generic perturbation interfaces
+- `forces-core`: drag, full SPH gravity+tides, ERP, SRP, relativity, third-body, and generic perturbation interfaces
 - `forces/surface_force`: shared surface-force kernel (cannonball + macro plate projection)
 - `apps/drag-cli`: single-state CLI
 - `apps/drag_batch_cli`: batched drag outputs (CSV/JSON)
@@ -41,6 +42,7 @@ flowchart LR
 - `apps/erp_cli`: single-state ERP evaluation
 - `apps/erp_batch_cli`: batched ERP outputs
 - `apps/relativity_cli`: single-state relativistic acceleration evaluation
+- `apps/gravity_sph_cli`: single-state full SPH gravity and tides evaluation
 - `apps/srp_cli`: single-state SRP evaluation
 - `apps/srp_batch_cli`: batched SRP outputs
 - `apps/perturbation_profile_cli`: altitude sweep profiler with per-component outputs
@@ -53,6 +55,7 @@ flowchart LR
 - `astroforces::forces::ThirdBodyPerturbationModel`: configurable Sun/Moon third-body model.
 - `astroforces::erp::ErpPerturbationModel`: ERP implementation of the generic interface.
 - `astroforces::forces::RelativityPerturbationModel`: relativity implementation of the generic interface.
+- `astroforces::forces::GravitySphPerturbationModel`: full SPH gravity/tides implementation of the generic interface.
 - `astroforces::srp::SrpPerturbationModel`: SRP implementation of the generic interface.
 
 ## Design Rules

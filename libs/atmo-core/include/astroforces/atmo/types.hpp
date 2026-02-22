@@ -9,7 +9,7 @@
 #include <cmath>
 #include <cstdint>
 
-namespace astroforces::atmo {
+namespace astroforces::core {
 
 enum class Frame : std::uint8_t { ECI, ECEF, NED, BODY };
 
@@ -53,13 +53,13 @@ struct GeodeticPoint {
 struct WeatherIndices {
   double f107{};
   double f107a{};
-  double ap{};  // Daily AP average.
-  double kp{};  // Daily KP average (0-9 scale).
+  double ap{};
+  double kp{};
   double ap_3h_current{};
   double kp_3h_current{};
   std::array<double, 8> ap_3h_utc{};
-  std::array<double, 8> kp_3h_utc{};  // 0-9 scale.
-  std::array<double, 7> ap_msis_history{};  // Current, -3h, -6h, -9h, avg12-33, avg36-57, avg60-81.
+  std::array<double, 8> kp_3h_utc{};
+  std::array<double, 7> ap_msis_history{};
   bool has_ap_msis_history{};
   bool f107_observed{true};
   bool geomagnetic_observed{true};
@@ -81,4 +81,22 @@ struct WindSample {
   Status status{Status::Ok};
 };
 
-}  // namespace astroforces::atmo
+}  // namespace astroforces::core
+
+namespace astroforces {
+
+using Frame = core::Frame;
+using Status = core::Status;
+using WeatherSource = core::WeatherSource;
+using Vec3 = core::Vec3;
+using Epoch = core::Epoch;
+using StateVector = core::StateVector;
+using GeodeticPoint = core::GeodeticPoint;
+using WeatherIndices = core::WeatherIndices;
+using AtmosphereSample = core::AtmosphereSample;
+using WindSample = core::WindSample;
+
+inline double dot(const Vec3& a, const Vec3& b) { return core::dot(a, b); }
+inline double norm(const Vec3& v) { return core::norm(v); }
+
+}  // namespace astroforces

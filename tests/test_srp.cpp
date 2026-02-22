@@ -11,11 +11,11 @@
 #include <spdlog/spdlog.h>
 
 #include "astroforces/sc/spacecraft.hpp"
-#include "astroforces/srp/srp_model.hpp"
+#include "astroforces/forces/surface/srp/srp_model.hpp"
 
 namespace {
 
-bool finite_vec(const astroforces::atmo::Vec3& v) {
+bool finite_vec(const astroforces::core::Vec3& v) {
   return std::isfinite(v.x) && std::isfinite(v.y) && std::isfinite(v.z);
 }
 
@@ -34,22 +34,22 @@ int main() {
     return 0;
   }
 
-  astroforces::atmo::StateVector state{};
-  state.frame = astroforces::atmo::Frame::ECI;
+  astroforces::core::StateVector state{};
+  state.frame = astroforces::core::Frame::ECI;
   state.epoch.utc_seconds = 1.0e9;
-  state.position_m = astroforces::atmo::Vec3{6778137.0, 0.0, 0.0};
-  state.velocity_mps = astroforces::atmo::Vec3{0.0, 7670.0, 0.0};
+  state.position_m = astroforces::core::Vec3{6778137.0, 0.0, 0.0};
+  state.velocity_mps = astroforces::core::Vec3{0.0, 7670.0, 0.0};
 
   astroforces::sc::SpacecraftProperties sc{
       .mass_kg = 600.0, .reference_area_m2 = 4.0, .cd = 2.2, .cr = 1.3, .use_surface_model = false, .surfaces = {}};
 
   const auto srp = astroforces::srp::SrpAccelerationModel::Create({.ephemeris_file = eph_path, .use_eclipse = false});
   const auto out = srp->evaluate(state, sc);
-  if (out.status != astroforces::atmo::Status::Ok) {
+  if (out.status != astroforces::core::Status::Ok) {
     spdlog::error("srp evaluate failed");
     return 1;
   }
-  if (!finite_vec(out.acceleration_mps2) || !(astroforces::atmo::norm(out.acceleration_mps2) > 0.0)) {
+  if (!finite_vec(out.acceleration_mps2) || !(astroforces::core::norm(out.acceleration_mps2) > 0.0)) {
     spdlog::error("srp acceleration invalid");
     return 2;
   }
@@ -60,7 +60,7 @@ int main() {
 
   const auto srp_e = astroforces::srp::SrpAccelerationModel::Create({.ephemeris_file = eph_path, .use_eclipse = true});
   const auto out_e = srp_e->evaluate(state, sc);
-  if (out_e.status != astroforces::atmo::Status::Ok) {
+  if (out_e.status != astroforces::core::Status::Ok) {
     spdlog::error("srp eclipse evaluate failed");
     return 4;
   }

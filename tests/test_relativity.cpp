@@ -10,28 +10,28 @@
 
 #include <spdlog/spdlog.h>
 
-#include "astroforces/forces/relativity_model.hpp"
+#include "astroforces/forces/gravity/relativity_model.hpp"
 
 namespace {
 
-bool finite_vec(const astroforces::atmo::Vec3& v) {
+bool finite_vec(const astroforces::core::Vec3& v) {
   return std::isfinite(v.x) && std::isfinite(v.y) && std::isfinite(v.z);
 }
 
-double mag(const astroforces::atmo::Vec3& v) { return astroforces::atmo::norm(v); }
+double mag(const astroforces::core::Vec3& v) { return astroforces::core::norm(v); }
 
 }  // namespace
 
 int main() {
-  astroforces::atmo::StateVector state{};
-  state.frame = astroforces::atmo::Frame::ECI;
+  astroforces::core::StateVector state{};
+  state.frame = astroforces::core::Frame::ECI;
   state.epoch.utc_seconds = 1.0e9;
-  state.position_m = astroforces::atmo::Vec3{6778137.0, 0.0, 0.0};
-  state.velocity_mps = astroforces::atmo::Vec3{0.0, 7670.0, 0.0};
+  state.position_m = astroforces::core::Vec3{6778137.0, 0.0, 0.0};
+  state.velocity_mps = astroforces::core::Vec3{0.0, 7670.0, 0.0};
 
   const auto rel_no_geo = astroforces::forces::RelativityAccelerationModel::Create({.use_geodesic_precession = false});
   const auto out_no_geo = rel_no_geo->evaluate(state);
-  if (out_no_geo.status != astroforces::atmo::Status::Ok) {
+  if (out_no_geo.status != astroforces::core::Status::Ok) {
     spdlog::error("relativity no-geodesic evaluation failed");
     return 1;
   }
@@ -61,7 +61,7 @@ int main() {
   const auto rel_with_geo =
       astroforces::forces::RelativityAccelerationModel::Create({.ephemeris_file = eph_path, .use_geodesic_precession = true});
   const auto out_with_geo = rel_with_geo->evaluate(state);
-  if (out_with_geo.status != astroforces::atmo::Status::Ok) {
+  if (out_with_geo.status != astroforces::core::Status::Ok) {
     spdlog::error("relativity geodesic evaluation failed");
     return 4;
   }

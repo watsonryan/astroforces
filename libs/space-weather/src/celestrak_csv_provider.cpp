@@ -139,10 +139,10 @@ double avg_ap_range_hours_back(const std::vector<CelesTrakCsvSpaceWeatherProvide
   return (n > 0) ? (sum / static_cast<double>(n)) : 0.0;
 }
 
-astroforces::atmo::WeatherIndices make_indices(const CelesTrakCsvSpaceWeatherProvider::DailySample& s, bool interpolated,
+astroforces::core::WeatherIndices make_indices(const CelesTrakCsvSpaceWeatherProvider::DailySample& s, bool interpolated,
                                            bool extrapolated, int slot, bool has_msis_history,
                                            const std::array<double, 7>& ap_msis_history) {
-  astroforces::atmo::WeatherIndices out{
+  astroforces::core::WeatherIndices out{
       .f107 = s.f107_obs,
       .f107a = s.f107_obs_center81,
       .ap = s.ap_avg,
@@ -155,10 +155,10 @@ astroforces::atmo::WeatherIndices make_indices(const CelesTrakCsvSpaceWeatherPro
       .has_ap_msis_history = has_msis_history,
       .f107_observed = s.f107_observed,
       .geomagnetic_observed = s.geomagnetic_observed,
-      .source = astroforces::atmo::WeatherSource::CelesTrakLast5YearsCsv,
+      .source = astroforces::core::WeatherSource::CelesTrakLast5YearsCsv,
       .interpolated = interpolated,
       .extrapolated = extrapolated,
-      .status = astroforces::atmo::Status::Ok};
+      .status = astroforces::core::Status::Ok};
   return out;
 }
 
@@ -241,11 +241,11 @@ std::unique_ptr<CelesTrakCsvSpaceWeatherProvider> CelesTrakCsvSpaceWeatherProvid
   return std::unique_ptr<CelesTrakCsvSpaceWeatherProvider>(new CelesTrakCsvSpaceWeatherProvider(std::move(samples)));
 }
 
-astroforces::atmo::WeatherIndices CelesTrakCsvSpaceWeatherProvider::at(const astroforces::atmo::Epoch& epoch) const {
+astroforces::core::WeatherIndices CelesTrakCsvSpaceWeatherProvider::at(const astroforces::core::Epoch& epoch) const {
   if (samples_.empty()) {
-    return astroforces::atmo::WeatherIndices{
-        .source = astroforces::atmo::WeatherSource::CelesTrakLast5YearsCsv,
-        .status = astroforces::atmo::Status::DataUnavailable};
+    return astroforces::core::WeatherIndices{
+        .source = astroforces::core::WeatherSource::CelesTrakLast5YearsCsv,
+        .status = astroforces::core::Status::DataUnavailable};
   }
 
   const double t = epoch.utc_seconds;

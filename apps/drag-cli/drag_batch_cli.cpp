@@ -18,7 +18,7 @@
 #include "astroforces/adapters/dtm2020_adapter.hpp"
 #include "astroforces/adapters/hwm14_adapter.hpp"
 #include "astroforces/adapters/nrlmsis21_adapter.hpp"
-#include "astroforces/drag/drag_model.hpp"
+#include "astroforces/forces/surface/drag/drag_model.hpp"
 #include "astroforces/models/exponential_atmosphere.hpp"
 #include "astroforces/sc/spacecraft.hpp"
 #include "astroforces/weather/celestrak_csv_provider.hpp"
@@ -26,28 +26,28 @@
 
 namespace {
 
-const char* status_to_string(astroforces::atmo::Status s) {
+const char* status_to_string(astroforces::core::Status s) {
   switch (s) {
-    case astroforces::atmo::Status::Ok:
+    case astroforces::core::Status::Ok:
       return "ok";
-    case astroforces::atmo::Status::InvalidInput:
+    case astroforces::core::Status::InvalidInput:
       return "invalid_input";
-    case astroforces::atmo::Status::NotImplemented:
+    case astroforces::core::Status::NotImplemented:
       return "not_implemented";
-    case astroforces::atmo::Status::DataUnavailable:
+    case astroforces::core::Status::DataUnavailable:
       return "data_unavailable";
-    case astroforces::atmo::Status::NumericalError:
+    case astroforces::core::Status::NumericalError:
       return "numerical_error";
     default:
       return "unknown";
   }
 }
 
-const char* weather_source_to_string(astroforces::atmo::WeatherSource s) {
+const char* weather_source_to_string(astroforces::core::WeatherSource s) {
   switch (s) {
-    case astroforces::atmo::WeatherSource::StaticProvider:
+    case astroforces::core::WeatherSource::StaticProvider:
       return "static";
-    case astroforces::atmo::WeatherSource::CelesTrakLast5YearsCsv:
+    case astroforces::core::WeatherSource::CelesTrakLast5YearsCsv:
       return "celestrak_last5y";
     default:
       return "unknown";
@@ -56,8 +56,8 @@ const char* weather_source_to_string(astroforces::atmo::WeatherSource s) {
 
 struct SampleRow {
   double epoch_utc_s{};
-  astroforces::atmo::Vec3 position_m{};
-  astroforces::atmo::Vec3 velocity_mps{};
+  astroforces::core::Vec3 position_m{};
+  astroforces::core::Vec3 velocity_mps{};
 };
 
 bool parse_sample_row(const std::string& line, SampleRow& out) {
@@ -79,8 +79,8 @@ bool parse_sample_row(const std::string& line, SampleRow& out) {
     return false;
   }
   out.epoch_utc_s = values[0];
-  out.position_m = astroforces::atmo::Vec3{values[1], values[2], values[3]};
-  out.velocity_mps = astroforces::atmo::Vec3{values[4], values[5], values[6]};
+  out.position_m = astroforces::core::Vec3{values[1], values[2], values[3]};
+  out.velocity_mps = astroforces::core::Vec3{values[4], values[5], values[6]};
   return true;
 }
 
@@ -117,17 +117,17 @@ int main(int argc, char** argv) {
     return 3;
   }
 
-  std::unique_ptr<astroforces::atmo::ISpaceWeatherProvider> weather{};
+  std::unique_ptr<astroforces::core::ISpaceWeatherProvider> weather{};
   if (!weather_csv.empty()) {
     weather = astroforces::weather::CelesTrakCsvSpaceWeatherProvider::Create(
         astroforces::weather::CelesTrakCsvSpaceWeatherProvider::Config{.csv_file = weather_csv});
   } else {
-    const astroforces::atmo::WeatherIndices wx{.f107 = 150.0, .f107a = 150.0, .ap = 4.0, .kp = 2.0,
-                                            .status = astroforces::atmo::Status::Ok};
+    const astroforces::core::WeatherIndices wx{.f107 = 150.0, .f107a = 150.0, .ap = 4.0, .kp = 2.0,
+                                            .status = astroforces::core::Status::Ok};
     weather = std::make_unique<astroforces::weather::StaticSpaceWeatherProvider>(wx);
   }
 
-  std::unique_ptr<astroforces::atmo::IAtmosphereModel> atmosphere{};
+  std::unique_ptr<astroforces::core::IAtmosphereModel> atmosphere{};
   if (model_name == "nrlmsis") {
     atmosphere = astroforces::adapters::Nrlmsis21AtmosphereAdapter::Create(
         astroforces::adapters::Nrlmsis21AtmosphereAdapter::Config{.parm_file = model_data});
@@ -138,7 +138,7 @@ int main(int argc, char** argv) {
     atmosphere = std::make_unique<astroforces::models::ExponentialAtmosphereModel>(1.225, 0.0, 7000.0, 1000.0);
   }
 
-  std::unique_ptr<astroforces::atmo::IWindModel> wind{};
+  std::unique_ptr<astroforces::core::IWindModel> wind{};
   if (wind_name == "hwm14") {
     wind = astroforces::adapters::Hwm14WindAdapter::Create(
         astroforces::adapters::Hwm14WindAdapter::Config{.data_dir = wind_data});
@@ -180,11 +180,11 @@ int main(int argc, char** argv) {
       continue;
     }
 
-    astroforces::atmo::StateVector state{};
+    astroforces::core::StateVector state{};
     state.epoch.utc_seconds = row.epoch_utc_s;
     state.position_m = row.position_m;
     state.velocity_mps = row.velocity_mps;
-    state.frame = astroforces::atmo::Frame::ECEF;
+    state.frame = astroforces::core::Frame::ECEF;
 
     const auto r = drag.evaluate(state, sc);
     if (format == "json") {

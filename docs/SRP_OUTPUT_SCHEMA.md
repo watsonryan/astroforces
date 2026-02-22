@@ -20,5 +20,5 @@ Output CSV columns:
 - `ax_mps2`, `ay_mps2`, `az_mps2`, `amag_mps2`
 - `solar_pressure_pa`, `sun_distance_m`
 - `area_m2`, `cr`, `eclipsed`
-- `status` (`astroforces::atmo::Status` enum value as integer)
+- `status` (`astroforces::core::Status` enum value as integer)
 

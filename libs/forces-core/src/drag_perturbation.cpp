@@ -4,7 +4,7 @@
  * @author Watosn
  */
 
-#include "astroforces/drag/drag_perturbation.hpp"
+#include "astroforces/forces/surface/drag/drag_perturbation.hpp"
 
 namespace astroforces::drag {
 
@@ -16,7 +16,7 @@ astroforces::forces::PerturbationContribution DragPerturbationModel::evaluate(
 
   const auto* sc = request.spacecraft ? request.spacecraft : default_spacecraft_;
   if (!sc) {
-    out.status = astroforces::atmo::Status::InvalidInput;
+    out.status = astroforces::core::Status::InvalidInput;
     return out;
   }
 

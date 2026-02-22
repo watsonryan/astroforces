@@ -20,27 +20,27 @@ class Workspace;
 namespace astroforces::srp {
 
 struct SrpResult {
-  astroforces::atmo::Vec3 acceleration_mps2{};
+  astroforces::core::Vec3 acceleration_mps2{};
   double solar_pressure_pa{};
   double sun_distance_m{};
   double area_m2{};
   double cr{};
   bool eclipsed{};
-  astroforces::atmo::Status status{astroforces::atmo::Status::Ok};
+  astroforces::core::Status status{astroforces::core::Status::Ok};
 };
 
 class SrpAccelerationModel final {
  public:
   struct Config {
     std::filesystem::path ephemeris_file{};
-    double solar_pressure_1au_pa{astroforces::atmo::constants::kSolarRadiationPressureAt1AuPa};
-    double astronomical_unit_m{astroforces::atmo::constants::kAstronomicalUnitM};
+    double solar_pressure_1au_pa{astroforces::core::constants::kSolarRadiationPressureAt1AuPa};
+    double astronomical_unit_m{astroforces::core::constants::kAstronomicalUnitM};
     bool use_eclipse{false};
   };
 
   static std::unique_ptr<SrpAccelerationModel> Create(const Config& config);
 
-  [[nodiscard]] SrpResult evaluate(const astroforces::atmo::StateVector& state,
+  [[nodiscard]] SrpResult evaluate(const astroforces::core::StateVector& state,
                                    const astroforces::sc::SpacecraftProperties& sc) const;
 
  private:

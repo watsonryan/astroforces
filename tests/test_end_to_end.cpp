@@ -6,7 +6,7 @@
 
 #include <spdlog/spdlog.h>
 
-#include "astroforces/drag/drag_model.hpp"
+#include "astroforces/forces/surface/drag/drag_model.hpp"
 #include "astroforces/models/exponential_atmosphere.hpp"
 #include "astroforces/sc/spacecraft.hpp"
 #include "astroforces/weather/static_provider.hpp"
@@ -14,22 +14,22 @@
 int main() {
   using namespace astroforces;
 
-  const atmo::WeatherIndices wx{.f107 = 120.0, .f107a = 130.0, .ap = 8.0, .kp = 3.0, .status = atmo::Status::Ok};
+  const core::WeatherIndices wx{.f107 = 120.0, .f107a = 130.0, .ap = 8.0, .kp = 3.0, .status = core::Status::Ok};
   weather::StaticSpaceWeatherProvider weather(wx);
   models::ExponentialAtmosphereModel atmosphere(3.0e-11, 400e3, 65e3, 900.0);
   models::ZeroWindModel wind;
   drag::DragAccelerationModel model(weather, atmosphere, wind);
 
-  atmo::StateVector state{};
+  core::StateVector state{};
   state.epoch.utc_seconds = 1.0e9;
-  state.frame = atmo::Frame::ECI;
-  state.position_m = atmo::Vec3{6778137.0, 0.0, 0.0};
-  state.velocity_mps = atmo::Vec3{0.0, 7670.0, 0.0};
+  state.frame = core::Frame::ECI;
+  state.position_m = core::Vec3{6778137.0, 0.0, 0.0};
+  state.velocity_mps = core::Vec3{0.0, 7670.0, 0.0};
 
   sc::SpacecraftProperties sc{.mass_kg = 600.0, .reference_area_m2 = 4.0, .cd = 2.25, .use_surface_model = false};
 
   const auto out = model.evaluate(state, sc);
-  if (out.status != atmo::Status::Ok) {
+  if (out.status != core::Status::Ok) {
     spdlog::error("pipeline failed");
     return 1;
   }
