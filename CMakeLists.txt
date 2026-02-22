@@ -75,6 +75,8 @@ add_library(astroforces_forces_core STATIC
   libs/forces-core/src/gravity/third_body.cpp
   libs/forces-core/src/surface/drag/drag_model.cpp
   libs/forces-core/src/surface/drag/drag_perturbation.cpp
+  libs/forces-core/src/surface/antenna_thrust/antenna_thrust_model.cpp
+  libs/forces-core/src/surface/antenna_thrust/antenna_thrust_perturbation.cpp
   libs/forces-core/src/surface/earth_radiation/earth_radiation_model.cpp
   libs/forces-core/src/surface/earth_radiation/earth_radiation_perturbation.cpp
   libs/forces-core/src/surface/srp/srp_model.cpp
@@ -197,6 +199,18 @@ target_link_libraries(earth_radiation_batch_cli PRIVATE
   astroforces_sc_props
   astroforces_forces_core)
 
+add_executable(antenna_thrust_cli apps/forces-cli/antenna_thrust_cli.cpp)
+target_link_libraries(antenna_thrust_cli PRIVATE
+  astroforces_atmo_core
+  astroforces_sc_props
+  astroforces_forces_core)
+
+add_executable(antenna_thrust_batch_cli apps/forces-cli/antenna_thrust_batch_cli.cpp)
+target_link_libraries(antenna_thrust_batch_cli PRIVATE
+  astroforces_atmo_core
+  astroforces_sc_props
+  astroforces_forces_core)
+
 add_executable(relativity_cli apps/forces-cli/relativity_cli.cpp)
 target_link_libraries(relativity_cli PRIVATE
   astroforces_atmo_core
@@ -207,7 +221,7 @@ target_link_libraries(gravity_sph_cli PRIVATE
   astroforces_atmo_core
   astroforces_forces_core)
 
-foreach(tgt astroforces_space_weather astroforces_sc_props astroforces_models_basic astroforces_forces_core astroforces_adapters drag_cli drag_batch_cli perturbation_profile_cli third_body_cli third_body_batch_cli srp_cli srp_batch_cli earth_radiation_cli earth_radiation_batch_cli relativity_cli gravity_sph_cli)
+foreach(tgt astroforces_space_weather astroforces_sc_props astroforces_models_basic astroforces_forces_core astroforces_adapters drag_cli drag_batch_cli perturbation_profile_cli third_body_cli third_body_batch_cli srp_cli srp_batch_cli earth_radiation_cli earth_radiation_batch_cli antenna_thrust_cli antenna_thrust_batch_cli relativity_cli gravity_sph_cli)
   if(MSVC)
     target_compile_options(${tgt} PRIVATE /W4)
     if(ASTROFORCES_WARNINGS_AS_ERRORS)
@@ -310,6 +324,13 @@ if(ASTROFORCES_BUILD_TESTS)
     astroforces_sc_props
     astroforces_forces_core)
   add_test(NAME EarthRadiation COMMAND astroforces_test_earth_radiation)
+
+  add_executable(astroforces_test_antenna_thrust tests/test_antenna_thrust.cpp)
+  target_link_libraries(astroforces_test_antenna_thrust PRIVATE
+    astroforces_atmo_core
+    astroforces_sc_props
+    astroforces_forces_core)
+  add_test(NAME AntennaThrust COMMAND astroforces_test_antenna_thrust)
 
   add_executable(astroforces_test_relativity tests/test_relativity.cpp)
   target_link_libraries(astroforces_test_relativity PRIVATE
