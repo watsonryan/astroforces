@@ -229,7 +229,11 @@ add_executable(frame_transform_cli apps/forces-cli/frame_transform_cli.cpp)
 target_link_libraries(frame_transform_cli PRIVATE
   astroforces_core)
 
-foreach(tgt astroforces_space_weather astroforces_sc_props astroforces_models_basic astroforces_forces_core astroforces_adapters drag_cli drag_batch_cli perturbation_profile_cli third_body_cli third_body_batch_cli srp_cli srp_batch_cli earth_radiation_cli earth_radiation_batch_cli antenna_thrust_cli antenna_thrust_batch_cli relativity_cli gravity_sph_cli frame_transform_cli)
+add_executable(transform_profile_cli apps/forces-cli/transform_profile_cli.cpp)
+target_link_libraries(transform_profile_cli PRIVATE
+  astroforces_core)
+
+foreach(tgt astroforces_space_weather astroforces_sc_props astroforces_models_basic astroforces_forces_core astroforces_adapters drag_cli drag_batch_cli perturbation_profile_cli third_body_cli third_body_batch_cli srp_cli srp_batch_cli earth_radiation_cli earth_radiation_batch_cli antenna_thrust_cli antenna_thrust_batch_cli relativity_cli gravity_sph_cli frame_transform_cli transform_profile_cli)
   if(MSVC)
     target_compile_options(${tgt} PRIVATE /W4)
     if(ASTROFORCES_WARNINGS_AS_ERRORS)
