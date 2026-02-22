@@ -35,13 +35,22 @@ flowchart LR
 ```
 
 ## Scope
-- Shared force interfaces (`IPerturbationModel`, `PerturbationStack`)
-- Drag acceleration core (relative velocity + ballistic term)
-- Spacecraft geometry/surface property hooks
-- Adapter integration points for:
+- Core astrodynamics primitives and transforms:
+  - Frame/time types, EOP/CIP readers, leap-second handling
+  - Approximate and strict ECI/ECEF transform paths
+- Shared force composition interface:
+  - `IPerturbationModel`, `PerturbationStack`, typed contribution outputs
+- Implemented force models:
+  - Surface forces: Drag, SRP, Earth Radiation Pressure (ERP), Antenna Thrust
+  - Gravity forces: Central + SPH gravity, solid Earth/pole/ocean/atmos/AOD tide terms
+  - Other forces: Third-body (Sun/Moon), Post-Newtonian relativity
+- Spacecraft geometry/properties:
+  - Cannonball and macro-surface projection models
+- Weather/model adapters:
   - NRLMSIS 2.1 (`nrlmsis-2_1`)
   - DTM2020 (`dtm2020`)
   - HWM14 (`hwm14`)
+  - CelesTrak SW-Last5Years CSV provider
 
 ## Build
 ```bash
