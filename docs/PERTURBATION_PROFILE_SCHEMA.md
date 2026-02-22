@@ -17,6 +17,7 @@ Schema id: `perturbation_profile_v2`
 - `eop_finals_file` (optional)
 - `ocean_tide_file` (optional)
 - `atmos_tide_file` (optional)
+- `ocean_pole_tide_file` (optional)
 
 ## CSV Output
 Header starts with:

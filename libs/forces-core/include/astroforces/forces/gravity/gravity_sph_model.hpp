@@ -19,6 +19,7 @@ class Workspace;
 
 namespace astroforces::forces::tides {
 class ConstituentTideModel;
+class OceanPoleTideModel;
 }  // namespace astroforces::forces::tides
 
 namespace astroforces::forces {
@@ -43,6 +44,7 @@ class GravitySphAccelerationModel final {
     std::filesystem::path gravity_model_file{};
     std::filesystem::path ephemeris_file{};
     std::filesystem::path eop_finals_file{};
+    std::filesystem::path ocean_pole_tide_file{};
     std::filesystem::path ocean_tide_file{};
     std::filesystem::path atmos_tide_file{};
     int max_degree{360};
@@ -79,6 +81,7 @@ class GravitySphAccelerationModel final {
   std::shared_ptr<jpl::eph::Ephemeris> ephemeris_{};
   mutable std::shared_ptr<jpl::eph::Workspace> workspace_{};
   std::shared_ptr<astroforces::core::eop::Series> eop_{};
+  std::shared_ptr<tides::OceanPoleTideModel> ocean_pole_tide_{};
   std::shared_ptr<tides::ConstituentTideModel> ocean_tide_{};
   std::shared_ptr<tides::ConstituentTideModel> atmos_tide_{};
 };

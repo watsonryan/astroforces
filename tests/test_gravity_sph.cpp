@@ -65,6 +65,16 @@ std::filesystem::path write_test_constituent_tide() {
   return p;
 }
 
+std::filesystem::path write_test_ocean_pole_tide() {
+  namespace fs = std::filesystem;
+  const fs::path p = fs::temp_directory_path() / "astroforces_test_ocean_pole_tide.txt";
+  std::ofstream out(p);
+  out << "# n m cnmp cnmm snmp snmm\n";
+  out << "2 1 1.0e-2 5.0e-3 -3.0e-3 2.0e-3\n";
+  out.close();
+  return p;
+}
+
 }  // namespace
 
 int main() {
@@ -183,6 +193,35 @@ int main() {
         || !(astroforces::core::norm(out_with_pole.pole_tide_ocean_mps2) > 0.0)) {
       spdlog::error("pole tides had no effect");
       return 9;
+    }
+
+    const auto ocean_pole_file = write_test_ocean_pole_tide();
+    const auto with_pole_file = astroforces::forces::GravitySphAccelerationModel::Create(
+        {.gravity_model_file = gravity_file,
+         .eop_finals_file = eop_file,
+         .ocean_pole_tide_file = ocean_pole_file,
+         .max_degree = 4,
+         .use_central = true,
+         .use_sph = true,
+         .use_solid_earth_tides = false,
+         .use_pole_tide_solid = false,
+         .use_pole_tide_ocean = true});
+    const auto out_with_pole_file = with_pole_file->evaluate(state);
+    if (out_with_pole_file.status != astroforces::core::Status::Ok) {
+      spdlog::error("file-driven pole tide model evaluation failed");
+      return 14;
+    }
+    if (!(astroforces::core::norm(out_with_pole_file.pole_tide_ocean_mps2) > 0.0)) {
+      spdlog::error("file-driven ocean pole tide had no effect");
+      return 15;
+    }
+    const auto ocean_pole_delta = astroforces::core::Vec3{
+        out_with_pole_file.pole_tide_ocean_mps2.x - out_with_pole.pole_tide_ocean_mps2.x,
+        out_with_pole_file.pole_tide_ocean_mps2.y - out_with_pole.pole_tide_ocean_mps2.y,
+        out_with_pole_file.pole_tide_ocean_mps2.z - out_with_pole.pole_tide_ocean_mps2.z};
+    if (!(astroforces::core::norm(ocean_pole_delta) > 0.0)) {
+      spdlog::error("file-driven ocean pole tide did not change fallback result");
+      return 16;
     }
   }
 

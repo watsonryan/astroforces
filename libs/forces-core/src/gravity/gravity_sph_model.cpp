@@ -510,6 +510,12 @@ std::unique_ptr<GravitySphAccelerationModel> GravitySphAccelerationModel::Create
         out->eop_ = std::move(eop_series);
       }
     }
+    if (config.use_pole_tide_ocean && !config.ocean_pole_tide_file.empty()) {
+      auto model = tides::OceanPoleTideModel::load_from_file(config.ocean_pole_tide_file, std::max(0, config.max_degree));
+      if (model && !model->empty()) {
+        out->ocean_pole_tide_ = std::shared_ptr<tides::OceanPoleTideModel>(std::move(model));
+      }
+    }
   }
 
   if (config.use_ocean_tide && !config.ocean_tide_file.empty()) {
@@ -648,7 +654,18 @@ GravitySphResult GravitySphAccelerationModel::evaluate(const astroforces::core::
         if (config_.use_pole_tide_ocean) {
           Eigen::MatrixXd dC_pole_ocean = Eigen::MatrixXd::Zero(Ceff.rows(), Ceff.cols());
           Eigen::MatrixXd dS_pole_ocean = Eigen::MatrixXd::Zero(Seff.rows(), Seff.cols());
-          tides::add_pole_ocean_tide_delta(mjd_tt, eop_now->xp_rad, eop_now->yp_rad, dC_pole_ocean, dS_pole_ocean);
+          if (ocean_pole_tide_) {
+            double xpv_mas = 0.0;
+            double ypv_mas = 0.0;
+            const double t_years = (mjd_tt - 51544.5) / 365.25;
+            xpv_mas = 55.0 + 1.677 * t_years;
+            ypv_mas = 320.5 + 3.460 * t_years;
+            const double m1 = +(eop_now->xp_rad / astroforces::core::constants::kArcsecToRad - xpv_mas / 1000.0);
+            const double m2 = -(eop_now->yp_rad / astroforces::core::constants::kArcsecToRad - ypv_mas / 1000.0);
+            ocean_pole_tide_->add_delta_coefficients(m1, m2, dC_pole_ocean, dS_pole_ocean);
+          } else {
+            tides::add_pole_ocean_tide_delta(mjd_tt, eop_now->xp_rad, eop_now->yp_rad, dC_pole_ocean, dS_pole_ocean);
+          }
           out.pole_tide_ocean_mps2 = accel_sph_noncentral(r_ecef, dC_pole_ocean, dS_pole_ocean, nmax, mu_earth, radius_m);
           Ceff += dC_pole_ocean;
           Seff += dS_pole_ocean;

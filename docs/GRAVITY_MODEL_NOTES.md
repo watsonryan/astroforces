@@ -35,6 +35,8 @@ Reference source for model download/comparison:
 
 - Sun/Moon solid tides require JPL ephemeris.
 - Pole tides require IERS finals EOP (`xp/yp`).
+- Ocean pole tide can optionally use a coefficient file (`n m cnmp cnmm snmp snmm`);
+  otherwise the built-in IERS-style fallback coefficients are used.
 - Constituent ocean/atmospheric tides require potential coefficient files in the expected constituent format.
 
 ## SPH Acceleration Synthesis

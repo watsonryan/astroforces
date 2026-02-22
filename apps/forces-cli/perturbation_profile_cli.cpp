@@ -48,9 +48,9 @@ double magnitude(const astroforces::core::Vec3& v) { return astroforces::core::n
 }  // namespace
 
 int main(int argc, char** argv) {
-  if (argc < 7 || argc > 14) {
+  if (argc < 7 || argc > 15) {
     spdlog::error(
-        "usage: perturbation_profile_cli <output_csv> <alt_min_km> <alt_max_km> <samples> <dtm_coeff_file> <space_weather_csv> [jpl_ephemeris_file] [epoch_utc_s] [gravity_gfc_file] [gravity_max_degree] [eop_finals_file] [ocean_tide_file] [atmos_tide_file]");
+        "usage: perturbation_profile_cli <output_csv> <alt_min_km> <alt_max_km> <samples> <dtm_coeff_file> <space_weather_csv> [jpl_ephemeris_file] [epoch_utc_s] [gravity_gfc_file] [gravity_max_degree] [eop_finals_file] [ocean_tide_file] [atmos_tide_file] [ocean_pole_tide_file]");
     return 1;
   }
 
@@ -67,6 +67,7 @@ int main(int argc, char** argv) {
   const std::filesystem::path eop_finals_file = (argc >= 12) ? std::filesystem::path(argv[11]) : std::filesystem::path{};
   const std::filesystem::path ocean_tide_file = (argc >= 13) ? std::filesystem::path(argv[12]) : std::filesystem::path{};
   const std::filesystem::path atmos_tide_file = (argc >= 14) ? std::filesystem::path(argv[13]) : std::filesystem::path{};
+  const std::filesystem::path ocean_pole_tide_file = (argc >= 15) ? std::filesystem::path(argv[14]) : std::filesystem::path{};
 
   if (!(alt_min_km >= 0.0) || !(alt_max_km > alt_min_km) || samples < 2) {
     spdlog::error("invalid sweep parameters: require alt_min>=0, alt_max>alt_min, samples>=2");
@@ -100,6 +101,10 @@ int main(int argc, char** argv) {
     spdlog::error("atmos tide file not found: {}", atmos_tide_file.string());
     return 12;
   }
+  if (!ocean_pole_tide_file.empty() && !std::filesystem::exists(ocean_pole_tide_file)) {
+    spdlog::error("ocean pole tide file not found: {}", ocean_pole_tide_file.string());
+    return 13;
+  }
 
   std::ofstream out(out_csv);
   if (!out) {
@@ -128,6 +133,7 @@ int main(int argc, char** argv) {
         {.gravity_model_file = gravity_gfc_file,
          .ephemeris_file = std::filesystem::path(eph_file),
          .eop_finals_file = eop_finals_file,
+         .ocean_pole_tide_file = ocean_pole_tide_file,
          .ocean_tide_file = ocean_tide_file,
          .atmos_tide_file = atmos_tide_file,
          .max_degree = gravity_max_degree,
