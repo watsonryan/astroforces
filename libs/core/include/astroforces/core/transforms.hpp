@@ -85,16 +85,17 @@ inline double tt_minus_utc_seconds(const double utc_seconds) {
   return tai_minus_utc_seconds(utc_seconds) + 32.184;
 }
 
+inline double utc_seconds_to_julian_date_tai(const double utc_seconds) {
+  return utc_seconds_to_julian_date_utc(utc_seconds) + tai_minus_utc_seconds(utc_seconds) / constants::kSecondsPerDay;
+}
+
 inline double utc_seconds_to_julian_date_tt(const double utc_seconds) {
-  return utc_seconds_to_julian_date_utc(utc_seconds) + tt_minus_utc_seconds(utc_seconds) / constants::kSecondsPerDay;
+  return utc_seconds_to_julian_date_tai(utc_seconds) + 32.184 / constants::kSecondsPerDay;
 }
 
 inline double utc_seconds_to_julian_date_tdb(const double utc_seconds) {
   const double jd_tt = utc_seconds_to_julian_date_tt(utc_seconds);
-  const double t_cent = (jd_tt - constants::kJ2000Jd) / 36525.0;
-  const double g_rad = (357.5277233 + 35999.05034 * t_cent) * constants::kDegToRad;
-  const double tdb_minus_tt_s = 0.001657 * std::sin(g_rad) + 0.000022 * std::sin(2.0 * g_rad);
-  return jd_tt + tdb_minus_tt_s / constants::kSecondsPerDay;
+  return jd_tt + sofa::dtdb_seconds_approx(jd_tt) / constants::kSecondsPerDay;
 }
 
 inline double earth_rotation_angle_rad(double jd_ut1) {

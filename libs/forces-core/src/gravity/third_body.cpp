@@ -7,6 +7,7 @@
 #include "astroforces/forces/gravity/third_body.hpp"
 
 #include <cmath>
+#include <unordered_map>
 
 #include "astroforces/core/transforms.hpp"
 #include "astroforces/core/constants.hpp"
@@ -69,9 +70,9 @@ astroforces::core::Vec3 goce_eq79_indirect_j2(const astroforces::core::Vec3& r_t
   };
 }
 
-jpl::eph::Workspace& thread_local_workspace() {
-  thread_local jpl::eph::Workspace workspace{};
-  return workspace;
+jpl::eph::Workspace& thread_local_workspace_for(const void* key) {
+  thread_local std::unordered_map<const void*, jpl::eph::Workspace> workspaces{};
+  return workspaces[key];
 }
 
 }  // namespace
@@ -97,7 +98,7 @@ PerturbationContribution ThirdBodyPerturbationModel::evaluate(const Perturbation
     out.status = astroforces::core::Status::DataUnavailable;
     return out;
   }
-  auto& workspace = thread_local_workspace();
+  auto& workspace = thread_local_workspace_for(this);
   if (request.state.frame != astroforces::core::Frame::ECI) {
     out.status = astroforces::core::Status::InvalidInput;
     return out;

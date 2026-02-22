@@ -112,4 +112,14 @@ inline Mat3 c2tcio(const Mat3& rc2i, const double era_rad, const Mat3& rpom) {
   return mat_mul(rpom, mat_mul(rot_z(era_rad), rc2i));
 }
 
+// SOFA-style compact periodic model for TDB-TT (seconds), suitable for force
+// model epoch conversion where microsecond-level effects matter.
+inline double dtdb_seconds_approx(const double jd_tt) {
+  const double t = (jd_tt - constants::kJ2000Jd) / 36525.0;
+  const double g = (357.5277233 + 35999.05034 * t) * constants::kDegToRad;   // Mean anomaly of the Sun.
+  const double l = (280.4665 + 36000.7698 * t) * constants::kDegToRad;        // Mean longitude of the Sun.
+  return 0.001657 * std::sin(g) + 0.000022 * std::sin(2.0 * g) + 0.000014 * std::sin(3.0 * g) + 0.000005 * std::sin(4.0 * g)
+         + 0.000005 * std::sin(l) + 0.000002 * std::sin(2.0 * l);
+}
+
 }  // namespace astroforces::core::sofa

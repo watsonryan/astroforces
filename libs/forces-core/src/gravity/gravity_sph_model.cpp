@@ -480,9 +480,9 @@ bool finite_vec(const astroforces::core::Vec3& v) {
   return std::isfinite(v.x) && std::isfinite(v.y) && std::isfinite(v.z);
 }
 
-jpl::eph::Workspace& thread_local_workspace() {
-  thread_local jpl::eph::Workspace workspace{};
-  return workspace;
+jpl::eph::Workspace& thread_local_workspace_for(const void* key) {
+  thread_local std::unordered_map<const void*, jpl::eph::Workspace> workspaces{};
+  return workspaces[key];
 }
 
 }  // namespace
@@ -561,7 +561,7 @@ GravitySphResult GravitySphAccelerationModel::evaluate(const astroforces::core::
   const double jd_tdb = astroforces::core::utc_seconds_to_julian_date_tdb(state.epoch.utc_seconds);
   const double jd_tt = astroforces::core::utc_seconds_to_julian_date_tt(state.epoch.utc_seconds);
   const double mjd_tt = jd_tt - 2400000.5;
-  auto& workspace = thread_local_workspace();
+  auto& workspace = thread_local_workspace_for(this);
 
   const bool need_itrf_gcrf_transform
       = (state.frame == astroforces::core::Frame::ECI)

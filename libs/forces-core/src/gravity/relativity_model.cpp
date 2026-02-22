@@ -8,6 +8,7 @@
 
 #include <array>
 #include <cmath>
+#include <unordered_map>
 
 #include "astroforces/core/transforms.hpp"
 #include "jpl_eph/jpl_eph.hpp"
@@ -36,9 +37,9 @@ bool finite_vec(const astroforces::core::Vec3& v) {
   return std::isfinite(v.x) && std::isfinite(v.y) && std::isfinite(v.z);
 }
 
-jpl::eph::Workspace& thread_local_workspace() {
-  thread_local jpl::eph::Workspace workspace{};
-  return workspace;
+jpl::eph::Workspace& thread_local_workspace_for(const void* key) {
+  thread_local std::unordered_map<const void*, jpl::eph::Workspace> workspaces{};
+  return workspaces[key];
 }
 
 }  // namespace
@@ -91,7 +92,7 @@ RelativityResult RelativityAccelerationModel::evaluate(const astroforces::core::
     if (!ephemeris_) {
       return RelativityResult{.status = astroforces::core::Status::DataUnavailable};
     }
-    auto& workspace = thread_local_workspace();
+    auto& workspace = thread_local_workspace_for(this);
     const double jd_tdb = astroforces::core::utc_seconds_to_julian_date_tdb(state.epoch.utc_seconds);
     const auto sun_wrt_earth = ephemeris_->PlephSi(jd_tdb, jpl::eph::Body::Sun, jpl::eph::Body::Earth, true, workspace);
     if (!sun_wrt_earth.has_value()) {

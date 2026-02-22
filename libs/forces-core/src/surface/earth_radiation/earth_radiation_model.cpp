@@ -10,6 +10,7 @@
 #include <array>
 #include <cmath>
 #include <numbers>
+#include <unordered_map>
 
 #include "astroforces/core/transforms.hpp"
 #include "astroforces/forces/surface/eclipse.hpp"
@@ -55,9 +56,9 @@ double lambert_phase_function(double phase_angle_rad) {
   return std::max(0.0, phi);
 }
 
-jpl::eph::Workspace& thread_local_workspace() {
-  thread_local jpl::eph::Workspace workspace{};
-  return workspace;
+jpl::eph::Workspace& thread_local_workspace_for(const void* key) {
+  thread_local std::unordered_map<const void*, jpl::eph::Workspace> workspaces{};
+  return workspaces[key];
 }
 
 }  // namespace
@@ -99,7 +100,7 @@ EarthRadiationResult EarthRadiationAccelerationModel::evaluate(const astroforces
   double albedo_phase = 1.0;
   double albedo_eclipse_factor = 1.0;
   if (config_.use_albedo && ephemeris_ && state.frame == astroforces::core::Frame::ECI) {
-    auto& workspace = thread_local_workspace();
+    auto& workspace = thread_local_workspace_for(this);
     const double jd_tdb = astroforces::core::utc_seconds_to_julian_date_tdb(state.epoch.utc_seconds);
     const auto sun = ephemeris_->PlephSi(jd_tdb, jpl::eph::Body::Sun, jpl::eph::Body::Earth, false, workspace);
     if (!sun.has_value()) {

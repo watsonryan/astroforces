@@ -8,6 +8,7 @@
 
 #include <array>
 #include <cmath>
+#include <unordered_map>
 
 #include "astroforces/core/transforms.hpp"
 #include "astroforces/forces/surface/eclipse.hpp"
@@ -44,9 +45,9 @@ astroforces::core::Vec3 body_from_frame_mul(const std::array<double, 9>& dcm, co
   };
 }
 
-jpl::eph::Workspace& thread_local_workspace() {
-  thread_local jpl::eph::Workspace workspace{};
-  return workspace;
+jpl::eph::Workspace& thread_local_workspace_for(const void* key) {
+  thread_local std::unordered_map<const void*, jpl::eph::Workspace> workspaces{};
+  return workspaces[key];
 }
 
 }  // namespace
@@ -71,7 +72,7 @@ SrpResult SrpAccelerationModel::evaluate(const astroforces::core::StateVector& s
   }
 
   const double jd_tdb = astroforces::core::utc_seconds_to_julian_date_tdb(state.epoch.utc_seconds);
-  auto& workspace = thread_local_workspace();
+  auto& workspace = thread_local_workspace_for(this);
   const auto sun = ephemeris_->PlephSi(jd_tdb, jpl::eph::Body::Sun, jpl::eph::Body::Earth, false, workspace);
   if (!sun.has_value()) {
     return SrpResult{.status = map_jpl_error(sun.error())};
