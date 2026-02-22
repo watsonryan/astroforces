@@ -5,7 +5,13 @@
 `GravitySphAccelerationModel` evaluates Earth gravity as:
 - degree-0 central term
 - non-central spherical harmonics from `Cnm/Snm` coefficients (`n>=2`) to configurable degree/order
-- optional solid Earth tide correction (IERS2010 Eq. 6.6/6.7 style coefficient deltas from Sun/Moon)
+- tide stack terms compatible with the Ginan-style decomposition:
+- solid Earth tide-1 (Sun/Moon body tide)
+- solid Earth tide-2 (frequency-dependent `C20/C21/S21/C22/S22`)
+- pole tide (solid)
+- pole tide (ocean)
+- constituent ocean tide
+- constituent atmospheric tide
 
 The model accepts state in `ECI` or `ECEF`.
 For `ECI`, a simple GMST z-rotation is used internally to evaluate the Earth-fixed field.
@@ -20,11 +26,16 @@ If the source is not tide-free and `convert_to_tide_free=true`, `C20` is correct
 
 Important for EIGEN-6S4 (Version 2):
 - EIGEN files may contain time-variable records (`gfct`, `trnd`, `acos`, `asin`).
-- Current implementation uses the static `gfc` coefficients only.
-- Time-variable gravity terms are not yet synthesized in this repo.
+- This implementation synthesizes these time-variable terms when present.
 
 Reference source for model download/comparison:
 - `https://icgem.gfz.de/tom_longtime`
+
+## Tide Inputs
+
+- Sun/Moon solid tides require JPL ephemeris.
+- Pole tides require IERS finals EOP (`xp/yp`).
+- Constituent ocean/atmospheric tides require potential coefficient files in the expected constituent format.
 
 ## SPH Acceleration Synthesis
 
@@ -33,15 +44,8 @@ The non-central acceleration follows the same derivative synthesis pattern used 
 - accumulate radial/latitudinal/longitudinal potential derivatives
 - scale by `mu` and project to Cartesian acceleration
 
-## Solid Earth Tides
-
-When enabled:
-- Sun/Moon positions are obtained from `jplEphem`
-- each body contributes `dCnm/dSnm` corrections (degrees 2-4) using elastic Love numbers
-- corrected coefficients are then synthesized by the same SPH evaluator
-
 ## Configuration Notes
 
 - `max_degree` defaults to `360` and is clamped to the coefficient file maximum.
 - no numerical Jacobians are used.
-- outputs are in m/s^2 and returned by term (`central`, `sph`, `solid_tide_sun`, `solid_tide_moon`).
+- outputs are in m/s^2 and returned by term (`central`, `sph`, `solid_tide_sun`, `solid_tide_moon`, `solid_tide_freqdep`, `pole_tide_solid`, `pole_tide_ocean`, `ocean_tide`, `atmos_tide`).

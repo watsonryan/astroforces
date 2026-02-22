@@ -16,7 +16,7 @@
 #include <spdlog/spdlog.h>
 
 #include "astroforces/adapters/dtm2020_adapter.hpp"
-#include "astroforces/atmo/conversions.hpp"
+#include "astroforces/core/transforms.hpp"
 #include "astroforces/atmo/constants.hpp"
 #include "astroforces/forces/surface/antenna_thrust/antenna_thrust_perturbation.hpp"
 #include "astroforces/forces/surface/drag/drag_perturbation.hpp"
@@ -48,9 +48,9 @@ double magnitude(const astroforces::core::Vec3& v) { return astroforces::core::n
 }  // namespace
 
 int main(int argc, char** argv) {
-  if (argc < 7 || argc > 11) {
+  if (argc < 7 || argc > 14) {
     spdlog::error(
-        "usage: perturbation_profile_cli <output_csv> <alt_min_km> <alt_max_km> <samples> <dtm_coeff_file> <space_weather_csv> [jpl_ephemeris_file] [epoch_utc_s] [gravity_gfc_file] [gravity_max_degree]");
+        "usage: perturbation_profile_cli <output_csv> <alt_min_km> <alt_max_km> <samples> <dtm_coeff_file> <space_weather_csv> [jpl_ephemeris_file] [epoch_utc_s] [gravity_gfc_file] [gravity_max_degree] [eop_finals_file] [ocean_tide_file] [atmos_tide_file]");
     return 1;
   }
 
@@ -64,6 +64,9 @@ int main(int argc, char** argv) {
   const double epoch_utc_s = (argc >= 9) ? std::atof(argv[8]) : 1.0e9;
   const std::filesystem::path gravity_gfc_file = (argc >= 10) ? std::filesystem::path(argv[9]) : std::filesystem::path{};
   const int gravity_max_degree = (argc >= 11) ? std::atoi(argv[10]) : 120;
+  const std::filesystem::path eop_finals_file = (argc >= 12) ? std::filesystem::path(argv[11]) : std::filesystem::path{};
+  const std::filesystem::path ocean_tide_file = (argc >= 13) ? std::filesystem::path(argv[12]) : std::filesystem::path{};
+  const std::filesystem::path atmos_tide_file = (argc >= 14) ? std::filesystem::path(argv[13]) : std::filesystem::path{};
 
   if (!(alt_min_km >= 0.0) || !(alt_max_km > alt_min_km) || samples < 2) {
     spdlog::error("invalid sweep parameters: require alt_min>=0, alt_max>alt_min, samples>=2");
@@ -84,6 +87,18 @@ int main(int argc, char** argv) {
   if (!gravity_gfc_file.empty() && !std::filesystem::exists(gravity_gfc_file)) {
     spdlog::error("gravity gfc file not found: {}", gravity_gfc_file.string());
     return 9;
+  }
+  if (!eop_finals_file.empty() && !std::filesystem::exists(eop_finals_file)) {
+    spdlog::error("EOP finals file not found: {}", eop_finals_file.string());
+    return 10;
+  }
+  if (!ocean_tide_file.empty() && !std::filesystem::exists(ocean_tide_file)) {
+    spdlog::error("ocean tide file not found: {}", ocean_tide_file.string());
+    return 11;
+  }
+  if (!atmos_tide_file.empty() && !std::filesystem::exists(atmos_tide_file)) {
+    spdlog::error("atmos tide file not found: {}", atmos_tide_file.string());
+    return 12;
   }
 
   std::ofstream out(out_csv);
@@ -112,10 +127,20 @@ int main(int argc, char** argv) {
     gravity = astroforces::forces::GravitySphAccelerationModel::Create(
         {.gravity_model_file = gravity_gfc_file,
          .ephemeris_file = std::filesystem::path(eph_file),
+         .eop_finals_file = eop_finals_file,
+         .ocean_tide_file = ocean_tide_file,
+         .atmos_tide_file = atmos_tide_file,
          .max_degree = gravity_max_degree,
          .use_central = true,
          .use_sph = true,
-         .use_solid_earth_tides = !eph_file.empty()});
+         .use_solid_earth_tides = true,
+         .use_sun_tide = !eph_file.empty(),
+         .use_moon_tide = !eph_file.empty(),
+         .use_solid_earth_tide2 = true,
+         .use_pole_tide_solid = !eop_finals_file.empty(),
+         .use_pole_tide_ocean = !eop_finals_file.empty(),
+         .use_ocean_tide = !ocean_tide_file.empty(),
+         .use_atmos_tide = !atmos_tide_file.empty()});
   }
 
   struct ComponentModel {
@@ -193,7 +218,7 @@ int main(int argc, char** argv) {
 
   out << "altitude_km";
   if (gravity) {
-    out << ",gravity_central_mps2,gravity_sph_mps2,gravity_tide_sun_mps2,gravity_tide_moon_mps2";
+    out << ",gravity_central_mps2,gravity_sph_tides_mps2,gravity_tide_solid_sun_mps2,gravity_tide_solid_moon_mps2,gravity_tide_solid_freqdep_mps2,gravity_tide_pole_solid_mps2,gravity_tide_pole_ocean_mps2,gravity_tide_ocean_mps2,gravity_tide_atmos_mps2";
   }
   for (const auto& comp : components) {
     out << "," << comp.label << "_mps2";
@@ -222,7 +247,7 @@ int main(int argc, char** argv) {
 
     std::vector<double> gravity_mags{};
     if (gravity) {
-      gravity_mags.reserve(4);
+      gravity_mags.reserve(9);
     }
     std::vector<double> comp_mags{};
     comp_mags.reserve(components.size());
@@ -232,13 +257,24 @@ int main(int argc, char** argv) {
       const auto g = gravity->evaluate(drag_state);
       const double g_c = magnitude(g.central_mps2);
       const double g_sph = magnitude(g.sph_mps2);
-      const double g_ts = magnitude(g.solid_tide_sun_mps2);
-      const double g_tm = magnitude(g.solid_tide_moon_mps2);
+      const double g_tss = magnitude(g.solid_tide_sun_mps2);
+      const double g_tsm = magnitude(g.solid_tide_moon_mps2);
+      const double g_tsf = magnitude(g.solid_tide_freqdep_mps2);
+      const double g_tps = magnitude(g.pole_tide_solid_mps2);
+      const double g_tpo = magnitude(g.pole_tide_ocean_mps2);
+      const double g_to = magnitude(g.ocean_tide_mps2);
+      const double g_ta = magnitude(g.atmos_tide_mps2);
       gravity_mags.push_back(g_c);
       gravity_mags.push_back(g_sph);
-      gravity_mags.push_back(g_ts);
-      gravity_mags.push_back(g_tm);
-      rss_sum += g_c * g_c + g_sph * g_sph + g_ts * g_ts + g_tm * g_tm;
+      gravity_mags.push_back(g_tss);
+      gravity_mags.push_back(g_tsm);
+      gravity_mags.push_back(g_tsf);
+      gravity_mags.push_back(g_tps);
+      gravity_mags.push_back(g_tpo);
+      gravity_mags.push_back(g_to);
+      gravity_mags.push_back(g_ta);
+      rss_sum += g_c * g_c + g_sph * g_sph + g_tss * g_tss + g_tsm * g_tsm + g_tsf * g_tsf + g_tps * g_tps + g_tpo * g_tpo
+                 + g_to * g_to + g_ta * g_ta;
       if (status == astroforces::core::Status::Ok && g.status != astroforces::core::Status::Ok) {
         status = g.status;
       }
