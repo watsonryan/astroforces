@@ -22,6 +22,17 @@ int main() {
   const double jd_utc = 2460737.5;  // 2025-03-16T00:00:00 UTC
   const double utc_seconds = (jd_utc - 2440587.5) * astroforces::core::constants::kSecondsPerDay;
   const double jd_tt = utc_seconds_to_julian_date_tt(utc_seconds);
+  const double jd_tdb = utc_seconds_to_julian_date_tdb(utc_seconds);
+
+  const double tdb_minus_tt_s = (jd_tdb - jd_tt) * astroforces::core::constants::kSecondsPerDay;
+  if (!approx_abs(tdb_minus_tt_s, 0.00142, 5e-5)) {
+    spdlog::error("utc->tdb conversion mismatch");
+    return 4;
+  }
+  if (!(std::abs(tdb_minus_tt_s) <= 0.001679)) {
+    spdlog::error("tdb-tt offset out of expected analytic bounds");
+    return 5;
+  }
 
   const CelestialIntermediatePole cip{
       .x_rad = 0.2 * astroforces::core::constants::kArcsecToRad,

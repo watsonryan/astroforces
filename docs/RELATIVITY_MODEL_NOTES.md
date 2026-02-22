@@ -1,7 +1,9 @@
 # Relativity Model Notes (Eq. 25)
 
 This implementation follows the Eq. 25 decomposition from:
-- Decaia et al., Section 6.8 (`decaiaacos.pdf`), Eq. 25 decomposition.
+- Decaia et al., Section 6.8, Eq. 25 decomposition:
+  `https://www.iag-ggos.org/sci/itrsstandard_docs/decaiaacos.pdf`
+  (ITRS standards technical note document used for force-model term decomposition).
 
 Implemented additive terms:
 - Spherical central-body term (PPN `beta`, `gamma`)
