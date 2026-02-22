@@ -586,10 +586,28 @@ GravitySphResult GravitySphAccelerationModel::evaluate(const astroforces::core::
 
     const int nmax = std::min(config_.max_degree, field_->max_degree);
     if (nmax >= 2) {
-      Eigen::MatrixXd Ceff = field_->C;
-      Eigen::MatrixXd Seff = field_->S;
-      if (field_->has_time_variable) {
-        apply_time_variable_coefficients(*field_, jd_utc, nmax, Ceff, Seff);
+      const bool needs_coeff_mutation = field_->has_time_variable || config_.use_solid_earth_tides || config_.use_pole_tide_solid
+                                        || config_.use_pole_tide_ocean || config_.use_aod || config_.use_ocean_tide
+                                        || config_.use_atmos_tide;
+      const Eigen::MatrixXd* coeff_c = &field_->C;
+      const Eigen::MatrixXd* coeff_s = &field_->S;
+      Eigen::MatrixXd Ceff;
+      Eigen::MatrixXd Seff;
+      if (needs_coeff_mutation) {
+        Ceff = field_->C;
+        Seff = field_->S;
+        coeff_c = &Ceff;
+        coeff_s = &Seff;
+        if (field_->has_time_variable) {
+          apply_time_variable_coefficients(*field_, jd_utc, nmax, Ceff, Seff);
+        }
+      }
+
+      Eigen::MatrixXd tmpC;
+      Eigen::MatrixXd tmpS;
+      if (needs_coeff_mutation) {
+        tmpC = Eigen::MatrixXd::Zero(Ceff.rows(), Ceff.cols());
+        tmpS = Eigen::MatrixXd::Zero(Seff.rows(), Seff.cols());
       }
 
       if (config_.use_solid_earth_tides && (config_.use_sun_tide || config_.use_moon_tide || config_.use_solid_earth_tide2)) {
@@ -615,22 +633,22 @@ GravitySphResult GravitySphAccelerationModel::evaluate(const astroforces::core::
           if (!moon.has_value()) {
             return GravitySphResult{.status = map_jpl_error(moon.error())};
           }
-          Eigen::MatrixXd dCmoon = Eigen::MatrixXd::Zero(Ceff.rows(), Ceff.cols());
-          Eigen::MatrixXd dSmoon = Eigen::MatrixXd::Zero(Seff.rows(), Seff.cols());
+          tmpC.setZero();
+          tmpS.setZero();
           const auto r_moon_ecef = rot_z(gmst, to_vec3(moon.value().pv));
-          tides::add_solid_earth_tide1_delta(r_moon_ecef, config_.mu_moon_m3_s2, mu_earth, radius_m, nmax, dCmoon, dSmoon);
-          out.solid_tide_moon_mps2 = accel_sph_noncentral(r_ecef, dCmoon, dSmoon, nmax, mu_earth, radius_m);
-          dC += dCmoon;
-          dS += dSmoon;
+          tides::add_solid_earth_tide1_delta(r_moon_ecef, config_.mu_moon_m3_s2, mu_earth, radius_m, nmax, tmpC, tmpS);
+          out.solid_tide_moon_mps2 = accel_sph_noncentral(r_ecef, tmpC, tmpS, nmax, mu_earth, radius_m);
+          dC += tmpC;
+          dS += tmpS;
         }
 
         if (config_.use_solid_earth_tide2) {
-          Eigen::MatrixXd dC2 = Eigen::MatrixXd::Zero(Ceff.rows(), Ceff.cols());
-          Eigen::MatrixXd dS2 = Eigen::MatrixXd::Zero(Seff.rows(), Seff.cols());
-          tides::add_solid_earth_tide2_delta(jd_utc, gmst, dC2, dS2);
-          out.solid_tide_freqdep_mps2 = accel_sph_noncentral(r_ecef, dC2, dS2, nmax, mu_earth, radius_m);
-          dC += dC2;
-          dS += dS2;
+          tmpC.setZero();
+          tmpS.setZero();
+          tides::add_solid_earth_tide2_delta(jd_utc, gmst, tmpC, tmpS);
+          out.solid_tide_freqdep_mps2 = accel_sph_noncentral(r_ecef, tmpC, tmpS, nmax, mu_earth, radius_m);
+          dC += tmpC;
+          dS += tmpS;
         }
 
         Ceff += dC;
@@ -651,17 +669,17 @@ GravitySphResult GravitySphAccelerationModel::evaluate(const astroforces::core::
         const double mjd_tt = jd_tt - 2400000.5;
 
         if (config_.use_pole_tide_solid) {
-          Eigen::MatrixXd dC_pole_solid = Eigen::MatrixXd::Zero(Ceff.rows(), Ceff.cols());
-          Eigen::MatrixXd dS_pole_solid = Eigen::MatrixXd::Zero(Seff.rows(), Seff.cols());
-          tides::add_pole_solid_tide_delta(mjd_tt, eop_now->xp_rad, eop_now->yp_rad, dC_pole_solid, dS_pole_solid);
-          out.pole_tide_solid_mps2 = accel_sph_noncentral(r_ecef, dC_pole_solid, dS_pole_solid, nmax, mu_earth, radius_m);
-          Ceff += dC_pole_solid;
-          Seff += dS_pole_solid;
+          tmpC.setZero();
+          tmpS.setZero();
+          tides::add_pole_solid_tide_delta(mjd_tt, eop_now->xp_rad, eop_now->yp_rad, tmpC, tmpS);
+          out.pole_tide_solid_mps2 = accel_sph_noncentral(r_ecef, tmpC, tmpS, nmax, mu_earth, radius_m);
+          Ceff += tmpC;
+          Seff += tmpS;
         }
 
         if (config_.use_pole_tide_ocean) {
-          Eigen::MatrixXd dC_pole_ocean = Eigen::MatrixXd::Zero(Ceff.rows(), Ceff.cols());
-          Eigen::MatrixXd dS_pole_ocean = Eigen::MatrixXd::Zero(Seff.rows(), Seff.cols());
+          tmpC.setZero();
+          tmpS.setZero();
           if (ocean_pole_tide_) {
             double xpv_mas = 0.0;
             double ypv_mas = 0.0;
@@ -670,13 +688,13 @@ GravitySphResult GravitySphAccelerationModel::evaluate(const astroforces::core::
             ypv_mas = 320.5 + 3.460 * t_years;
             const double m1 = +(eop_now->xp_rad / astroforces::core::constants::kArcsecToRad - xpv_mas / 1000.0);
             const double m2 = -(eop_now->yp_rad / astroforces::core::constants::kArcsecToRad - ypv_mas / 1000.0);
-            ocean_pole_tide_->add_delta_coefficients(m1, m2, dC_pole_ocean, dS_pole_ocean);
+            ocean_pole_tide_->add_delta_coefficients(m1, m2, tmpC, tmpS);
           } else {
-            tides::add_pole_ocean_tide_delta(mjd_tt, eop_now->xp_rad, eop_now->yp_rad, dC_pole_ocean, dS_pole_ocean);
+            tides::add_pole_ocean_tide_delta(mjd_tt, eop_now->xp_rad, eop_now->yp_rad, tmpC, tmpS);
           }
-          out.pole_tide_ocean_mps2 = accel_sph_noncentral(r_ecef, dC_pole_ocean, dS_pole_ocean, nmax, mu_earth, radius_m);
-          Ceff += dC_pole_ocean;
-          Seff += dS_pole_ocean;
+          out.pole_tide_ocean_mps2 = accel_sph_noncentral(r_ecef, tmpC, tmpS, nmax, mu_earth, radius_m);
+          Ceff += tmpC;
+          Seff += tmpS;
         }
       }
 
@@ -684,12 +702,12 @@ GravitySphResult GravitySphAccelerationModel::evaluate(const astroforces::core::
         if (!aod_tide_) {
           return GravitySphResult{.status = astroforces::core::Status::DataUnavailable};
         }
-        Eigen::MatrixXd dC_aod = Eigen::MatrixXd::Zero(Ceff.rows(), Ceff.cols());
-        Eigen::MatrixXd dS_aod = Eigen::MatrixXd::Zero(Seff.rows(), Seff.cols());
-        if (aod_tide_->interpolate_delta_coefficients(jd_utc, dC_aod, dS_aod)) {
-          out.aod_mps2 = accel_sph_noncentral(r_ecef, dC_aod, dS_aod, nmax, mu_earth, radius_m);
-          Ceff += dC_aod;
-          Seff += dS_aod;
+        tmpC.setZero();
+        tmpS.setZero();
+        if (aod_tide_->interpolate_delta_coefficients(jd_utc, tmpC, tmpS)) {
+          out.aod_mps2 = accel_sph_noncentral(r_ecef, tmpC, tmpS, nmax, mu_earth, radius_m);
+          Ceff += tmpC;
+          Seff += tmpS;
         }
       }
 
@@ -697,27 +715,27 @@ GravitySphResult GravitySphAccelerationModel::evaluate(const astroforces::core::
         if (!ocean_tide_) {
           return GravitySphResult{.status = astroforces::core::Status::DataUnavailable};
         }
-        Eigen::MatrixXd dC_ocean = Eigen::MatrixXd::Zero(Ceff.rows(), Ceff.cols());
-        Eigen::MatrixXd dS_ocean = Eigen::MatrixXd::Zero(Seff.rows(), Seff.cols());
-        ocean_tide_->add_delta_coefficients(jd_utc, gmst, dC_ocean, dS_ocean);
-        out.ocean_tide_mps2 = accel_sph_noncentral(r_ecef, dC_ocean, dS_ocean, nmax, mu_earth, radius_m);
-        Ceff += dC_ocean;
-        Seff += dS_ocean;
+        tmpC.setZero();
+        tmpS.setZero();
+        ocean_tide_->add_delta_coefficients(jd_utc, gmst, tmpC, tmpS);
+        out.ocean_tide_mps2 = accel_sph_noncentral(r_ecef, tmpC, tmpS, nmax, mu_earth, radius_m);
+        Ceff += tmpC;
+        Seff += tmpS;
       }
 
       if (config_.use_atmos_tide) {
         if (!atmos_tide_) {
           return GravitySphResult{.status = astroforces::core::Status::DataUnavailable};
         }
-        Eigen::MatrixXd dC_atmos = Eigen::MatrixXd::Zero(Ceff.rows(), Ceff.cols());
-        Eigen::MatrixXd dS_atmos = Eigen::MatrixXd::Zero(Seff.rows(), Seff.cols());
-        atmos_tide_->add_delta_coefficients(jd_utc, gmst, dC_atmos, dS_atmos);
-        out.atmos_tide_mps2 = accel_sph_noncentral(r_ecef, dC_atmos, dS_atmos, nmax, mu_earth, radius_m);
-        Ceff += dC_atmos;
-        Seff += dS_atmos;
+        tmpC.setZero();
+        tmpS.setZero();
+        atmos_tide_->add_delta_coefficients(jd_utc, gmst, tmpC, tmpS);
+        out.atmos_tide_mps2 = accel_sph_noncentral(r_ecef, tmpC, tmpS, nmax, mu_earth, radius_m);
+        Ceff += tmpC;
+        Seff += tmpS;
       }
 
-      out.sph_mps2 = accel_sph_noncentral(r_ecef, Ceff, Seff, nmax, mu_earth, radius_m);
+      out.sph_mps2 = accel_sph_noncentral(r_ecef, *coeff_c, *coeff_s, nmax, mu_earth, radius_m);
     }
   }
 
