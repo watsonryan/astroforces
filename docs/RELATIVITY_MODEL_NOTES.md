@@ -1,7 +1,7 @@
 # Relativity Model Notes (Eq. 25)
 
 This implementation follows the Eq. 25 decomposition from:
-- Decaia et al., *AIAA S-XXX-200X* draft, Section 6.8 (`decaiaacos.pdf`)
+- Decaia et al., Section 6.8 (`decaiaacos.pdf`), Eq. 25 decomposition.
 
 Implemented additive terms:
 - Spherical central-body term (PPN `beta`, `gamma`)
@@ -19,4 +19,3 @@ Notes:
 - Geodesic precession requires ephemerides (`Earth wrt Sun` state).
 - The rotational-energy term is modeled separately, though standards literature notes practical coupling with recovered effective `J2`.
 - For default GR behavior: `beta = gamma = 1`, `lense_thirring_parameter = 1`.
-

@@ -92,8 +92,8 @@ RelativityResult RelativityAccelerationModel::evaluate(const astroforces::core::
       return RelativityResult{.status = astroforces::core::Status::DataUnavailable};
     }
     auto& workspace = thread_local_workspace();
-    const double jd_utc = astroforces::core::utc_seconds_to_julian_date_utc(state.epoch.utc_seconds);
-    const auto sun_wrt_earth = ephemeris_->PlephSi(jd_utc, jpl::eph::Body::Sun, jpl::eph::Body::Earth, true, workspace);
+    const double jd_tdb = astroforces::core::utc_seconds_to_julian_date_tdb(state.epoch.utc_seconds);
+    const auto sun_wrt_earth = ephemeris_->PlephSi(jd_tdb, jpl::eph::Body::Sun, jpl::eph::Body::Earth, true, workspace);
     if (!sun_wrt_earth.has_value()) {
       return RelativityResult{.status = map_jpl_error(sun_wrt_earth.error())};
     }

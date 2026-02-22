@@ -100,8 +100,8 @@ EarthRadiationResult EarthRadiationAccelerationModel::evaluate(const astroforces
   double albedo_eclipse_factor = 1.0;
   if (config_.use_albedo && ephemeris_ && state.frame == astroforces::core::Frame::ECI) {
     auto& workspace = thread_local_workspace();
-    const double jd_utc = astroforces::core::utc_seconds_to_julian_date_utc(state.epoch.utc_seconds);
-    const auto sun = ephemeris_->PlephSi(jd_utc, jpl::eph::Body::Sun, jpl::eph::Body::Earth, false, workspace);
+    const double jd_tdb = astroforces::core::utc_seconds_to_julian_date_tdb(state.epoch.utc_seconds);
+    const auto sun = ephemeris_->PlephSi(jd_tdb, jpl::eph::Body::Sun, jpl::eph::Body::Earth, false, workspace);
     if (!sun.has_value()) {
       return EarthRadiationResult{.status = map_jpl_error(sun.error())};
     }
@@ -115,7 +115,7 @@ EarthRadiationResult EarthRadiationAccelerationModel::evaluate(const astroforces
       albedo_phase = lambert_phase_function(phase);
     }
     if (config_.use_eclipse) {
-      const auto moon = ephemeris_->PlephSi(jd_utc, jpl::eph::Body::Moon, jpl::eph::Body::Earth, false, workspace);
+      const auto moon = ephemeris_->PlephSi(jd_tdb, jpl::eph::Body::Moon, jpl::eph::Body::Earth, false, workspace);
       astroforces::core::Vec3 r_moon{};
       astroforces::core::Vec3* moon_ptr = nullptr;
       if (moon.has_value()) {

@@ -103,8 +103,7 @@ PerturbationContribution ThirdBodyPerturbationModel::evaluate(const Perturbation
     return out;
   }
 
-  // Approximate UTC as TDB for initial force-model integration.
-  const double jed_tdb = astroforces::core::utc_seconds_to_julian_date_utc(request.state.epoch.utc_seconds);
+  const double jed_tdb = astroforces::core::utc_seconds_to_julian_date_tdb(request.state.epoch.utc_seconds);
 
   if (config_.use_sun) {
     const auto sun = ephemeris_->PlephSi(jed_tdb, jpl::eph::Body::Sun, jpl::eph::Body::Earth, false, workspace);

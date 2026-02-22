@@ -558,6 +558,7 @@ GravitySphResult GravitySphAccelerationModel::evaluate(const astroforces::core::
   }
 
   const double jd_utc = astroforces::core::utc_seconds_to_julian_date_utc(state.epoch.utc_seconds);
+  const double jd_tdb = astroforces::core::utc_seconds_to_julian_date_tdb(state.epoch.utc_seconds);
   const double jd_tt = astroforces::core::utc_seconds_to_julian_date_tt(state.epoch.utc_seconds);
   const double mjd_tt = jd_tt - 2400000.5;
   auto& workspace = thread_local_workspace();
@@ -656,7 +657,7 @@ GravitySphResult GravitySphAccelerationModel::evaluate(const astroforces::core::
         Eigen::MatrixXd dS = Eigen::MatrixXd::Zero(Seff.rows(), Seff.cols());
 
         if (config_.use_sun_tide) {
-          const auto sun = ephemeris_->PlephSi(jd_utc, jpl::eph::Body::Sun, jpl::eph::Body::Earth, false, workspace);
+          const auto sun = ephemeris_->PlephSi(jd_tdb, jpl::eph::Body::Sun, jpl::eph::Body::Earth, false, workspace);
           if (!sun.has_value()) {
             return GravitySphResult{.status = map_jpl_error(sun.error())};
           }
@@ -666,7 +667,7 @@ GravitySphResult GravitySphAccelerationModel::evaluate(const astroforces::core::
         }
 
         if (config_.use_moon_tide) {
-          const auto moon = ephemeris_->PlephSi(jd_utc, jpl::eph::Body::Moon, jpl::eph::Body::Earth, false, workspace);
+          const auto moon = ephemeris_->PlephSi(jd_tdb, jpl::eph::Body::Moon, jpl::eph::Body::Earth, false, workspace);
           if (!moon.has_value()) {
             return GravitySphResult{.status = map_jpl_error(moon.error())};
           }

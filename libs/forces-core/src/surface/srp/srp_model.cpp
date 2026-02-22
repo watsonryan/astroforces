@@ -70,9 +70,9 @@ SrpResult SrpAccelerationModel::evaluate(const astroforces::core::StateVector& s
     return SrpResult{.status = astroforces::core::Status::InvalidInput};
   }
 
-  const double jd_utc = astroforces::core::utc_seconds_to_julian_date_utc(state.epoch.utc_seconds);
+  const double jd_tdb = astroforces::core::utc_seconds_to_julian_date_tdb(state.epoch.utc_seconds);
   auto& workspace = thread_local_workspace();
-  const auto sun = ephemeris_->PlephSi(jd_utc, jpl::eph::Body::Sun, jpl::eph::Body::Earth, false, workspace);
+  const auto sun = ephemeris_->PlephSi(jd_tdb, jpl::eph::Body::Sun, jpl::eph::Body::Earth, false, workspace);
   if (!sun.has_value()) {
     return SrpResult{.status = map_jpl_error(sun.error())};
   }
@@ -87,7 +87,7 @@ SrpResult SrpAccelerationModel::evaluate(const astroforces::core::StateVector& s
   astroforces::core::Vec3 r_moon_eci_m{};
   bool has_moon = false;
   if (config_.use_eclipse) {
-    const auto moon = ephemeris_->PlephSi(jd_utc, jpl::eph::Body::Moon, jpl::eph::Body::Earth, false, workspace);
+    const auto moon = ephemeris_->PlephSi(jd_tdb, jpl::eph::Body::Moon, jpl::eph::Body::Earth, false, workspace);
     if (moon.has_value()) {
       r_moon_eci_m = to_vec3(moon.value().pv);
       has_moon = true;
