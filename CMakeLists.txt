@@ -2,27 +2,58 @@
 cmake_minimum_required(VERSION 3.25)
 project(astrodynamics_forces_cpp VERSION 0.1.0 LANGUAGES CXX)
 
-option(DRAGCPP_BUILD_TESTS "Build tests" ON)
-option(DRAGCPP_WARNINGS_AS_ERRORS "Treat warnings as errors" ON)
+# Legacy option compatibility.
+if(DEFINED DRAGCPP_BUILD_TESTS AND NOT DEFINED ASTROFORCES_BUILD_TESTS)
+  set(ASTROFORCES_BUILD_TESTS "${DRAGCPP_BUILD_TESTS}")
+endif()
+if(DEFINED DRAGCPP_WARNINGS_AS_ERRORS AND NOT DEFINED ASTROFORCES_WARNINGS_AS_ERRORS)
+  set(ASTROFORCES_WARNINGS_AS_ERRORS "${DRAGCPP_WARNINGS_AS_ERRORS}")
+endif()
 
-set(DRAGCPP_NRLMSIS21_REPO "https://github.com/watsonryan/nrlmsis-2_1.git" CACHE STRING "NRLMSIS 2.1 repo")
-set(DRAGCPP_DTM2020_REPO "https://github.com/watsonryan/dtm2020.git" CACHE STRING "DTM2020 repo")
-set(DRAGCPP_HWM14_REPO "https://github.com/watsonryan/hwm14.git" CACHE STRING "HWM14 repo")
-set(DRAGCPP_JPL_EPH_REPO "https://github.com/watsonryan/jplEphem.git" CACHE STRING "jplEphem repo")
-set(DRAGCPP_EXTERNAL_MODELS_TAG "main" CACHE STRING "Branch/tag for external model repos")
+option(ASTROFORCES_BUILD_TESTS "Build tests" ON)
+option(ASTROFORCES_WARNINGS_AS_ERRORS "Treat warnings as errors" ON)
+
+set(ASTROFORCES_NRLMSIS21_REPO "https://github.com/watsonryan/nrlmsis-2_1.git" CACHE STRING "NRLMSIS 2.1 repo")
+set(ASTROFORCES_DTM2020_REPO "https://github.com/watsonryan/dtm2020.git" CACHE STRING "DTM2020 repo")
+set(ASTROFORCES_HWM14_REPO "https://github.com/watsonryan/hwm14.git" CACHE STRING "HWM14 repo")
+set(ASTROFORCES_JPL_EPH_REPO "https://github.com/watsonryan/jplEphem.git" CACHE STRING "jplEphem repo")
+set(ASTROFORCES_EXTERNAL_MODELS_TAG "main" CACHE STRING "Branch/tag for external model repos")
+
+# Legacy cache-variable compatibility.
+if(DEFINED DRAGCPP_NRLMSIS21_REPO)
+  set(ASTROFORCES_NRLMSIS21_REPO "${DRAGCPP_NRLMSIS21_REPO}" CACHE STRING "NRLMSIS 2.1 repo" FORCE)
+endif()
+if(DEFINED DRAGCPP_DTM2020_REPO)
+  set(ASTROFORCES_DTM2020_REPO "${DRAGCPP_DTM2020_REPO}" CACHE STRING "DTM2020 repo" FORCE)
+endif()
+if(DEFINED DRAGCPP_HWM14_REPO)
+  set(ASTROFORCES_HWM14_REPO "${DRAGCPP_HWM14_REPO}" CACHE STRING "HWM14 repo" FORCE)
+endif()
+if(DEFINED DRAGCPP_JPL_EPH_REPO)
+  set(ASTROFORCES_JPL_EPH_REPO "${DRAGCPP_JPL_EPH_REPO}" CACHE STRING "jplEphem repo" FORCE)
+endif()
+if(DEFINED DRAGCPP_EXTERNAL_MODELS_TAG)
+  set(ASTROFORCES_EXTERNAL_MODELS_TAG "${DRAGCPP_EXTERNAL_MODELS_TAG}" CACHE STRING "Branch/tag for external model repos" FORCE)
+endif()
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 include(${CMAKE_SOURCE_DIR}/cmake/CPM.cmake)
-set(DRAGCPP_EIGEN_REPO "https://gitlab.com/libeigen/eigen.git" CACHE STRING "Eigen repository URL")
-set(DRAGCPP_EIGEN_TAG "5.0.0" CACHE STRING "Eigen git tag")
+set(ASTROFORCES_EIGEN_REPO "https://gitlab.com/libeigen/eigen.git" CACHE STRING "Eigen repository URL")
+set(ASTROFORCES_EIGEN_TAG "5.0.0" CACHE STRING "Eigen git tag")
+if(DEFINED DRAGCPP_EIGEN_REPO)
+  set(ASTROFORCES_EIGEN_REPO "${DRAGCPP_EIGEN_REPO}" CACHE STRING "Eigen repository URL" FORCE)
+endif()
+if(DEFINED DRAGCPP_EIGEN_TAG)
+  set(ASTROFORCES_EIGEN_TAG "${DRAGCPP_EIGEN_TAG}" CACHE STRING "Eigen git tag" FORCE)
+endif()
 
 CPMAddPackage(
   NAME eigen
-  GIT_REPOSITORY ${DRAGCPP_EIGEN_REPO}
-  GIT_TAG ${DRAGCPP_EIGEN_TAG}
+  GIT_REPOSITORY ${ASTROFORCES_EIGEN_REPO}
+  GIT_TAG ${ASTROFORCES_EIGEN_TAG}
 )
 CPMAddPackage(
   NAME fmt
@@ -37,35 +68,35 @@ CPMAddPackage(
     "SPDLOG_FMT_EXTERNAL ON"
 )
 
-set(DRAGCPP_EIGEN_TARGET "")
+set(ASTROFORCES_EIGEN_TARGET "")
 if(TARGET Eigen3::Eigen)
-  set(DRAGCPP_EIGEN_TARGET Eigen3::Eigen)
+  set(ASTROFORCES_EIGEN_TARGET Eigen3::Eigen)
 elseif(TARGET eigen)
-  set(DRAGCPP_EIGEN_TARGET eigen)
+  set(ASTROFORCES_EIGEN_TARGET eigen)
 endif()
 
-add_library(dragcpp_atmo_core INTERFACE)
-target_include_directories(dragcpp_atmo_core INTERFACE ${CMAKE_SOURCE_DIR}/libs/atmo-core/include)
-target_link_libraries(dragcpp_atmo_core INTERFACE fmt::fmt spdlog::spdlog)
+add_library(astroforces_atmo_core INTERFACE)
+target_include_directories(astroforces_atmo_core INTERFACE ${CMAKE_SOURCE_DIR}/libs/atmo-core/include)
+target_link_libraries(astroforces_atmo_core INTERFACE fmt::fmt spdlog::spdlog)
 
-add_library(dragcpp_space_weather STATIC
+add_library(astroforces_space_weather STATIC
   libs/space-weather/src/static_provider.cpp
   libs/space-weather/src/celestrak_csv_provider.cpp)
-target_include_directories(dragcpp_space_weather PUBLIC ${CMAKE_SOURCE_DIR}/libs/space-weather/include)
-target_link_libraries(dragcpp_space_weather PUBLIC dragcpp_atmo_core)
+target_include_directories(astroforces_space_weather PUBLIC ${CMAKE_SOURCE_DIR}/libs/space-weather/include)
+target_link_libraries(astroforces_space_weather PUBLIC astroforces_atmo_core)
 
-add_library(dragcpp_sc_props STATIC
+add_library(astroforces_sc_props STATIC
   libs/sc-props/src/spacecraft.cpp)
-target_include_directories(dragcpp_sc_props PUBLIC ${CMAKE_SOURCE_DIR}/libs/sc-props/include)
-target_link_libraries(dragcpp_sc_props PUBLIC dragcpp_atmo_core)
+target_include_directories(astroforces_sc_props PUBLIC ${CMAKE_SOURCE_DIR}/libs/sc-props/include)
+target_link_libraries(astroforces_sc_props PUBLIC astroforces_atmo_core)
 
-add_library(dragcpp_models_basic STATIC
+add_library(astroforces_models_basic STATIC
   libs/models-basic/src/exponential_atmosphere.cpp
   libs/models-basic/src/zero_wind.cpp)
-target_include_directories(dragcpp_models_basic PUBLIC ${CMAKE_SOURCE_DIR}/libs/models-basic/include)
-target_link_libraries(dragcpp_models_basic PUBLIC dragcpp_atmo_core)
+target_include_directories(astroforces_models_basic PUBLIC ${CMAKE_SOURCE_DIR}/libs/models-basic/include)
+target_link_libraries(astroforces_models_basic PUBLIC astroforces_atmo_core)
 
-add_library(dragcpp_drag_core STATIC
+add_library(astroforces_forces_core STATIC
   libs/forces-core/src/core/perturbation.cpp
   libs/forces-core/src/gravity/gravity_sph_model.cpp
   libs/forces-core/src/gravity/gravity_sph_perturbation.cpp
@@ -78,28 +109,36 @@ add_library(dragcpp_drag_core STATIC
   libs/forces-core/src/surface/erp/erp_perturbation.cpp
   libs/forces-core/src/surface/srp/srp_model.cpp
   libs/forces-core/src/surface/srp/srp_perturbation.cpp)
-target_include_directories(dragcpp_drag_core PUBLIC ${CMAKE_SOURCE_DIR}/libs/forces-core/include)
-target_link_libraries(dragcpp_drag_core PUBLIC dragcpp_atmo_core dragcpp_sc_props)
-if(DRAGCPP_EIGEN_TARGET)
-  target_link_libraries(dragcpp_drag_core PRIVATE ${DRAGCPP_EIGEN_TARGET})
+target_include_directories(astroforces_forces_core PUBLIC ${CMAKE_SOURCE_DIR}/libs/forces-core/include)
+target_link_libraries(astroforces_forces_core PUBLIC astroforces_atmo_core astroforces_sc_props)
+if(ASTROFORCES_EIGEN_TARGET)
+  target_link_libraries(astroforces_forces_core PRIVATE ${ASTROFORCES_EIGEN_TARGET})
 endif()
 
-add_library(dragcpp_adapters STATIC
+add_library(astroforces_adapters STATIC
   libs/adapters/src/placeholders.cpp
   libs/adapters/src/nrlmsis21_adapter.cpp
   libs/adapters/src/dtm2020_adapter.cpp
   libs/adapters/src/hwm14_adapter.cpp)
-target_include_directories(dragcpp_adapters PUBLIC ${CMAKE_SOURCE_DIR}/libs/adapters/include)
-target_link_libraries(dragcpp_adapters PUBLIC
-  dragcpp_atmo_core
+target_include_directories(astroforces_adapters PUBLIC ${CMAKE_SOURCE_DIR}/libs/adapters/include)
+target_link_libraries(astroforces_adapters PUBLIC
+  astroforces_atmo_core
   msis21::msis21
   dtm2020::dtm2020
   hwm14::hwm14)
 
+# Legacy target-name compatibility aliases.
+add_library(dragcpp_atmo_core ALIAS astroforces_atmo_core)
+add_library(dragcpp_space_weather ALIAS astroforces_space_weather)
+add_library(dragcpp_sc_props ALIAS astroforces_sc_props)
+add_library(dragcpp_models_basic ALIAS astroforces_models_basic)
+add_library(dragcpp_drag_core ALIAS astroforces_forces_core)
+add_library(dragcpp_adapters ALIAS astroforces_adapters)
+
 CPMAddPackage(
   NAME nrlmsis21_ext
-  GIT_REPOSITORY ${DRAGCPP_NRLMSIS21_REPO}
-  GIT_TAG ${DRAGCPP_EXTERNAL_MODELS_TAG}
+  GIT_REPOSITORY ${ASTROFORCES_NRLMSIS21_REPO}
+  GIT_TAG ${ASTROFORCES_EXTERNAL_MODELS_TAG}
   OPTIONS
     "MSIS21_BUILD_TESTS OFF"
     "MSIS21_BUILD_CLI OFF"
@@ -107,8 +146,8 @@ CPMAddPackage(
 
 CPMAddPackage(
   NAME dtm2020_ext
-  GIT_REPOSITORY ${DRAGCPP_DTM2020_REPO}
-  GIT_TAG ${DRAGCPP_EXTERNAL_MODELS_TAG}
+  GIT_REPOSITORY ${ASTROFORCES_DTM2020_REPO}
+  GIT_TAG ${ASTROFORCES_EXTERNAL_MODELS_TAG}
   OPTIONS
     "DTM2020_BUILD_TESTS OFF"
     "DTM2020_ENABLE_RESEARCH OFF"
@@ -116,8 +155,8 @@ CPMAddPackage(
 
 CPMAddPackage(
   NAME hwm14_ext
-  GIT_REPOSITORY ${DRAGCPP_HWM14_REPO}
-  GIT_TAG ${DRAGCPP_EXTERNAL_MODELS_TAG}
+  GIT_REPOSITORY ${ASTROFORCES_HWM14_REPO}
+  GIT_TAG ${ASTROFORCES_EXTERNAL_MODELS_TAG}
   OPTIONS
     "HWM14_BUILD_TESTS OFF"
     "HWM14_BUILD_EXAMPLES OFF"
@@ -125,199 +164,212 @@ CPMAddPackage(
 
 CPMAddPackage(
   NAME jpl_eph_ext
-  GIT_REPOSITORY ${DRAGCPP_JPL_EPH_REPO}
-  GIT_TAG ${DRAGCPP_EXTERNAL_MODELS_TAG}
+  GIT_REPOSITORY ${ASTROFORCES_JPL_EPH_REPO}
+  GIT_TAG ${ASTROFORCES_EXTERNAL_MODELS_TAG}
   OPTIONS
     "JPL_EPH_BUILD_TESTS OFF"
     "JPL_EPH_BUILD_TOOLS OFF"
     "JPL_EPH_FETCH_DEPS OFF"
 )
 
-target_link_libraries(dragcpp_drag_core PRIVATE jpl::eph)
+target_link_libraries(astroforces_forces_core PRIVATE jpl::eph)
 
 add_executable(drag_cli apps/drag-cli/main.cpp)
 target_link_libraries(drag_cli PRIVATE
-  dragcpp_atmo_core
-  dragcpp_space_weather
-  dragcpp_sc_props
-  dragcpp_adapters
-  dragcpp_models_basic
-  dragcpp_drag_core)
+  astroforces_atmo_core
+  astroforces_space_weather
+  astroforces_sc_props
+  astroforces_adapters
+  astroforces_models_basic
+  astroforces_forces_core)
 
 add_executable(drag_batch_cli apps/drag-cli/drag_batch_cli.cpp)
 target_link_libraries(drag_batch_cli PRIVATE
-  dragcpp_atmo_core
-  dragcpp_space_weather
-  dragcpp_sc_props
-  dragcpp_adapters
-  dragcpp_models_basic
-  dragcpp_drag_core)
+  astroforces_atmo_core
+  astroforces_space_weather
+  astroforces_sc_props
+  astroforces_adapters
+  astroforces_models_basic
+  astroforces_forces_core)
 
 add_executable(perturbation_profile_cli apps/drag-cli/perturbation_profile_cli.cpp)
 target_link_libraries(perturbation_profile_cli PRIVATE
-  dragcpp_atmo_core
-  dragcpp_space_weather
-  dragcpp_sc_props
-  dragcpp_adapters
-  dragcpp_models_basic
-  dragcpp_drag_core)
+  astroforces_atmo_core
+  astroforces_space_weather
+  astroforces_sc_props
+  astroforces_adapters
+  astroforces_models_basic
+  astroforces_forces_core)
 
 add_executable(third_body_cli apps/forces-cli/third_body_cli.cpp)
 target_link_libraries(third_body_cli PRIVATE
-  dragcpp_atmo_core
-  dragcpp_drag_core)
+  astroforces_atmo_core
+  astroforces_forces_core)
 
 add_executable(third_body_batch_cli apps/forces-cli/third_body_batch_cli.cpp)
 target_link_libraries(third_body_batch_cli PRIVATE
-  dragcpp_atmo_core
-  dragcpp_drag_core)
+  astroforces_atmo_core
+  astroforces_forces_core)
 
 add_executable(srp_cli apps/forces-cli/srp_cli.cpp)
 target_link_libraries(srp_cli PRIVATE
-  dragcpp_atmo_core
-  dragcpp_sc_props
-  dragcpp_drag_core)
+  astroforces_atmo_core
+  astroforces_sc_props
+  astroforces_forces_core)
 
 add_executable(srp_batch_cli apps/forces-cli/srp_batch_cli.cpp)
 target_link_libraries(srp_batch_cli PRIVATE
-  dragcpp_atmo_core
-  dragcpp_sc_props
-  dragcpp_drag_core)
+  astroforces_atmo_core
+  astroforces_sc_props
+  astroforces_forces_core)
 
 add_executable(erp_cli apps/forces-cli/erp_cli.cpp)
 target_link_libraries(erp_cli PRIVATE
-  dragcpp_atmo_core
-  dragcpp_sc_props
-  dragcpp_drag_core)
+  astroforces_atmo_core
+  astroforces_sc_props
+  astroforces_forces_core)
 
 add_executable(erp_batch_cli apps/forces-cli/erp_batch_cli.cpp)
 target_link_libraries(erp_batch_cli PRIVATE
-  dragcpp_atmo_core
-  dragcpp_sc_props
-  dragcpp_drag_core)
+  astroforces_atmo_core
+  astroforces_sc_props
+  astroforces_forces_core)
 
 add_executable(relativity_cli apps/forces-cli/relativity_cli.cpp)
 target_link_libraries(relativity_cli PRIVATE
-  dragcpp_atmo_core
-  dragcpp_drag_core)
+  astroforces_atmo_core
+  astroforces_forces_core)
 
 add_executable(gravity_sph_cli apps/forces-cli/gravity_sph_cli.cpp)
 target_link_libraries(gravity_sph_cli PRIVATE
-  dragcpp_atmo_core
-  dragcpp_drag_core)
+  astroforces_atmo_core
+  astroforces_forces_core)
 
-foreach(tgt dragcpp_space_weather dragcpp_sc_props dragcpp_models_basic dragcpp_drag_core dragcpp_adapters drag_cli drag_batch_cli perturbation_profile_cli third_body_cli third_body_batch_cli srp_cli srp_batch_cli erp_cli erp_batch_cli relativity_cli gravity_sph_cli)
+foreach(tgt astroforces_space_weather astroforces_sc_props astroforces_models_basic astroforces_forces_core astroforces_adapters drag_cli drag_batch_cli perturbation_profile_cli third_body_cli third_body_batch_cli srp_cli srp_batch_cli erp_cli erp_batch_cli relativity_cli gravity_sph_cli)
   if(MSVC)
     target_compile_options(${tgt} PRIVATE /W4)
-    if(DRAGCPP_WARNINGS_AS_ERRORS)
+    if(ASTROFORCES_WARNINGS_AS_ERRORS)
       target_compile_options(${tgt} PRIVATE /WX)
     endif()
   else()
     target_compile_options(${tgt} PRIVATE -Wall -Wextra -Wpedantic)
-    if(DRAGCPP_WARNINGS_AS_ERRORS)
+    if(ASTROFORCES_WARNINGS_AS_ERRORS)
       target_compile_options(${tgt} PRIVATE -Werror)
     endif()
   endif()
 endforeach()
 
-if(DRAGCPP_BUILD_TESTS)
+if(ASTROFORCES_BUILD_TESTS)
   include(CTest)
   enable_testing()
-  add_executable(dragcpp_test_drag_core tests/test_drag_core.cpp)
-  target_link_libraries(dragcpp_test_drag_core PRIVATE
-    dragcpp_atmo_core
-    dragcpp_space_weather
-    dragcpp_sc_props
-    dragcpp_models_basic
-    dragcpp_drag_core)
-  add_test(NAME DragCore COMMAND dragcpp_test_drag_core)
+  add_executable(astroforces_test_drag_core tests/test_drag_core.cpp)
+  target_link_libraries(astroforces_test_drag_core PRIVATE
+    astroforces_atmo_core
+    astroforces_space_weather
+    astroforces_sc_props
+    astroforces_models_basic
+    astroforces_forces_core)
+  add_test(NAME DragCore COMMAND astroforces_test_drag_core)
 
-  add_executable(dragcpp_test_end_to_end tests/test_end_to_end.cpp)
-  target_link_libraries(dragcpp_test_end_to_end PRIVATE
-    dragcpp_atmo_core
-    dragcpp_space_weather
-    dragcpp_sc_props
-    dragcpp_models_basic
-    dragcpp_drag_core)
-  add_test(NAME DragEndToEnd COMMAND dragcpp_test_end_to_end)
+  add_executable(astroforces_test_end_to_end tests/test_end_to_end.cpp)
+  target_link_libraries(astroforces_test_end_to_end PRIVATE
+    astroforces_atmo_core
+    astroforces_space_weather
+    astroforces_sc_props
+    astroforces_models_basic
+    astroforces_forces_core)
+  add_test(NAME DragEndToEnd COMMAND astroforces_test_end_to_end)
 
-  add_executable(dragcpp_test_adapters tests/test_adapters_integration.cpp)
-  target_link_libraries(dragcpp_test_adapters PRIVATE
-    dragcpp_atmo_core
-    dragcpp_space_weather
-    dragcpp_sc_props
-    dragcpp_drag_core
-    dragcpp_adapters)
-  target_compile_definitions(dragcpp_test_adapters PRIVATE
+  add_executable(astroforces_test_adapters tests/test_adapters_integration.cpp)
+  target_link_libraries(astroforces_test_adapters PRIVATE
+    astroforces_atmo_core
+    astroforces_space_weather
+    astroforces_sc_props
+    astroforces_forces_core
+    astroforces_adapters)
+  target_compile_definitions(astroforces_test_adapters PRIVATE
+    ASTROFORCES_NRLMSIS21_SOURCE_DIR="${nrlmsis21_ext_SOURCE_DIR}"
+    ASTROFORCES_DTM2020_SOURCE_DIR="${dtm2020_ext_SOURCE_DIR}"
+    ASTROFORCES_HWM14_SOURCE_DIR="${hwm14_ext_SOURCE_DIR}"
     DRAGCPP_NRLMSIS21_SOURCE_DIR="${nrlmsis21_ext_SOURCE_DIR}"
     DRAGCPP_DTM2020_SOURCE_DIR="${dtm2020_ext_SOURCE_DIR}"
     DRAGCPP_HWM14_SOURCE_DIR="${hwm14_ext_SOURCE_DIR}")
-  add_test(NAME DragAdaptersIntegration COMMAND dragcpp_test_adapters)
+  add_test(NAME DragAdaptersIntegration COMMAND astroforces_test_adapters)
 
-  add_executable(dragcpp_test_space_weather tests/test_space_weather_celestrak.cpp)
-  target_link_libraries(dragcpp_test_space_weather PRIVATE
-    dragcpp_atmo_core
-    dragcpp_space_weather)
-  add_test(NAME SpaceWeatherCelesTrak COMMAND dragcpp_test_space_weather)
+  add_executable(astroforces_test_space_weather tests/test_space_weather_celestrak.cpp)
+  target_link_libraries(astroforces_test_space_weather PRIVATE
+    astroforces_atmo_core
+    astroforces_space_weather)
+  add_test(NAME SpaceWeatherCelesTrak COMMAND astroforces_test_space_weather)
 
-  add_executable(dragcpp_test_space_weather_real_snippet tests/test_space_weather_celestrak_real_snippet.cpp)
-  target_link_libraries(dragcpp_test_space_weather_real_snippet PRIVATE
-    dragcpp_atmo_core
-    dragcpp_space_weather)
-  target_compile_definitions(dragcpp_test_space_weather_real_snippet PRIVATE DRAGCPP_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
-  add_test(NAME SpaceWeatherCelesTrakRealSnippet COMMAND dragcpp_test_space_weather_real_snippet)
+  add_executable(astroforces_test_space_weather_real_snippet tests/test_space_weather_celestrak_real_snippet.cpp)
+  target_link_libraries(astroforces_test_space_weather_real_snippet PRIVATE
+    astroforces_atmo_core
+    astroforces_space_weather)
+  target_compile_definitions(astroforces_test_space_weather_real_snippet PRIVATE
+    ASTROFORCES_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+    DRAGCPP_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+  add_test(NAME SpaceWeatherCelesTrakRealSnippet COMMAND astroforces_test_space_weather_real_snippet)
 
-  add_executable(dragcpp_test_perturbation_stack tests/test_perturbation_stack.cpp)
-  target_link_libraries(dragcpp_test_perturbation_stack PRIVATE
-    dragcpp_atmo_core
-    dragcpp_space_weather
-    dragcpp_sc_props
-    dragcpp_models_basic
-    dragcpp_drag_core)
-  add_test(NAME PerturbationStack COMMAND dragcpp_test_perturbation_stack)
+  add_executable(astroforces_test_perturbation_stack tests/test_perturbation_stack.cpp)
+  target_link_libraries(astroforces_test_perturbation_stack PRIVATE
+    astroforces_atmo_core
+    astroforces_space_weather
+    astroforces_sc_props
+    astroforces_models_basic
+    astroforces_forces_core)
+  add_test(NAME PerturbationStack COMMAND astroforces_test_perturbation_stack)
 
-  add_executable(dragcpp_perf_benchmark tests/drag_perf_benchmark.cpp)
-  target_link_libraries(dragcpp_perf_benchmark PRIVATE
-    dragcpp_atmo_core
-    dragcpp_space_weather
-    dragcpp_sc_props
-    dragcpp_models_basic
-    dragcpp_drag_core)
+  add_executable(astroforces_perf_benchmark tests/drag_perf_benchmark.cpp)
+  target_link_libraries(astroforces_perf_benchmark PRIVATE
+    astroforces_atmo_core
+    astroforces_space_weather
+    astroforces_sc_props
+    astroforces_models_basic
+    astroforces_forces_core)
 
-  add_executable(dragcpp_test_third_body tests/test_third_body.cpp)
-  target_link_libraries(dragcpp_test_third_body PRIVATE
-    dragcpp_atmo_core
-    dragcpp_sc_props
-    dragcpp_drag_core)
-  target_compile_definitions(dragcpp_test_third_body PRIVATE DRAGCPP_JPL_EPH_SOURCE_DIR="${jpl_eph_ext_SOURCE_DIR}")
-  add_test(NAME ThirdBody COMMAND dragcpp_test_third_body)
+  add_executable(astroforces_test_third_body tests/test_third_body.cpp)
+  target_link_libraries(astroforces_test_third_body PRIVATE
+    astroforces_atmo_core
+    astroforces_sc_props
+    astroforces_forces_core)
+  target_compile_definitions(astroforces_test_third_body PRIVATE
+    ASTROFORCES_JPL_EPH_SOURCE_DIR="${jpl_eph_ext_SOURCE_DIR}"
+    DRAGCPP_JPL_EPH_SOURCE_DIR="${jpl_eph_ext_SOURCE_DIR}")
+  add_test(NAME ThirdBody COMMAND astroforces_test_third_body)
 
-  add_executable(dragcpp_test_srp tests/test_srp.cpp)
-  target_link_libraries(dragcpp_test_srp PRIVATE
-    dragcpp_atmo_core
-    dragcpp_sc_props
-    dragcpp_drag_core)
-  target_compile_definitions(dragcpp_test_srp PRIVATE DRAGCPP_JPL_EPH_SOURCE_DIR="${jpl_eph_ext_SOURCE_DIR}")
-  add_test(NAME SRP COMMAND dragcpp_test_srp)
+  add_executable(astroforces_test_srp tests/test_srp.cpp)
+  target_link_libraries(astroforces_test_srp PRIVATE
+    astroforces_atmo_core
+    astroforces_sc_props
+    astroforces_forces_core)
+  target_compile_definitions(astroforces_test_srp PRIVATE
+    ASTROFORCES_JPL_EPH_SOURCE_DIR="${jpl_eph_ext_SOURCE_DIR}"
+    DRAGCPP_JPL_EPH_SOURCE_DIR="${jpl_eph_ext_SOURCE_DIR}")
+  add_test(NAME SRP COMMAND astroforces_test_srp)
 
-  add_executable(dragcpp_test_erp tests/test_erp.cpp)
-  target_link_libraries(dragcpp_test_erp PRIVATE
-    dragcpp_atmo_core
-    dragcpp_sc_props
-    dragcpp_drag_core)
-  add_test(NAME ERP COMMAND dragcpp_test_erp)
+  add_executable(astroforces_test_erp tests/test_erp.cpp)
+  target_link_libraries(astroforces_test_erp PRIVATE
+    astroforces_atmo_core
+    astroforces_sc_props
+    astroforces_forces_core)
+  add_test(NAME ERP COMMAND astroforces_test_erp)
 
-  add_executable(dragcpp_test_relativity tests/test_relativity.cpp)
-  target_link_libraries(dragcpp_test_relativity PRIVATE
-    dragcpp_atmo_core
-    dragcpp_drag_core)
-  target_compile_definitions(dragcpp_test_relativity PRIVATE DRAGCPP_JPL_EPH_SOURCE_DIR="${jpl_eph_ext_SOURCE_DIR}")
-  add_test(NAME Relativity COMMAND dragcpp_test_relativity)
+  add_executable(astroforces_test_relativity tests/test_relativity.cpp)
+  target_link_libraries(astroforces_test_relativity PRIVATE
+    astroforces_atmo_core
+    astroforces_forces_core)
+  target_compile_definitions(astroforces_test_relativity PRIVATE
+    ASTROFORCES_JPL_EPH_SOURCE_DIR="${jpl_eph_ext_SOURCE_DIR}"
+    DRAGCPP_JPL_EPH_SOURCE_DIR="${jpl_eph_ext_SOURCE_DIR}")
+  add_test(NAME Relativity COMMAND astroforces_test_relativity)
 
-  add_executable(dragcpp_test_gravity_sph tests/test_gravity_sph.cpp)
-  target_link_libraries(dragcpp_test_gravity_sph PRIVATE
-    dragcpp_atmo_core
-    dragcpp_drag_core)
-  target_compile_definitions(dragcpp_test_gravity_sph PRIVATE DRAGCPP_JPL_EPH_SOURCE_DIR="${jpl_eph_ext_SOURCE_DIR}")
-  add_test(NAME GravitySph COMMAND dragcpp_test_gravity_sph)
+  add_executable(astroforces_test_gravity_sph tests/test_gravity_sph.cpp)
+  target_link_libraries(astroforces_test_gravity_sph PRIVATE
+    astroforces_atmo_core
+    astroforces_forces_core)
+  target_compile_definitions(astroforces_test_gravity_sph PRIVATE
+    ASTROFORCES_JPL_EPH_SOURCE_DIR="${jpl_eph_ext_SOURCE_DIR}"
+    DRAGCPP_JPL_EPH_SOURCE_DIR="${jpl_eph_ext_SOURCE_DIR}")
+  add_test(NAME GravitySph COMMAND astroforces_test_gravity_sph)
 endif()

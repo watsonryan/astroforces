@@ -8,12 +8,12 @@ cmake --build --preset macos-debug -j
 
 ## Run
 ```bash
-./build/macos-debug/dragcpp_perf_benchmark
+./build/macos-debug/astroforces_perf_benchmark
 ```
 
 Optional controls:
 ```bash
-ASTRO_FORCES_PERF_SAMPLES=40 ASTRO_FORCES_PERF_ITERS=5000 ./build/macos-debug/dragcpp_perf_benchmark
+ASTRO_FORCES_PERF_SAMPLES=40 ASTRO_FORCES_PERF_ITERS=5000 ./build/macos-debug/astroforces_perf_benchmark
 ```
 
 ## Metrics

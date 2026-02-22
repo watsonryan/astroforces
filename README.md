@@ -49,7 +49,7 @@ ctest --preset macos-debug --output-on-failure
 ```
 
 External model repos are pulled via CPM with HTTPS URLs by default; override cache vars
-`DRAGCPP_NRLMSIS21_REPO`, `DRAGCPP_DTM2020_REPO`, and `DRAGCPP_HWM14_REPO` if you prefer SSH.
+`ASTROFORCES_NRLMSIS21_REPO`, `ASTROFORCES_DTM2020_REPO`, and `ASTROFORCES_HWM14_REPO` if you prefer SSH.
 
 ## CLI
 ```bash
@@ -177,7 +177,7 @@ Gravity coefficient sources:
 
 Performance benchmark:
 ```bash
-./build/macos-debug/dragcpp_perf_benchmark
+./build/macos-debug/astroforces_perf_benchmark
 ```
 Environment controls:
 - `ASTRO_FORCES_PERF_SAMPLES` (default `40`)
