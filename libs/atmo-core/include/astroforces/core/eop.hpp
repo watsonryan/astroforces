@@ -119,6 +119,8 @@ class Series {
     }
   }
 
+  static double mas_to_rad(const double mas) { return (mas * 1e-3) * constants::kArcsecToRad; }
+
   static std::optional<Record> parse_iers_finals_line(const std::string& line) {
     if (line.size() < 78) {
       return std::nullopt;
@@ -143,8 +145,10 @@ class Series {
         rec.eop.yp_rad = std::stod(tokens[7]) * constants::kArcsecToRad;
         rec.eop.dut1_s = std::stod(tokens[10]);
         rec.eop.lod_s = (tokens.size() > 12) ? std::stod(tokens[12]) * 1e-3 : 0.0;
-        rec.eop.dX_rad = 0.0;
-        rec.eop.dY_rad = 0.0;
+        // IERS finals2000A stores dX/dY in mas in later columns; parse by fixed
+        // columns because token layouts vary with spacing/flags.
+        rec.eop.dX_rad = (line.size() >= 106) ? mas_to_rad(parse_field(line, 97, 9)) : 0.0;
+        rec.eop.dY_rad = (line.size() >= 125) ? mas_to_rad(parse_field(line, 116, 9)) : 0.0;
         rec.predicted = (tokens.size() > 9 && (tokens[4] == "P" || tokens[9] == "P"));
         if (rec.mjd_utc <= 0.0) {
           return std::nullopt;
@@ -175,8 +179,8 @@ class Series {
     rec.eop.yp_rad = yp_arcsec * constants::kArcsecToRad;
     rec.eop.dut1_s = ut1_utc_s;
     rec.eop.lod_s = lod_s;
-    rec.eop.dX_rad = 0.0;
-    rec.eop.dY_rad = 0.0;
+    rec.eop.dX_rad = (line.size() >= 106) ? mas_to_rad(parse_field(line, 97, 9)) : 0.0;
+    rec.eop.dY_rad = (line.size() >= 125) ? mas_to_rad(parse_field(line, 116, 9)) : 0.0;
     rec.predicted = (line.size() > 57 && (line[16] == 'P' || line[57] == 'P'));
     return rec;
   }

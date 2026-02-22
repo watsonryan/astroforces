@@ -5,102 +5,24 @@
  */
 #pragma once
 
-#include <array>
 #include <cmath>
 #include <ctime>
 #include <utility>
 
 #include "astroforces/atmo/constants.hpp"
 #include "astroforces/atmo/types.hpp"
+#include "astroforces/core/math_utils.hpp"
+#include "astroforces/core/sofa_utils.hpp"
 
 namespace astroforces::core {
-
-struct Mat3 {
-  std::array<double, 9> v{};
-  [[nodiscard]] double& operator()(const int r, const int c) { return v[static_cast<std::size_t>(r * 3 + c)]; }
-  [[nodiscard]] double operator()(const int r, const int c) const { return v[static_cast<std::size_t>(r * 3 + c)]; }
-};
 
 struct RotationWithDerivative {
   Mat3 r{};
   Mat3 dr{};
 };
 
-inline Mat3 mat_identity() {
-  Mat3 m{};
-  m(0, 0) = 1.0;
-  m(1, 1) = 1.0;
-  m(2, 2) = 1.0;
-  return m;
-}
-
-inline Mat3 mat_mul(const Mat3& a, const Mat3& b) {
-  Mat3 c{};
-  for (int r = 0; r < 3; ++r) {
-    for (int col = 0; col < 3; ++col) {
-      c(r, col) = a(r, 0) * b(0, col) + a(r, 1) * b(1, col) + a(r, 2) * b(2, col);
-    }
-  }
-  return c;
-}
-
-inline Mat3 mat_transpose(const Mat3& m) {
-  Mat3 t{};
-  for (int r = 0; r < 3; ++r) {
-    for (int c = 0; c < 3; ++c) {
-      t(r, c) = m(c, r);
-    }
-  }
-  return t;
-}
-
-inline Vec3 mat_vec(const Mat3& m, const Vec3& x) {
-  return Vec3{
-      m(0, 0) * x.x + m(0, 1) * x.y + m(0, 2) * x.z,
-      m(1, 0) * x.x + m(1, 1) * x.y + m(1, 2) * x.z,
-      m(2, 0) * x.x + m(2, 1) * x.y + m(2, 2) * x.z,
-  };
-}
-
-inline Mat3 rot_x(const double a) {
-  Mat3 m = mat_identity();
-  const double c = std::cos(a);
-  const double s = std::sin(a);
-  m(1, 1) = c;
-  m(1, 2) = s;
-  m(2, 1) = -s;
-  m(2, 2) = c;
-  return m;
-}
-
-inline Mat3 rot_y(const double a) {
-  Mat3 m = mat_identity();
-  const double c = std::cos(a);
-  const double s = std::sin(a);
-  m(0, 0) = c;
-  m(0, 2) = -s;
-  m(2, 0) = s;
-  m(2, 2) = c;
-  return m;
-}
-
-inline Mat3 rot_z_mat(const double a) {
-  Mat3 m = mat_identity();
-  const double c = std::cos(a);
-  const double s = std::sin(a);
-  m(0, 0) = c;
-  m(0, 1) = s;
-  m(1, 0) = -s;
-  m(1, 1) = c;
-  return m;
-}
-
 inline Vec3 cross(const Vec3& a, const Vec3& b) {
-  return Vec3{
-      a.y * b.z - a.z * b.y,
-      a.z * b.x - a.x * b.z,
-      a.x * b.y - a.y * b.x,
-  };
+  return vec_cross(a, b);
 }
 
 inline GeodeticPoint spherical_geodetic_from_ecef(const Vec3& ecef_m) {
@@ -143,12 +65,7 @@ inline double utc_seconds_to_julian_date_utc(double utc_seconds) {
 }
 
 inline double earth_rotation_angle_rad(double jd_ut1) {
-  double era = constants::kTwoPi * (0.7790572732640 + 1.00273781191135448 * (jd_ut1 - constants::kJ2000Jd));
-  era = std::fmod(era, constants::kTwoPi);
-  if (era < 0.0) {
-    era += constants::kTwoPi;
-  }
-  return era;
+  return sofa::era00(jd_ut1);
 }
 
 inline double gmst_rad_from_jd_utc(double jd_utc) {
@@ -163,16 +80,18 @@ inline double gmst_rad_from_jd_utc(double jd_utc) {
 }
 
 inline Vec3 rotate_z(double angle_rad, const Vec3& v) {
-  const double c = std::cos(angle_rad);
-  const double s = std::sin(angle_rad);
-  return Vec3{c * v.x - s * v.y, s * v.x + c * v.y, v.z};
+  return mat_vec(sofa::rot_z(angle_rad), v);
 }
 
+// Approximate GMST-only transform (no precession/nutation/polar motion). Use
+// gcrf_to_itrf_* with EOP/CIP inputs for production-quality navigation.
 inline Vec3 eci_to_ecef_position(const Vec3& r_eci_m, double utc_seconds) {
   const double gmst = gmst_rad_from_jd_utc(utc_seconds_to_julian_date_utc(utc_seconds));
   return rotate_z(gmst, r_eci_m);
 }
 
+// Approximate GMST-only transform (no precession/nutation/polar motion). Use
+// itrf_to_gcrf_* with EOP/CIP inputs for production-quality navigation.
 inline Vec3 ecef_to_eci_position(const Vec3& r_ecef_m, double utc_seconds) {
   const double gmst = gmst_rad_from_jd_utc(utc_seconds_to_julian_date_utc(utc_seconds));
   return rotate_z(-gmst, r_ecef_m);
@@ -196,21 +115,15 @@ inline Vec3 ecef_to_eci_velocity(const Vec3& r_ecef_m, const Vec3& v_ecef_mps, d
 }
 
 inline double tio_locator_sp_rad(const double jd_tt) {
-  const double t = (jd_tt - constants::kJ2000Jd) / 36525.0;
-  return -47e-6 * constants::kArcsecToRad * t;
+  return sofa::sp00(jd_tt);
 }
 
 inline Mat3 c2i_from_xys(const CelestialIntermediatePole& cip) {
-  const double x = cip.x_rad;
-  const double y = cip.y_rad;
-  const double r2 = x * x + y * y;
-  const double e = (r2 > 0.0) ? std::atan2(y, x) : 0.0;
-  const double d = std::atan(std::sqrt(r2 / std::max(1e-30, 1.0 - r2)));
-  return mat_mul(rot_z_mat(e), mat_mul(rot_y(d), rot_z_mat(-(e + cip.s_rad))));
+  return sofa::c2ixys(cip.x_rad, cip.y_rad, cip.s_rad);
 }
 
 inline Mat3 polar_motion_matrix(const EarthOrientation& eop, const double sp_rad) {
-  return mat_mul(rot_z_mat(sp_rad), mat_mul(rot_y(-eop.xp_rad), rot_x(-eop.yp_rad)));
+  return sofa::pom00(eop.xp_rad, eop.yp_rad, sp_rad);
 }
 
 inline RotationWithDerivative gcrf_to_itrf_rotation_with_derivative(
@@ -224,7 +137,8 @@ inline RotationWithDerivative gcrf_to_itrf_rotation_with_derivative(
   corrected.y_rad += eop.dY_rad;
 
   const Mat3 rc2i = c2i_from_xys(corrected);
-  const Mat3 r3era = rot_z_mat(earth_rotation_angle_rad(jd_ut1));
+  const double era = earth_rotation_angle_rad(jd_ut1);
+  const Mat3 r3era = sofa::rot_z(era);
   const Mat3 rpom = polar_motion_matrix(eop, tio_locator_sp_rad(jd_tt));
 
   const double omega = constants::kEarthRotationRateRadPerSec / (1.0 + eop.lod_s / constants::kSecondsPerDay);
@@ -238,7 +152,7 @@ inline RotationWithDerivative gcrf_to_itrf_rotation_with_derivative(
   }
 
   RotationWithDerivative out{};
-  out.r = mat_mul(rpom, mat_mul(r3era, rc2i));
+  out.r = sofa::c2tcio(rc2i, era, rpom);
   out.dr = mat_mul(rpom, mat_mul(dr3_scaled, rc2i));
   return out;
 }

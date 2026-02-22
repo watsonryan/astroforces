@@ -368,4 +368,9 @@ if(ASTROFORCES_BUILD_TESTS)
   target_compile_definitions(astroforces_test_eop_reader PRIVATE
     ASTROFORCES_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
   add_test(NAME EopReader COMMAND astroforces_test_eop_reader)
+
+  add_executable(astroforces_test_cip_reader tests/test_cip_reader.cpp)
+  target_link_libraries(astroforces_test_cip_reader PRIVATE
+    astroforces_atmo_core)
+  add_test(NAME CipReader COMMAND astroforces_test_cip_reader)
 endif()

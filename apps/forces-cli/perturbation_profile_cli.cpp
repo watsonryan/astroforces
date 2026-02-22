@@ -48,9 +48,9 @@ double magnitude(const astroforces::core::Vec3& v) { return astroforces::core::n
 }  // namespace
 
 int main(int argc, char** argv) {
-  if (argc < 7 || argc > 16) {
+  if (argc < 7 || argc > 17) {
     spdlog::error(
-        "usage: perturbation_profile_cli <output_csv> <alt_min_km> <alt_max_km> <samples> <dtm_coeff_file> <space_weather_csv> [jpl_ephemeris_file] [epoch_utc_s] [gravity_gfc_file] [gravity_max_degree] [eop_finals_file] [ocean_tide_file] [atmos_tide_file] [ocean_pole_tide_file] [aod_file]");
+        "usage: perturbation_profile_cli <output_csv> <alt_min_km> <alt_max_km> <samples> <dtm_coeff_file> <space_weather_csv> [jpl_ephemeris_file] [epoch_utc_s] [gravity_gfc_file] [gravity_max_degree] [eop_finals_file] [ocean_tide_file] [atmos_tide_file] [ocean_pole_tide_file] [aod_file] [cip_xys_file]");
     return 1;
   }
 
@@ -69,6 +69,7 @@ int main(int argc, char** argv) {
   const std::filesystem::path atmos_tide_file = (argc >= 14) ? std::filesystem::path(argv[13]) : std::filesystem::path{};
   const std::filesystem::path ocean_pole_tide_file = (argc >= 15) ? std::filesystem::path(argv[14]) : std::filesystem::path{};
   const std::filesystem::path aod_file = (argc >= 16) ? std::filesystem::path(argv[15]) : std::filesystem::path{};
+  const std::filesystem::path cip_xys_file = (argc >= 17) ? std::filesystem::path(argv[16]) : std::filesystem::path{};
 
   if (!(alt_min_km >= 0.0) || !(alt_max_km > alt_min_km) || samples < 2) {
     spdlog::error("invalid sweep parameters: require alt_min>=0, alt_max>alt_min, samples>=2");
@@ -110,6 +111,10 @@ int main(int argc, char** argv) {
     spdlog::error("aod file not found: {}", aod_file.string());
     return 14;
   }
+  if (!cip_xys_file.empty() && !std::filesystem::exists(cip_xys_file)) {
+    spdlog::error("CIP X/Y/s file not found: {}", cip_xys_file.string());
+    return 15;
+  }
 
   std::ofstream out(out_csv);
   if (!out) {
@@ -138,6 +143,7 @@ int main(int argc, char** argv) {
         {.gravity_model_file = gravity_gfc_file,
          .ephemeris_file = std::filesystem::path(eph_file),
          .eop_finals_file = eop_finals_file,
+         .cip_xys_file = cip_xys_file,
          .ocean_pole_tide_file = ocean_pole_tide_file,
          .aod_file = aod_file,
          .ocean_tide_file = ocean_tide_file,
@@ -255,8 +261,8 @@ int main(int argc, char** argv) {
     astroforces::core::StateVector third_state{};
     third_state.epoch.utc_seconds = epoch_utc_s;
     third_state.frame = astroforces::core::Frame::ECI;
-    third_state.position_m = astroforces::core::ecef_to_eci_position(r_ecef_m, epoch_utc_s);
-    third_state.velocity_mps = astroforces::core::ecef_to_eci_velocity(r_ecef_m, v_ecef_mps, epoch_utc_s);
+    third_state.position_m = astroforces::core::Vec3{r_m, 0.0, 0.0};
+    third_state.velocity_mps = astroforces::core::Vec3{0.0, circular_speed_mps(r_m), 0.0};
 
     std::vector<double> gravity_mags{};
     if (gravity) {
