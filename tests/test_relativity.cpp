@@ -53,10 +53,18 @@ int main() {
     eph_path = env;
   } else {
     eph_path = fs::path(ASTROFORCES_JPL_EPH_SOURCE_DIR) / "testdata" / "linux_p1550p2650.440";
+    if (!fs::exists(eph_path)) {
+      eph_path = fs::path(ASTROFORCES_SOURCE_DIR) / "data" / "required" / "linux_p1550p2650.440";
+    }
   }
   if (!fs::exists(eph_path)) {
+#if defined(ASTROFORCES_TEST_REQUIRE_EXTERNAL_DATA)
+    spdlog::error("relativity geodesic test requires ephemeris but file not found: {}", eph_path.string());
+    return 100;
+#else
     spdlog::warn("relativity geodesic test skipped: ephemeris not found: {}", eph_path.string());
     return 0;
+#endif
   }
   const auto rel_with_geo =
       astroforces::forces::RelativityAccelerationModel::Create({.ephemeris_file = eph_path, .use_geodesic_precession = true});
@@ -71,4 +79,3 @@ int main() {
   }
   return 0;
 }
-

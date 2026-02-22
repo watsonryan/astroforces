@@ -4,6 +4,7 @@ project(astroforces VERSION 0.1.0 LANGUAGES CXX)
 
 option(ASTROFORCES_BUILD_TESTS "Build tests" ON)
 option(ASTROFORCES_WARNINGS_AS_ERRORS "Treat warnings as errors" ON)
+option(ASTROFORCES_TEST_REQUIRE_EXTERNAL_DATA "Fail tests when required external ephemeris data is missing" OFF)
 
 set(ASTROFORCES_NRLMSIS21_REPO "https://github.com/watsonryan/nrlmsis-2_1.git" CACHE STRING "NRLMSIS 2.1 repo")
 set(ASTROFORCES_DTM2020_REPO "https://github.com/watsonryan/dtm2020.git" CACHE STRING "DTM2020 repo")
@@ -303,7 +304,9 @@ if(ASTROFORCES_BUILD_TESTS)
     astroforces_core
     astroforces_forces_core)
   target_compile_definitions(astroforces_test_third_body PRIVATE
-    ASTROFORCES_JPL_EPH_SOURCE_DIR="${jpl_eph_ext_SOURCE_DIR}")
+    ASTROFORCES_JPL_EPH_SOURCE_DIR="${jpl_eph_ext_SOURCE_DIR}"
+    ASTROFORCES_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+    $<$<BOOL:${ASTROFORCES_TEST_REQUIRE_EXTERNAL_DATA}>:ASTROFORCES_TEST_REQUIRE_EXTERNAL_DATA=1>)
   add_test(NAME ThirdBody COMMAND astroforces_test_third_body)
 
   add_executable(astroforces_test_srp tests/test_srp.cpp)
@@ -311,7 +314,9 @@ if(ASTROFORCES_BUILD_TESTS)
     astroforces_core
     astroforces_forces_core)
   target_compile_definitions(astroforces_test_srp PRIVATE
-    ASTROFORCES_JPL_EPH_SOURCE_DIR="${jpl_eph_ext_SOURCE_DIR}")
+    ASTROFORCES_JPL_EPH_SOURCE_DIR="${jpl_eph_ext_SOURCE_DIR}"
+    ASTROFORCES_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+    $<$<BOOL:${ASTROFORCES_TEST_REQUIRE_EXTERNAL_DATA}>:ASTROFORCES_TEST_REQUIRE_EXTERNAL_DATA=1>)
   add_test(NAME SRP COMMAND astroforces_test_srp)
 
   add_executable(astroforces_test_earth_radiation tests/test_earth_radiation.cpp)
@@ -331,7 +336,9 @@ if(ASTROFORCES_BUILD_TESTS)
     astroforces_core
     astroforces_forces_core)
   target_compile_definitions(astroforces_test_relativity PRIVATE
-    ASTROFORCES_JPL_EPH_SOURCE_DIR="${jpl_eph_ext_SOURCE_DIR}")
+    ASTROFORCES_JPL_EPH_SOURCE_DIR="${jpl_eph_ext_SOURCE_DIR}"
+    ASTROFORCES_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+    $<$<BOOL:${ASTROFORCES_TEST_REQUIRE_EXTERNAL_DATA}>:ASTROFORCES_TEST_REQUIRE_EXTERNAL_DATA=1>)
   add_test(NAME Relativity COMMAND astroforces_test_relativity)
 
   add_executable(astroforces_test_gravity_sph tests/test_gravity_sph.cpp)
@@ -339,7 +346,9 @@ if(ASTROFORCES_BUILD_TESTS)
     astroforces_core
     astroforces_forces_core)
   target_compile_definitions(astroforces_test_gravity_sph PRIVATE
-    ASTROFORCES_JPL_EPH_SOURCE_DIR="${jpl_eph_ext_SOURCE_DIR}")
+    ASTROFORCES_JPL_EPH_SOURCE_DIR="${jpl_eph_ext_SOURCE_DIR}"
+    ASTROFORCES_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+    $<$<BOOL:${ASTROFORCES_TEST_REQUIRE_EXTERNAL_DATA}>:ASTROFORCES_TEST_REQUIRE_EXTERNAL_DATA=1>)
   add_test(NAME GravitySph COMMAND astroforces_test_gravity_sph)
 
   add_executable(astroforces_test_core_transforms tests/test_core_transforms.cpp)

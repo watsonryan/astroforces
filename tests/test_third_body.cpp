@@ -33,10 +33,18 @@ int main() {
     eph_path = env;
   } else {
     eph_path = fs::path(ASTROFORCES_JPL_EPH_SOURCE_DIR) / "testdata" / "linux_p1550p2650.440";
+    if (!fs::exists(eph_path)) {
+      eph_path = fs::path(ASTROFORCES_SOURCE_DIR) / "data" / "required" / "linux_p1550p2650.440";
+    }
   }
   if (!fs::exists(eph_path)) {
+#if defined(ASTROFORCES_TEST_REQUIRE_EXTERNAL_DATA)
+    spdlog::error("third-body test requires ephemeris but file not found: {}", eph_path.string());
+    return 100;
+#else
     spdlog::warn("third-body test skipped: ephemeris not found: {}", eph_path.string());
     return 0;
+#endif
   }
 
   astroforces::core::StateVector state{};
