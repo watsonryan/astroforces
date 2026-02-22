@@ -28,7 +28,7 @@ Current default components:
 - `gravity_sph_mps2` (if gravity file provided)
 - `gravity_tide_sun_mps2` (if gravity file + ephemeris provided)
 - `gravity_tide_moon_mps2` (if gravity file + ephemeris provided)
-- `erp_mps2`
+- `earth_radiation_mps2`
 - `relativity_mps2`
 - `third_body_sun_mps2` (if ephemeris provided)
 - `third_body_moon_mps2` (if ephemeris provided)

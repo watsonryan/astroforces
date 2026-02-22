@@ -19,7 +19,7 @@
 #include "astroforces/atmo/conversions.hpp"
 #include "astroforces/atmo/constants.hpp"
 #include "astroforces/forces/surface/drag/drag_perturbation.hpp"
-#include "astroforces/forces/surface/erp/erp_perturbation.hpp"
+#include "astroforces/forces/surface/earth_radiation/earth_radiation_perturbation.hpp"
 #include "astroforces/forces/gravity/gravity_sph_model.hpp"
 #include "astroforces/forces/core/perturbation.hpp"
 #include "astroforces/forces/gravity/relativity_perturbation.hpp"
@@ -155,10 +155,10 @@ int main(int argc, char** argv) {
       .max_alt_km = kDtmOperationalMaxAltKm,
   });
   components.push_back(ComponentModel{
-      .label = "erp",
+      .label = "earth_radiation",
       .frame = astroforces::core::Frame::ECI,
-      .model = std::make_unique<astroforces::forces::ErpPerturbationModel>(
-          astroforces::forces::ErpAccelerationModel({.ephemeris_file = std::filesystem::path(eph_file)}), &sc, "erp"),
+      .model = std::make_unique<astroforces::forces::EarthRadiationPerturbationModel>(
+          astroforces::forces::EarthRadiationAccelerationModel({.ephemeris_file = std::filesystem::path(eph_file)}), &sc, "earth_radiation"),
   });
   components.push_back(ComponentModel{
       .label = "relativity",

@@ -102,7 +102,7 @@ def pretty_label(key: str) -> str:
         return "Gravity SPH + Tides"
     core = key.replace("_mps2", "")
     parts = core.split("_")
-    acronyms = {"srp": "SRP", "erp": "ERP"}
+    acronyms = {"srp": "SRP", "earth_radiation": "Earth Radiation"}
     return " ".join(acronyms.get(p, p.capitalize()) for p in parts)
 
 

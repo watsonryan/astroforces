@@ -1,5 +1,5 @@
 /**
- * @file erp_cli.cpp
+ * @file earth_radiation_cli.cpp
  * @brief Single-state Earth radiation pressure perturbation CLI.
  * @author Watosn
  */
@@ -10,7 +10,7 @@
 #include <fmt/format.h>
 #include <spdlog/spdlog.h>
 
-#include "astroforces/forces/surface/erp/erp_model.hpp"
+#include "astroforces/forces/surface/earth_radiation/earth_radiation_model.hpp"
 
 namespace {
 
@@ -21,7 +21,7 @@ double magnitude(const astroforces::core::Vec3& v) { return astroforces::core::n
 int main(int argc, char** argv) {
   if (argc < 8 || argc > 12) {
     spdlog::error(
-        "usage: erp_cli <x_frame_m> <y_frame_m> <z_frame_m> <vx_frame_mps> <vy_frame_mps> <vz_frame_mps> <epoch_utc_s> [mass_kg] [area_m2] [cr] [jpl_ephemeris_file]");
+        "usage: earth_radiation_cli <x_frame_m> <y_frame_m> <z_frame_m> <vx_frame_mps> <vy_frame_mps> <vz_frame_mps> <epoch_utc_s> [mass_kg] [area_m2] [cr] [jpl_ephemeris_file]");
     return 1;
   }
 
@@ -39,16 +39,16 @@ int main(int argc, char** argv) {
   astroforces::sc::SpacecraftProperties sc{
       .mass_kg = mass_kg, .reference_area_m2 = area_m2, .cd = 2.2, .cr = cr, .use_surface_model = false, .surfaces = {}};
 
-  auto erp = astroforces::forces::ErpAccelerationModel::Create({
+  auto earth_radiation = astroforces::forces::EarthRadiationAccelerationModel::Create({
       .ephemeris_file = eph_file,
   });
-  if (!erp) {
-    spdlog::error("failed to create ERP model");
+  if (!earth_radiation) {
+    spdlog::error("failed to create Earth Radiation model");
     return 2;
   }
-  const auto out = erp->evaluate(state, sc);
+  const auto out = earth_radiation->evaluate(state, sc);
   if (out.status != astroforces::core::Status::Ok) {
-    spdlog::error("erp evaluation failed: status={}", static_cast<int>(out.status));
+    spdlog::error("earth_radiation evaluation failed: status={}", static_cast<int>(out.status));
     return 3;
   }
 

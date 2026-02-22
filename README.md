@@ -8,7 +8,7 @@ flowchart LR
   A[atmo-core<br/>types, frames, interfaces] --> B[space-weather<br/>CelesTrak CSV]
   A --> C[sc-props<br/>cannonball + macro surfaces]
   A --> D[adapters<br/>NRLMSIS / DTM2020 / HWM14]
-  A --> E[forces-core<br/>Drag/Gravity/ERP/SRP/Relativity/Third-Body]
+  A --> E[forces-core<br/>Drag/Gravity/Earth Radiation/SRP/Relativity/Third-Body]
   A --> F[forces<br/>IPerturbationModel + PerturbationStack]
   B --> E
   C --> E
@@ -21,8 +21,8 @@ flowchart LR
   F --> Y[apps/forces-cli/third_body_batch_cli.cpp]
   F --> S[apps/forces-cli/srp_cli.cpp]
   F --> U[apps/forces-cli/srp_batch_cli.cpp]
-  F --> R[apps/forces-cli/erp_cli.cpp]
-  F --> V[apps/forces-cli/erp_batch_cli.cpp]
+  F --> R[apps/forces-cli/earth_radiation_cli.cpp]
+  F --> V[apps/forces-cli/earth_radiation_batch_cli.cpp]
   F --> W[apps/forces-cli/relativity_cli.cpp]
   F --> K[apps/forces-cli/gravity_sph_cli.cpp]
   F --> P[apps/forces-cli/perturbation_profile_cli.cpp]
@@ -99,11 +99,11 @@ General perturbation interface:
 - Combine models with `astroforces::forces::PerturbationStack`.
 - Drag is exposed as `astroforces::forces::DragPerturbationModel` and plugs directly into the same stack as gravity/SRP/third-body models.
 - Third-body is exposed as `astroforces::forces::ThirdBodyPerturbationModel` (Sun/Moon direct + indirect terms via JPL ephemerides).
-- ERP is exposed via `astroforces::forces::ErpAccelerationModel` and `astroforces::forces::ErpPerturbationModel`.
+- Earth Radiation is exposed via `astroforces::forces::EarthRadiationAccelerationModel` and `astroforces::forces::EarthRadiationPerturbationModel`.
 - SRP is exposed via `astroforces::forces::SrpAccelerationModel` and `astroforces::forces::SrpPerturbationModel`.
 - Relativity is exposed via `astroforces::forces::RelativityAccelerationModel` and `astroforces::forces::RelativityPerturbationModel`.
 - Gravity+tides is exposed via `astroforces::forces::GravitySphAccelerationModel` and `astroforces::forces::GravitySphPerturbationModel`.
-- Drag, ERP, and SRP all use the shared surface-force kernel (`astroforces::forces::evaluate_surface_force`) for cannonball/macro area+coefficient handling.
+- Drag, Earth Radiation, and SRP all use the shared surface-force kernel (`astroforces::forces::evaluate_surface_force`) for cannonball/macro area+coefficient handling.
 
 Gravity+tides single-state CLI:
 ```bash
@@ -111,16 +111,16 @@ Gravity+tides single-state CLI:
 ```
 Model notes reference: `docs/GRAVITY_MODEL_NOTES.md`
 
-ERP single-state CLI:
+Earth Radiation single-state CLI:
 ```bash
-./build/macos-debug/erp_cli 6778137 0 0 0 7670 0 1000000000 600 4 1.3 data/required/linux_p1550p2650.440
+./build/macos-debug/earth_radiation_cli 6778137 0 0 0 7670 0 1000000000 600 4 1.3 data/required/linux_p1550p2650.440
 ```
 
-ERP batch CLI:
+Earth Radiation batch CLI:
 ```bash
-./build/macos-debug/erp_batch_cli input_eci.csv erp_output.csv 600 4 1.3 data/required/linux_p1550p2650.440
+./build/macos-debug/earth_radiation_batch_cli input_eci.csv erp_output.csv 600 4 1.3 data/required/linux_p1550p2650.440
 ```
-Output schema reference: `docs/ERP_OUTPUT_SCHEMA.md`
+Output schema reference: `docs/EARTH_RADIATION_OUTPUT_SCHEMA.md`
 
 Relativity single-state CLI:
 ```bash
@@ -158,7 +158,7 @@ Output columns include:
 - `gravity_sph_mps2`
 - `gravity_tide_sun_mps2`
 - `gravity_tide_moon_mps2`
-- `erp_mps2`
+- `earth_radiation_mps2`
 - `relativity_mps2`
 - `srp_mps2` (if ephemeris provided)
 - `third_body_sun_mps2`

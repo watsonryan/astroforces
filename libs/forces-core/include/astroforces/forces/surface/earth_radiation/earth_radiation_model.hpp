@@ -1,5 +1,5 @@
 /**
- * @file erp_model.hpp
+ * @file earth_radiation_model.hpp
  * @brief Earth radiation pressure acceleration model.
  * @author Watosn
  */
@@ -19,7 +19,7 @@ class Workspace;
 
 namespace astroforces::forces {
 
-struct ErpResult {
+struct EarthRadiationResult {
   astroforces::core::Vec3 acceleration_mps2{};
   double earth_radiation_pressure_pa{};
   double albedo_pressure_pa{};
@@ -32,7 +32,7 @@ struct ErpResult {
   astroforces::core::Status status{astroforces::core::Status::Ok};
 };
 
-class ErpAccelerationModel final {
+class EarthRadiationAccelerationModel final {
  public:
   struct Config {
     std::filesystem::path ephemeris_file{};
@@ -46,12 +46,12 @@ class ErpAccelerationModel final {
     bool use_eclipse{true};
   };
 
-  static std::unique_ptr<ErpAccelerationModel> Create(const Config& config);
+  static std::unique_ptr<EarthRadiationAccelerationModel> Create(const Config& config);
 
-  ErpAccelerationModel() = default;
-  explicit ErpAccelerationModel(const Config& config);
+  EarthRadiationAccelerationModel() = default;
+  explicit EarthRadiationAccelerationModel(const Config& config);
 
-  [[nodiscard]] ErpResult evaluate(const astroforces::core::StateVector& state,
+  [[nodiscard]] EarthRadiationResult evaluate(const astroforces::core::StateVector& state,
                                    const astroforces::sc::SpacecraftProperties& sc) const;
 
  private:

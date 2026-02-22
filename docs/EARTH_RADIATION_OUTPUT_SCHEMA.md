@@ -1,8 +1,8 @@
-# ERP Output Schema
+# Earth Radiation Output Schema
 
 ## Single-State CLI
 Command:
-- `erp_cli x_frame_m y_frame_m z_frame_m vx_frame_mps vy_frame_mps vz_frame_mps epoch_utc_s [mass_kg] [area_m2] [cr] [jpl_ephemeris_file]`
+- `earth_radiation_cli x_frame_m y_frame_m z_frame_m vx_frame_mps vy_frame_mps vz_frame_mps epoch_utc_s [mass_kg] [area_m2] [cr] [jpl_ephemeris_file]`
 
 Output fields:
 - Acceleration: `ax`, `ay`, `az`, `amag`
@@ -16,7 +16,7 @@ Output fields:
 
 ## Batch CLI
 Command:
-- `erp_batch_cli input_csv output_csv [mass_kg] [area_m2] [cr] [jpl_ephemeris_file]`
+- `earth_radiation_batch_cli input_csv output_csv [mass_kg] [area_m2] [cr] [jpl_ephemeris_file]`
 
 Input row format:
 - `epoch_utc_s,x_eci_m,y_eci_m,z_eci_m,vx_eci_mps,vy_eci_mps,vz_eci_mps`

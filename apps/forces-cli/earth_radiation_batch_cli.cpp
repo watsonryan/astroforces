@@ -1,5 +1,5 @@
 /**
- * @file erp_batch_cli.cpp
+ * @file earth_radiation_batch_cli.cpp
  * @brief Batch Earth radiation pressure perturbation CLI.
  * @author Watosn
  */
@@ -14,7 +14,7 @@
 #include <fmt/format.h>
 #include <spdlog/spdlog.h>
 
-#include "astroforces/forces/surface/erp/erp_model.hpp"
+#include "astroforces/forces/surface/earth_radiation/earth_radiation_model.hpp"
 
 namespace {
 
@@ -54,7 +54,7 @@ double magnitude(const astroforces::core::Vec3& v) { return astroforces::core::n
 
 int main(int argc, char** argv) {
   if (argc < 3 || argc > 7) {
-    spdlog::error("usage: erp_batch_cli <input_csv> <output_csv> [mass_kg] [area_m2] [cr] [jpl_ephemeris_file]");
+    spdlog::error("usage: earth_radiation_batch_cli <input_csv> <output_csv> [mass_kg] [area_m2] [cr] [jpl_ephemeris_file]");
     spdlog::error("input row: epoch_utc_s,x_eci_m,y_eci_m,z_eci_m,vx_eci_mps,vy_eci_mps,vz_eci_mps");
     return 1;
   }
@@ -79,11 +79,11 @@ int main(int argc, char** argv) {
 
   astroforces::sc::SpacecraftProperties sc{
       .mass_kg = mass_kg, .reference_area_m2 = area_m2, .cd = 2.2, .cr = cr, .use_surface_model = false, .surfaces = {}};
-  auto erp = astroforces::forces::ErpAccelerationModel::Create({
+  auto earth_radiation = astroforces::forces::EarthRadiationAccelerationModel::Create({
       .ephemeris_file = eph_file,
   });
-  if (!erp) {
-    spdlog::error("failed to create ERP model");
+  if (!earth_radiation) {
+    spdlog::error("failed to create Earth Radiation model");
     return 4;
   }
 
@@ -112,7 +112,7 @@ int main(int argc, char** argv) {
     state.velocity_mps = row.velocity_eci_mps;
     state.frame = astroforces::core::Frame::ECI;
 
-    const auto r = erp->evaluate(state, sc);
+    const auto r = earth_radiation->evaluate(state, sc);
     out << fmt::format("{:.6f},{:.12e},{:.12e},{:.12e},{:.12e},{:.12e},{:.12e},{:.12e},{:.12e},{:.12e},{:.12e},{:.12e},{:.12e},{}\n",
                        row.epoch_utc_s, r.acceleration_mps2.x, r.acceleration_mps2.y, r.acceleration_mps2.z,
                        magnitude(r.acceleration_mps2), r.earth_radiation_pressure_pa, r.albedo_pressure_pa, r.ir_pressure_pa,
@@ -120,6 +120,6 @@ int main(int argc, char** argv) {
                        static_cast<int>(r.status));
   }
 
-  spdlog::info("wrote erp batch output: {}", output_csv.string());
+  spdlog::info("wrote earth_radiation batch output: {}", output_csv.string());
   return 0;
 }

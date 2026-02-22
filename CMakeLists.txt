@@ -75,8 +75,8 @@ add_library(astroforces_forces_core STATIC
   libs/forces-core/src/gravity/third_body.cpp
   libs/forces-core/src/surface/drag/drag_model.cpp
   libs/forces-core/src/surface/drag/drag_perturbation.cpp
-  libs/forces-core/src/surface/erp/erp_model.cpp
-  libs/forces-core/src/surface/erp/erp_perturbation.cpp
+  libs/forces-core/src/surface/earth_radiation/earth_radiation_model.cpp
+  libs/forces-core/src/surface/earth_radiation/earth_radiation_perturbation.cpp
   libs/forces-core/src/surface/srp/srp_model.cpp
   libs/forces-core/src/surface/srp/srp_perturbation.cpp)
 target_include_directories(astroforces_forces_core PUBLIC ${CMAKE_SOURCE_DIR}/libs/forces-core/include)
@@ -185,14 +185,14 @@ target_link_libraries(srp_batch_cli PRIVATE
   astroforces_sc_props
   astroforces_forces_core)
 
-add_executable(erp_cli apps/forces-cli/erp_cli.cpp)
-target_link_libraries(erp_cli PRIVATE
+add_executable(earth_radiation_cli apps/forces-cli/earth_radiation_cli.cpp)
+target_link_libraries(earth_radiation_cli PRIVATE
   astroforces_atmo_core
   astroforces_sc_props
   astroforces_forces_core)
 
-add_executable(erp_batch_cli apps/forces-cli/erp_batch_cli.cpp)
-target_link_libraries(erp_batch_cli PRIVATE
+add_executable(earth_radiation_batch_cli apps/forces-cli/earth_radiation_batch_cli.cpp)
+target_link_libraries(earth_radiation_batch_cli PRIVATE
   astroforces_atmo_core
   astroforces_sc_props
   astroforces_forces_core)
@@ -207,7 +207,7 @@ target_link_libraries(gravity_sph_cli PRIVATE
   astroforces_atmo_core
   astroforces_forces_core)
 
-foreach(tgt astroforces_space_weather astroforces_sc_props astroforces_models_basic astroforces_forces_core astroforces_adapters drag_cli drag_batch_cli perturbation_profile_cli third_body_cli third_body_batch_cli srp_cli srp_batch_cli erp_cli erp_batch_cli relativity_cli gravity_sph_cli)
+foreach(tgt astroforces_space_weather astroforces_sc_props astroforces_models_basic astroforces_forces_core astroforces_adapters drag_cli drag_batch_cli perturbation_profile_cli third_body_cli third_body_batch_cli srp_cli srp_batch_cli earth_radiation_cli earth_radiation_batch_cli relativity_cli gravity_sph_cli)
   if(MSVC)
     target_compile_options(${tgt} PRIVATE /W4)
     if(ASTROFORCES_WARNINGS_AS_ERRORS)
@@ -304,12 +304,12 @@ if(ASTROFORCES_BUILD_TESTS)
     ASTROFORCES_JPL_EPH_SOURCE_DIR="${jpl_eph_ext_SOURCE_DIR}")
   add_test(NAME SRP COMMAND astroforces_test_srp)
 
-  add_executable(astroforces_test_erp tests/test_erp.cpp)
-  target_link_libraries(astroforces_test_erp PRIVATE
+  add_executable(astroforces_test_earth_radiation tests/test_earth_radiation.cpp)
+  target_link_libraries(astroforces_test_earth_radiation PRIVATE
     astroforces_atmo_core
     astroforces_sc_props
     astroforces_forces_core)
-  add_test(NAME ERP COMMAND astroforces_test_erp)
+  add_test(NAME EarthRadiation COMMAND astroforces_test_earth_radiation)
 
   add_executable(astroforces_test_relativity tests/test_relativity.cpp)
   target_link_libraries(astroforces_test_relativity PRIVATE

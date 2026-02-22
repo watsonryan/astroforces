@@ -1,10 +1,10 @@
 /**
- * @file erp_model.cpp
+ * @file earth_radiation_model.cpp
  * @brief Earth radiation pressure acceleration model implementation.
  * @author Watosn
  */
 
-#include "astroforces/forces/surface/erp/erp_model.hpp"
+#include "astroforces/forces/surface/earth_radiation/earth_radiation_model.hpp"
 
 #include <algorithm>
 #include <array>
@@ -51,11 +51,11 @@ double lambert_phase_function(double phase_angle_rad) {
 
 }  // namespace
 
-std::unique_ptr<ErpAccelerationModel> ErpAccelerationModel::Create(const Config& config) {
-  return std::unique_ptr<ErpAccelerationModel>(new ErpAccelerationModel(config));
+std::unique_ptr<EarthRadiationAccelerationModel> EarthRadiationAccelerationModel::Create(const Config& config) {
+  return std::unique_ptr<EarthRadiationAccelerationModel>(new EarthRadiationAccelerationModel(config));
 }
 
-ErpAccelerationModel::ErpAccelerationModel(const Config& config) : config_(config) {
+EarthRadiationAccelerationModel::EarthRadiationAccelerationModel(const Config& config) : config_(config) {
   if (config_.ephemeris_file.empty()) {
     return;
   }
@@ -67,20 +67,20 @@ ErpAccelerationModel::ErpAccelerationModel(const Config& config) : config_(confi
   workspace_ = std::make_shared<jpl::eph::Workspace>();
 }
 
-ErpResult ErpAccelerationModel::evaluate(const astroforces::core::StateVector& state,
+EarthRadiationResult EarthRadiationAccelerationModel::evaluate(const astroforces::core::StateVector& state,
                                          const astroforces::sc::SpacecraftProperties& sc) const {
   if (sc.mass_kg <= 0.0 || config_.earth_reference_radius_m <= 0.0 || config_.solar_flux_w_m2 < 0.0 ||
       config_.earth_albedo < 0.0 || config_.earth_ir_flux_w_m2 < 0.0 || config_.speed_of_light_mps <= 0.0) {
-    return ErpResult{.status = astroforces::core::Status::InvalidInput};
+    return EarthRadiationResult{.status = astroforces::core::Status::InvalidInput};
   }
   if (state.frame != astroforces::core::Frame::ECI && state.frame != astroforces::core::Frame::ECEF) {
-    return ErpResult{.status = astroforces::core::Status::InvalidInput};
+    return EarthRadiationResult{.status = astroforces::core::Status::InvalidInput};
   }
 
   double earth_dist_m = 0.0;
   const auto flow_dir_frame = astroforces::forces::unit_direction(state.position_m, &earth_dist_m);
   if (!(earth_dist_m > 0.0)) {
-    return ErpResult{.status = astroforces::core::Status::NumericalError};
+    return EarthRadiationResult{.status = astroforces::core::Status::NumericalError};
   }
 
   const double ratio = config_.earth_reference_radius_m / earth_dist_m;
@@ -92,7 +92,7 @@ ErpResult ErpAccelerationModel::evaluate(const astroforces::core::StateVector& s
     const double jd_utc = astroforces::core::utc_seconds_to_julian_date_utc(state.epoch.utc_seconds);
     const auto sun = ephemeris_->PlephSi(jd_utc, jpl::eph::Body::Sun, jpl::eph::Body::Earth, false, *workspace_);
     if (!sun.has_value()) {
-      return ErpResult{.status = map_jpl_error(sun.error())};
+      return EarthRadiationResult{.status = map_jpl_error(sun.error())};
     }
     const auto r_sun = to_vec3(sun.value().pv);
     const double r_sun_n = astroforces::core::norm(r_sun);
@@ -125,7 +125,7 @@ ErpResult ErpAccelerationModel::evaluate(const astroforces::core::StateVector& s
                           : 0.0;
   const double pressure_pa = p_albedo + p_ir;
   if (!std::isfinite(pressure_pa) || pressure_pa < 0.0) {
-    return ErpResult{.status = astroforces::core::Status::NumericalError};
+    return EarthRadiationResult{.status = astroforces::core::Status::NumericalError};
   }
 
   astroforces::core::Vec3 flow_dir_body{};
@@ -144,10 +144,10 @@ ErpResult ErpAccelerationModel::evaluate(const astroforces::core::StateVector& s
                                                               astroforces::sc::SurfaceCoeffModel::RadiationPressure,
                                                               +1.0);
   if (sf.status != astroforces::core::Status::Ok) {
-    return ErpResult{.status = sf.status};
+    return EarthRadiationResult{.status = sf.status};
   }
 
-  return ErpResult{
+  return EarthRadiationResult{
       .acceleration_mps2 = sf.acceleration_mps2,
       .earth_radiation_pressure_pa = pressure_pa,
       .albedo_pressure_pa = p_albedo,

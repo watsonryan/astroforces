@@ -14,7 +14,7 @@
 
 namespace astroforces::forces {
 
-enum class PerturbationType : unsigned char { Unknown, Drag, Gravity, SRP, ERP, Relativity, ThirdBody };
+enum class PerturbationType : unsigned char { Unknown, Drag, Gravity, SRP, EarthRadiation, Relativity, ThirdBody };
 
 struct PerturbationRequest {
   astroforces::core::StateVector state{};
