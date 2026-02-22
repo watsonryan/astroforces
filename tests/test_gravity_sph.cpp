@@ -52,6 +52,19 @@ std::filesystem::path write_test_eop() {
   return p;
 }
 
+std::filesystem::path write_test_constituent_tide() {
+  namespace fs = std::filesystem;
+  const fs::path p = fs::temp_directory_path() / "astroforces_test_tide.txt";
+  std::ofstream out(p);
+  out << "header1\n";
+  out << "header2\n";
+  out << "header3\n";
+  out << "header4\n";
+  out << "055.565 TESTWAVE 2 1  1.0  0.5  0.2  -0.1\n";
+  out.close();
+  return p;
+}
+
 }  // namespace
 
 int main() {
@@ -170,6 +183,48 @@ int main() {
         || !(astroforces::core::norm(out_with_pole.pole_tide_ocean_mps2) > 0.0)) {
       spdlog::error("pole tides had no effect");
       return 9;
+    }
+  }
+
+  const auto constituent_tide_file = write_test_constituent_tide();
+  if (fs::exists(constituent_tide_file)) {
+    const auto no_constituent = astroforces::forces::GravitySphAccelerationModel::Create(
+        {.gravity_model_file = gravity_file,
+         .max_degree = 4,
+         .use_central = true,
+         .use_sph = true,
+         .use_solid_earth_tides = false,
+         .use_ocean_tide = false,
+         .use_atmos_tide = false});
+
+    const auto with_constituent = astroforces::forces::GravitySphAccelerationModel::Create(
+        {.gravity_model_file = gravity_file,
+         .ocean_tide_file = constituent_tide_file,
+         .atmos_tide_file = constituent_tide_file,
+         .max_degree = 4,
+         .use_central = true,
+         .use_sph = true,
+         .use_solid_earth_tides = false,
+         .use_ocean_tide = true,
+         .use_atmos_tide = true});
+
+    const auto out_no_constituent = no_constituent->evaluate(state);
+    const auto out_with_constituent = with_constituent->evaluate(state);
+    if (out_no_constituent.status != astroforces::core::Status::Ok
+        || out_with_constituent.status != astroforces::core::Status::Ok) {
+      spdlog::error("constituent tide model evaluation failed");
+      return 10;
+    }
+
+    const auto constituent_delta = astroforces::core::Vec3{
+        out_with_constituent.acceleration_mps2.x - out_no_constituent.acceleration_mps2.x,
+        out_with_constituent.acceleration_mps2.y - out_no_constituent.acceleration_mps2.y,
+        out_with_constituent.acceleration_mps2.z - out_no_constituent.acceleration_mps2.z};
+    if (!(astroforces::core::norm(constituent_delta) > 0.0)
+        || !(astroforces::core::norm(out_with_constituent.ocean_tide_mps2) > 0.0)
+        || !(astroforces::core::norm(out_with_constituent.atmos_tide_mps2) > 0.0)) {
+      spdlog::error("constituent tides had no effect");
+      return 11;
     }
   }
 

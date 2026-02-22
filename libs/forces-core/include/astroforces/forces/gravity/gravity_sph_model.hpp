@@ -17,6 +17,10 @@ class Ephemeris;
 class Workspace;
 }  // namespace jpl::eph
 
+namespace astroforces::forces::tides {
+class ConstituentTideModel;
+}  // namespace astroforces::forces::tides
+
 namespace astroforces::forces {
 
 struct GravitySphResult {
@@ -27,6 +31,8 @@ struct GravitySphResult {
   astroforces::core::Vec3 solid_tide_moon_mps2{};
   astroforces::core::Vec3 pole_tide_solid_mps2{};
   astroforces::core::Vec3 pole_tide_ocean_mps2{};
+  astroforces::core::Vec3 ocean_tide_mps2{};
+  astroforces::core::Vec3 atmos_tide_mps2{};
   astroforces::core::Status status{astroforces::core::Status::Ok};
 };
 
@@ -36,6 +42,8 @@ class GravitySphAccelerationModel final {
     std::filesystem::path gravity_model_file{};
     std::filesystem::path ephemeris_file{};
     std::filesystem::path eop_finals_file{};
+    std::filesystem::path ocean_tide_file{};
+    std::filesystem::path atmos_tide_file{};
     int max_degree{360};
     bool use_central{true};
     bool use_sph{true};
@@ -45,6 +53,8 @@ class GravitySphAccelerationModel final {
     bool convert_to_tide_free{true};
     bool use_pole_tide_solid{false};
     bool use_pole_tide_ocean{false};
+    bool use_ocean_tide{false};
+    bool use_atmos_tide{false};
     bool use_simple_eci_to_ecef{true};
     double mu_earth_m3_s2{0.0};
     double earth_equatorial_radius_m{0.0};
@@ -67,6 +77,8 @@ class GravitySphAccelerationModel final {
   std::shared_ptr<jpl::eph::Ephemeris> ephemeris_{};
   mutable std::shared_ptr<jpl::eph::Workspace> workspace_{};
   std::shared_ptr<astroforces::core::eop::Series> eop_{};
+  std::shared_ptr<tides::ConstituentTideModel> ocean_tide_{};
+  std::shared_ptr<tides::ConstituentTideModel> atmos_tide_{};
 };
 
 }  // namespace astroforces::forces

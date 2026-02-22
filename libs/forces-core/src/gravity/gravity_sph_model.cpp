@@ -20,6 +20,7 @@
 #include <Eigen/Dense>
 
 #include "astroforces/core/transforms.hpp"
+#include "astroforces/forces/gravity/tides/constituent_tide.hpp"
 #include "astroforces/forces/gravity/tides/pole_tide.hpp"
 #include "astroforces/forces/gravity/tides/solid_earth_tide.hpp"
 #include "jpl_eph/jpl_eph.hpp"
@@ -510,6 +511,20 @@ std::unique_ptr<GravitySphAccelerationModel> GravitySphAccelerationModel::Create
     }
   }
 
+  if (config.use_ocean_tide && !config.ocean_tide_file.empty()) {
+    auto model = tides::ConstituentTideModel::load_from_file(config.ocean_tide_file, std::max(0, config.max_degree));
+    if (model && !model->empty()) {
+      out->ocean_tide_ = std::shared_ptr<tides::ConstituentTideModel>(std::move(model));
+    }
+  }
+
+  if (config.use_atmos_tide && !config.atmos_tide_file.empty()) {
+    auto model = tides::ConstituentTideModel::load_from_file(config.atmos_tide_file, std::max(0, config.max_degree));
+    if (model && !model->empty()) {
+      out->atmos_tide_ = std::shared_ptr<tides::ConstituentTideModel>(std::move(model));
+    }
+  }
+
   return out;
 }
 
@@ -630,6 +645,30 @@ GravitySphResult GravitySphAccelerationModel::evaluate(const astroforces::core::
         }
       }
 
+      if (config_.use_ocean_tide) {
+        if (!ocean_tide_) {
+          return GravitySphResult{.status = astroforces::core::Status::DataUnavailable};
+        }
+        Eigen::MatrixXd dC_ocean = Eigen::MatrixXd::Zero(Ceff.rows(), Ceff.cols());
+        Eigen::MatrixXd dS_ocean = Eigen::MatrixXd::Zero(Seff.rows(), Seff.cols());
+        ocean_tide_->add_delta_coefficients(jd_utc, gmst, dC_ocean, dS_ocean);
+        out.ocean_tide_mps2 = accel_sph_noncentral(r_ecef, dC_ocean, dS_ocean, nmax, mu_earth, radius_m);
+        Ceff += dC_ocean;
+        Seff += dS_ocean;
+      }
+
+      if (config_.use_atmos_tide) {
+        if (!atmos_tide_) {
+          return GravitySphResult{.status = astroforces::core::Status::DataUnavailable};
+        }
+        Eigen::MatrixXd dC_atmos = Eigen::MatrixXd::Zero(Ceff.rows(), Ceff.cols());
+        Eigen::MatrixXd dS_atmos = Eigen::MatrixXd::Zero(Seff.rows(), Seff.cols());
+        atmos_tide_->add_delta_coefficients(jd_utc, gmst, dC_atmos, dS_atmos);
+        out.atmos_tide_mps2 = accel_sph_noncentral(r_ecef, dC_atmos, dS_atmos, nmax, mu_earth, radius_m);
+        Ceff += dC_atmos;
+        Seff += dS_atmos;
+      }
+
       out.sph_mps2 = accel_sph_noncentral(r_ecef, Ceff, Seff, nmax, mu_earth, radius_m);
     }
   }
@@ -644,6 +683,8 @@ GravitySphResult GravitySphAccelerationModel::evaluate(const astroforces::core::
     out.solid_tide_moon_mps2 = rot_z(-gmst, out.solid_tide_moon_mps2);
     out.pole_tide_solid_mps2 = rot_z(-gmst, out.pole_tide_solid_mps2);
     out.pole_tide_ocean_mps2 = rot_z(-gmst, out.pole_tide_ocean_mps2);
+    out.ocean_tide_mps2 = rot_z(-gmst, out.ocean_tide_mps2);
+    out.atmos_tide_mps2 = rot_z(-gmst, out.atmos_tide_mps2);
   }
 
   if (!finite_vec(out.acceleration_mps2)) {

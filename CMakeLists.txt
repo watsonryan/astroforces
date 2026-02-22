@@ -71,6 +71,7 @@ add_library(astroforces_forces_core STATIC
   libs/forces-core/src/gravity/gravity_sph_model.cpp
   libs/forces-core/src/gravity/tides/solid_earth_tide.cpp
   libs/forces-core/src/gravity/tides/pole_tide.cpp
+  libs/forces-core/src/gravity/tides/constituent_tide.cpp
   libs/forces-core/src/gravity/gravity_sph_perturbation.cpp
   libs/forces-core/src/gravity/relativity_model.cpp
   libs/forces-core/src/gravity/relativity_perturbation.cpp
