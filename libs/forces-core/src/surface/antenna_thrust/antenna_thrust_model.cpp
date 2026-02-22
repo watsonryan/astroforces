@@ -8,8 +8,6 @@
 
 #include <cmath>
 
-#include <Eigen/Dense>
-
 namespace astroforces::forces {
 namespace {
 
@@ -25,6 +23,16 @@ astroforces::core::Vec3 unit_direction(const astroforces::core::Vec3& v, astrofo
     *status_out = astroforces::core::Status::Ok;
   }
   return v / n;
+}
+
+astroforces::core::Vec3 body_axis_to_eci(const std::array<double, 9>& body_from_frame_dcm,
+                                         const astroforces::core::Vec3& axis_body) {
+  // axis_eci = body_from_frame^T * axis_body.
+  return astroforces::core::Vec3{
+      body_from_frame_dcm[0] * axis_body.x + body_from_frame_dcm[3] * axis_body.y + body_from_frame_dcm[6] * axis_body.z,
+      body_from_frame_dcm[1] * axis_body.x + body_from_frame_dcm[4] * axis_body.y + body_from_frame_dcm[7] * axis_body.z,
+      body_from_frame_dcm[2] * axis_body.x + body_from_frame_dcm[5] * axis_body.y + body_from_frame_dcm[8] * axis_body.z,
+  };
 }
 
 }  // namespace
@@ -46,10 +54,7 @@ astroforces::core::Vec3 AntennaThrustAccelerationModel::direction_unit_eci(const
     case static_cast<int>(AntennaThrustDirectionMode::CustomEci):
       return unit_direction(config_.custom_direction_eci, status_out);
     case static_cast<int>(AntennaThrustDirectionMode::BodyFixed): {
-      const Eigen::Vector3d axis_body(config_.body_axis.x, config_.body_axis.y, config_.body_axis.z);
-      const Eigen::Map<const Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> body_from_frame(state.body_from_frame_dcm.data());
-      const Eigen::Vector3d axis_eci = body_from_frame.transpose() * axis_body;
-      return unit_direction(astroforces::core::Vec3{axis_eci.x(), axis_eci.y(), axis_eci.z()}, status_out);
+      return unit_direction(body_axis_to_eci(state.body_from_frame_dcm, config_.body_axis), status_out);
     }
     default:
       if (status_out) {
