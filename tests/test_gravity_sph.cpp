@@ -186,6 +186,44 @@ int main() {
     }
   }
 
+  {
+    const auto no_tide2 = astroforces::forces::GravitySphAccelerationModel::Create(
+        {.gravity_model_file = gravity_file,
+         .max_degree = 4,
+         .use_central = true,
+         .use_sph = true,
+         .use_solid_earth_tides = true,
+         .use_sun_tide = false,
+         .use_moon_tide = false,
+         .use_solid_earth_tide2 = false});
+
+    const auto with_tide2 = astroforces::forces::GravitySphAccelerationModel::Create(
+        {.gravity_model_file = gravity_file,
+         .max_degree = 4,
+         .use_central = true,
+         .use_sph = true,
+         .use_solid_earth_tides = true,
+         .use_sun_tide = false,
+         .use_moon_tide = false,
+         .use_solid_earth_tide2 = true});
+
+    const auto out_no_tide2 = no_tide2->evaluate(state);
+    const auto out_with_tide2 = with_tide2->evaluate(state);
+    if (out_no_tide2.status != astroforces::core::Status::Ok || out_with_tide2.status != astroforces::core::Status::Ok) {
+      spdlog::error("solid Earth tide2 evaluation failed");
+      return 12;
+    }
+    const auto tide2_delta = astroforces::core::Vec3{
+        out_with_tide2.acceleration_mps2.x - out_no_tide2.acceleration_mps2.x,
+        out_with_tide2.acceleration_mps2.y - out_no_tide2.acceleration_mps2.y,
+        out_with_tide2.acceleration_mps2.z - out_no_tide2.acceleration_mps2.z};
+    if (!(astroforces::core::norm(tide2_delta) > 0.0)
+        || !(astroforces::core::norm(out_with_tide2.solid_tide_freqdep_mps2) > 0.0)) {
+      spdlog::error("solid Earth tide2 had no effect");
+      return 13;
+    }
+  }
+
   const auto constituent_tide_file = write_test_constituent_tide();
   if (fs::exists(constituent_tide_file)) {
     const auto no_constituent = astroforces::forces::GravitySphAccelerationModel::Create(

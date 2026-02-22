@@ -29,6 +29,7 @@ struct GravitySphResult {
   astroforces::core::Vec3 sph_mps2{};
   astroforces::core::Vec3 solid_tide_sun_mps2{};
   astroforces::core::Vec3 solid_tide_moon_mps2{};
+  astroforces::core::Vec3 solid_tide_freqdep_mps2{};
   astroforces::core::Vec3 pole_tide_solid_mps2{};
   astroforces::core::Vec3 pole_tide_ocean_mps2{};
   astroforces::core::Vec3 ocean_tide_mps2{};
@@ -50,6 +51,7 @@ class GravitySphAccelerationModel final {
     bool use_solid_earth_tides{true};
     bool use_sun_tide{true};
     bool use_moon_tide{true};
+    bool use_solid_earth_tide2{true};
     bool convert_to_tide_free{true};
     bool use_pole_tide_solid{false};
     bool use_pole_tide_ocean{false};

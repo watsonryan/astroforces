@@ -23,6 +23,7 @@
 #include "astroforces/forces/gravity/tides/constituent_tide.hpp"
 #include "astroforces/forces/gravity/tides/pole_tide.hpp"
 #include "astroforces/forces/gravity/tides/solid_earth_tide.hpp"
+#include "astroforces/forces/gravity/tides/solid_earth_tide_freqdep.hpp"
 #include "jpl_eph/jpl_eph.hpp"
 
 namespace astroforces::forces {
@@ -577,8 +578,8 @@ GravitySphResult GravitySphAccelerationModel::evaluate(const astroforces::core::
         apply_time_variable_coefficients(*field_, jd_utc, nmax, Ceff, Seff);
       }
 
-      if (config_.use_solid_earth_tides && (config_.use_sun_tide || config_.use_moon_tide)) {
-        if (!ephemeris_ || !workspace_) {
+      if (config_.use_solid_earth_tides && (config_.use_sun_tide || config_.use_moon_tide || config_.use_solid_earth_tide2)) {
+        if ((config_.use_sun_tide || config_.use_moon_tide) && (!ephemeris_ || !workspace_)) {
           return GravitySphResult{.status = astroforces::core::Status::DataUnavailable};
         }
 
@@ -607,6 +608,15 @@ GravitySphResult GravitySphAccelerationModel::evaluate(const astroforces::core::
           out.solid_tide_moon_mps2 = accel_sph_noncentral(r_ecef, dCmoon, dSmoon, nmax, mu_earth, radius_m);
           dC += dCmoon;
           dS += dSmoon;
+        }
+
+        if (config_.use_solid_earth_tide2) {
+          Eigen::MatrixXd dC2 = Eigen::MatrixXd::Zero(Ceff.rows(), Ceff.cols());
+          Eigen::MatrixXd dS2 = Eigen::MatrixXd::Zero(Seff.rows(), Seff.cols());
+          tides::add_solid_earth_tide2_delta(jd_utc, gmst, dC2, dS2);
+          out.solid_tide_freqdep_mps2 = accel_sph_noncentral(r_ecef, dC2, dS2, nmax, mu_earth, radius_m);
+          dC += dC2;
+          dS += dS2;
         }
 
         Ceff += dC;
@@ -681,6 +691,7 @@ GravitySphResult GravitySphAccelerationModel::evaluate(const astroforces::core::
     out.sph_mps2 = rot_z(-gmst, out.sph_mps2);
     out.solid_tide_sun_mps2 = rot_z(-gmst, out.solid_tide_sun_mps2);
     out.solid_tide_moon_mps2 = rot_z(-gmst, out.solid_tide_moon_mps2);
+    out.solid_tide_freqdep_mps2 = rot_z(-gmst, out.solid_tide_freqdep_mps2);
     out.pole_tide_solid_mps2 = rot_z(-gmst, out.pole_tide_solid_mps2);
     out.pole_tide_ocean_mps2 = rot_z(-gmst, out.pole_tide_ocean_mps2);
     out.ocean_tide_mps2 = rot_z(-gmst, out.ocean_tide_mps2);
