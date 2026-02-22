@@ -18,6 +18,7 @@ Schema id: `perturbation_profile_v2`
 - `ocean_tide_file` (optional)
 - `atmos_tide_file` (optional)
 - `ocean_pole_tide_file` (optional)
+- `aod_file` (optional)
 
 ## CSV Output
 Header starts with:
@@ -36,6 +37,7 @@ Current default components:
 - `gravity_tide_solid_freqdep_mps2` (if gravity file provided)
 - `gravity_tide_pole_solid_mps2` (if gravity file + EOP provided)
 - `gravity_tide_pole_ocean_mps2` (if gravity file + EOP provided)
+- `gravity_tide_aod_mps2` (if gravity file + AOD file provided)
 - `gravity_tide_ocean_mps2` (if gravity file + ocean tide file provided)
 - `gravity_tide_atmos_mps2` (if gravity file + atmos tide file provided)
 - `earth_radiation_mps2`

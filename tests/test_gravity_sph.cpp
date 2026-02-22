@@ -75,6 +75,20 @@ std::filesystem::path write_test_ocean_pole_tide() {
   return p;
 }
 
+std::filesystem::path write_test_aod() {
+  namespace fs = std::filesystem;
+  const fs::path p = fs::temp_directory_path() / "astroforces_test_aod.txt";
+  std::ofstream out(p);
+  out << "DATA SET 1: 2 COEFFICIENTS FOR 2001-09-09 01:46:39 OF TYPE glo\n";
+  out << "2 0 1.0e-11 0.0\n";
+  out << "2 1 2.0e-11 -1.0e-11\n";
+  out << "DATA SET 2: 2 COEFFICIENTS FOR 2001-09-09 07:46:39 OF TYPE glo\n";
+  out << "2 0 3.0e-11 0.0\n";
+  out << "2 1 4.0e-11 -2.0e-11\n";
+  out.close();
+  return p;
+}
+
 }  // namespace
 
 int main() {
@@ -302,6 +316,41 @@ int main() {
         || !(astroforces::core::norm(out_with_constituent.atmos_tide_mps2) > 0.0)) {
       spdlog::error("constituent tides had no effect");
       return 11;
+    }
+  }
+
+  {
+    const auto aod_file = write_test_aod();
+    const auto no_aod = astroforces::forces::GravitySphAccelerationModel::Create(
+        {.gravity_model_file = gravity_file,
+         .max_degree = 4,
+         .use_central = true,
+         .use_sph = true,
+         .use_solid_earth_tides = false,
+         .use_aod = false});
+
+    const auto with_aod = astroforces::forces::GravitySphAccelerationModel::Create(
+        {.gravity_model_file = gravity_file,
+         .aod_file = aod_file,
+         .max_degree = 4,
+         .use_central = true,
+         .use_sph = true,
+         .use_solid_earth_tides = false,
+         .use_aod = true});
+
+    const auto out_no_aod = no_aod->evaluate(state);
+    const auto out_with_aod = with_aod->evaluate(state);
+    if (out_no_aod.status != astroforces::core::Status::Ok || out_with_aod.status != astroforces::core::Status::Ok) {
+      spdlog::error("AOD model evaluation failed");
+      return 17;
+    }
+    const auto aod_delta = astroforces::core::Vec3{
+        out_with_aod.acceleration_mps2.x - out_no_aod.acceleration_mps2.x,
+        out_with_aod.acceleration_mps2.y - out_no_aod.acceleration_mps2.y,
+        out_with_aod.acceleration_mps2.z - out_no_aod.acceleration_mps2.z};
+    if (!(astroforces::core::norm(aod_delta) > 0.0) || !(astroforces::core::norm(out_with_aod.aod_mps2) > 0.0)) {
+      spdlog::error("AOD had no effect");
+      return 18;
     }
   }
 

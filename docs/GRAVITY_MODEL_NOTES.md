@@ -10,6 +10,7 @@
 - solid Earth tide-2 (frequency-dependent `C20/C21/S21/C22/S22`)
 - pole tide (solid)
 - pole tide (ocean)
+- AOD1B gravity de-aliasing (interpolated SH deltas)
 - constituent ocean tide
 - constituent atmospheric tide
 
@@ -37,6 +38,7 @@ Reference source for model download/comparison:
 - Pole tides require IERS finals EOP (`xp/yp`).
 - Ocean pole tide can optionally use a coefficient file (`n m cnmp cnmm snmp snmm`);
   otherwise the built-in IERS-style fallback coefficients are used.
+- AOD requires an AOD1B-formatted coefficient file (time-tagged `DATA SET ... OF TYPE glo` blocks).
 - Constituent ocean/atmospheric tides require potential coefficient files in the expected constituent format.
 
 ## SPH Acceleration Synthesis
@@ -50,4 +52,4 @@ The non-central acceleration follows the same derivative synthesis pattern used 
 
 - `max_degree` defaults to `360` and is clamped to the coefficient file maximum.
 - no numerical Jacobians are used.
-- outputs are in m/s^2 and returned by term (`central`, `sph`, `solid_tide_sun`, `solid_tide_moon`, `solid_tide_freqdep`, `pole_tide_solid`, `pole_tide_ocean`, `ocean_tide`, `atmos_tide`).
+- outputs are in m/s^2 and returned by term (`central`, `sph`, `solid_tide_sun`, `solid_tide_moon`, `solid_tide_freqdep`, `pole_tide_solid`, `pole_tide_ocean`, `aod`, `ocean_tide`, `atmos_tide`).

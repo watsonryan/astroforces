@@ -20,6 +20,7 @@
 #include <Eigen/Dense>
 
 #include "astroforces/core/transforms.hpp"
+#include "astroforces/forces/gravity/tides/aod1b_tide.hpp"
 #include "astroforces/forces/gravity/tides/constituent_tide.hpp"
 #include "astroforces/forces/gravity/tides/pole_tide.hpp"
 #include "astroforces/forces/gravity/tides/solid_earth_tide.hpp"
@@ -532,6 +533,13 @@ std::unique_ptr<GravitySphAccelerationModel> GravitySphAccelerationModel::Create
     }
   }
 
+  if (config.use_aod && !config.aod_file.empty()) {
+    auto model = tides::Aod1bTideModel::load_from_file(config.aod_file, std::max(0, config.max_degree));
+    if (model && !model->empty()) {
+      out->aod_tide_ = std::shared_ptr<tides::Aod1bTideModel>(std::move(model));
+    }
+  }
+
   return out;
 }
 
@@ -672,6 +680,19 @@ GravitySphResult GravitySphAccelerationModel::evaluate(const astroforces::core::
         }
       }
 
+      if (config_.use_aod) {
+        if (!aod_tide_) {
+          return GravitySphResult{.status = astroforces::core::Status::DataUnavailable};
+        }
+        Eigen::MatrixXd dC_aod = Eigen::MatrixXd::Zero(Ceff.rows(), Ceff.cols());
+        Eigen::MatrixXd dS_aod = Eigen::MatrixXd::Zero(Seff.rows(), Seff.cols());
+        if (aod_tide_->interpolate_delta_coefficients(jd_utc, dC_aod, dS_aod)) {
+          out.aod_mps2 = accel_sph_noncentral(r_ecef, dC_aod, dS_aod, nmax, mu_earth, radius_m);
+          Ceff += dC_aod;
+          Seff += dS_aod;
+        }
+      }
+
       if (config_.use_ocean_tide) {
         if (!ocean_tide_) {
           return GravitySphResult{.status = astroforces::core::Status::DataUnavailable};
@@ -711,6 +732,7 @@ GravitySphResult GravitySphAccelerationModel::evaluate(const astroforces::core::
     out.solid_tide_freqdep_mps2 = rot_z(-gmst, out.solid_tide_freqdep_mps2);
     out.pole_tide_solid_mps2 = rot_z(-gmst, out.pole_tide_solid_mps2);
     out.pole_tide_ocean_mps2 = rot_z(-gmst, out.pole_tide_ocean_mps2);
+    out.aod_mps2 = rot_z(-gmst, out.aod_mps2);
     out.ocean_tide_mps2 = rot_z(-gmst, out.ocean_tide_mps2);
     out.atmos_tide_mps2 = rot_z(-gmst, out.atmos_tide_mps2);
   }
