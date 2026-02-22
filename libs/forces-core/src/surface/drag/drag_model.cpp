@@ -55,7 +55,7 @@ DragResult DragAccelerationModel::evaluate(const astroforces::core::StateVector&
     if (strict_ctx.has_value()) {
       return &(*strict_ctx);
     }
-    if (eop_series_ == nullptr || cip_series_ == nullptr) {
+    if (!eop_series_.has_value() || !cip_series_.has_value()) {
       return nullptr;
     }
     const auto eop_sample = eop_series_->sample_at_utc_seconds(state.epoch.utc_seconds);

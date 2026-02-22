@@ -5,6 +5,8 @@
  */
 #pragma once
 
+#include <optional>
+
 #include "astroforces/core/interfaces.hpp"
 #include "astroforces/core/eop.hpp"
 #include "astroforces/core/cip.hpp"
@@ -42,8 +44,8 @@ class DragAccelerationModel {
         atmosphere_(atmosphere),
         wind_(wind),
         transform_mode_(transform_mode),
-        eop_series_(eop_series),
-        cip_series_(cip_series) {}
+        eop_series_(eop_series != nullptr ? std::optional<astroforces::core::eop::Series>(*eop_series) : std::nullopt),
+        cip_series_(cip_series != nullptr ? std::optional<astroforces::core::cip::Series>(*cip_series) : std::nullopt) {}
 
   [[nodiscard]] DragResult evaluate(const astroforces::core::StateVector& state,
                                     const astroforces::sc::SpacecraftProperties& sc) const;
@@ -53,8 +55,8 @@ class DragAccelerationModel {
   const astroforces::core::IAtmosphereModel& atmosphere_;
   const astroforces::core::IWindModel& wind_;
   DragFrameTransformMode transform_mode_{};
-  const astroforces::core::eop::Series* eop_series_{nullptr};
-  const astroforces::core::cip::Series* cip_series_{nullptr};
+  std::optional<astroforces::core::eop::Series> eop_series_{};
+  std::optional<astroforces::core::cip::Series> cip_series_{};
 };
 
 }  // namespace astroforces::forces

@@ -5,9 +5,11 @@
  */
 
 #include <cmath>
+#include <chrono>
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
+#include <random>
 #include <sstream>
 #include <string>
 
@@ -30,7 +32,9 @@ bool approx(double a, double b, double rel) {
 }
 
 std::filesystem::path make_fixed_column_eop_file() {
-  const auto path = std::filesystem::temp_directory_path() / "astroforces_drag_eop_test.txt";
+  const auto path = std::filesystem::temp_directory_path() / ("astroforces_drag_eop_test_" + std::to_string(
+                                                                   std::chrono::high_resolution_clock::now().time_since_epoch().count())
+                                                               + "_" + std::to_string(std::random_device{}()) + ".txt");
   std::ofstream out(path);
 
   auto make_line = [](double mjd,
@@ -63,7 +67,9 @@ std::filesystem::path make_fixed_column_eop_file() {
 }
 
 std::filesystem::path make_cip_file() {
-  const auto path = std::filesystem::temp_directory_path() / "astroforces_drag_cip_test.txt";
+  const auto path = std::filesystem::temp_directory_path() / ("astroforces_drag_cip_test_" + std::to_string(
+                                                                   std::chrono::high_resolution_clock::now().time_since_epoch().count())
+                                                               + "_" + std::to_string(std::random_device{}()) + ".txt");
   std::ofstream out(path);
   out << "# MJD_UTC X Y s (arcsec)\n";
   out << "60676.0 0.100 -0.200 0.010\n";
