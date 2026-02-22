@@ -18,6 +18,7 @@
 #include "astroforces/adapters/dtm2020_adapter.hpp"
 #include "astroforces/atmo/conversions.hpp"
 #include "astroforces/atmo/constants.hpp"
+#include "astroforces/forces/surface/antenna_thrust/antenna_thrust_perturbation.hpp"
 #include "astroforces/forces/surface/drag/drag_perturbation.hpp"
 #include "astroforces/forces/surface/earth_radiation/earth_radiation_perturbation.hpp"
 #include "astroforces/forces/gravity/gravity_sph_model.hpp"
@@ -155,6 +156,18 @@ int main(int argc, char** argv) {
       .max_alt_km = kDtmOperationalMaxAltKm,
   });
   components.push_back(ComponentModel{
+      .label = "antenna_thrust",
+      .frame = astroforces::core::Frame::ECI,
+      .model = std::make_unique<astroforces::forces::AntennaThrustPerturbationModel>(
+          astroforces::forces::AntennaThrustAccelerationModel({
+              .transmit_power_w = 20.0,
+              .efficiency = 1.0,
+              .direction_mode = astroforces::forces::AntennaThrustDirectionMode::Velocity,
+          }),
+          &sc,
+          "antenna_thrust"),
+  });
+  components.push_back(ComponentModel{
       .label = "earth_radiation",
       .frame = astroforces::core::Frame::ECI,
       .model = std::make_unique<astroforces::forces::EarthRadiationPerturbationModel>(
@@ -224,7 +237,7 @@ int main(int argc, char** argv) {
     third_state.epoch.utc_seconds = epoch_utc_s;
     third_state.frame = astroforces::core::Frame::ECI;
     third_state.position_m = ecef_to_eci(r_ecef_m, epoch_utc_s);
-    third_state.velocity_mps = astroforces::core::Vec3{};
+    third_state.velocity_mps = ecef_to_eci(v_ecef_mps, epoch_utc_s);
 
     std::vector<double> gravity_mags{};
     if (gravity) {

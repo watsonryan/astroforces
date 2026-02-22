@@ -8,7 +8,7 @@ flowchart LR
   A[atmo-core<br/>types, frames, interfaces] --> B[space-weather<br/>CelesTrak CSV]
   A --> C[sc-props<br/>cannonball + macro surfaces]
   A --> D[adapters<br/>NRLMSIS / DTM2020 / HWM14]
-  A --> E[forces-core<br/>Drag/Gravity/Earth Radiation/SRP/Relativity/Third-Body]
+  A --> E[forces-core<br/>Drag/Antenna Thrust/Gravity/Earth Radiation/SRP/Relativity/Third-Body]
   A --> F[forces<br/>IPerturbationModel + PerturbationStack]
   B --> E
   C --> E
@@ -23,6 +23,8 @@ flowchart LR
   F --> U[apps/forces-cli/srp_batch_cli.cpp]
   F --> R[apps/forces-cli/earth_radiation_cli.cpp]
   F --> V[apps/forces-cli/earth_radiation_batch_cli.cpp]
+  F --> M[apps/forces-cli/antenna_thrust_cli.cpp]
+  F --> N[apps/forces-cli/antenna_thrust_batch_cli.cpp]
   F --> W[apps/forces-cli/relativity_cli.cpp]
   F --> K[apps/forces-cli/gravity_sph_cli.cpp]
   F --> P[apps/forces-cli/perturbation_profile_cli.cpp]
@@ -103,6 +105,7 @@ General perturbation interface:
 - SRP is exposed via `astroforces::forces::SrpAccelerationModel` and `astroforces::forces::SrpPerturbationModel`.
 - Relativity is exposed via `astroforces::forces::RelativityAccelerationModel` and `astroforces::forces::RelativityPerturbationModel`.
 - Gravity+tides is exposed via `astroforces::forces::GravitySphAccelerationModel` and `astroforces::forces::GravitySphPerturbationModel`.
+- Antenna thrust is exposed via `astroforces::forces::AntennaThrustAccelerationModel` and `astroforces::forces::AntennaThrustPerturbationModel`.
 - Drag, Earth Radiation, and SRP all use the shared surface-force kernel (`astroforces::forces::evaluate_surface_force`) for cannonball/macro area+coefficient handling.
 
 Gravity+tides single-state CLI:
@@ -121,6 +124,17 @@ Earth Radiation batch CLI:
 ./build/macos-debug/earth_radiation_batch_cli input_eci.csv erp_output.csv 600 4 1.3 data/required/linux_p1550p2650.440
 ```
 Output schema reference: `docs/EARTH_RADIATION_OUTPUT_SCHEMA.md`
+
+Antenna thrust single-state CLI:
+```bash
+./build/macos-debug/antenna_thrust_cli 6778137 0 0 0 7670 0 1000000000 600 20 1.0 velocity
+```
+
+Antenna thrust batch CLI:
+```bash
+./build/macos-debug/antenna_thrust_batch_cli input_eci.csv antenna_thrust_output.csv 600 20 1.0 velocity
+```
+Output schema reference: `docs/ANTENNA_THRUST_OUTPUT_SCHEMA.md`
 
 Relativity single-state CLI:
 ```bash
@@ -154,6 +168,7 @@ python3 scripts/plot_perturbation_profile.py perturbation_profile.csv --output-s
 This generates publication-ready IEEE-style PDF/PNG plots of acceleration magnitude by perturbation component versus altitude.
 Output columns include:
 - `drag_mps2`
+- `antenna_thrust_mps2`
 - `gravity_central_mps2`
 - `gravity_sph_mps2`
 - `gravity_tide_sun_mps2`

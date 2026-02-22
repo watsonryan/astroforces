@@ -35,6 +35,8 @@ struct EarthRadiationResult {
 class EarthRadiationAccelerationModel final {
  public:
   struct Config {
+    // TODO(Watosn): Add configurable higher-order Earth radiance/BRDF modes
+    // (e.g., zonal/maps) beyond the current Lambert-style albedo phase model.
     std::filesystem::path ephemeris_file{};
     double earth_reference_radius_m{astroforces::core::constants::kEarthRadiusWgs84M};
     double solar_flux_w_m2{astroforces::core::constants::kSolarIrradianceAt1AuWm2};

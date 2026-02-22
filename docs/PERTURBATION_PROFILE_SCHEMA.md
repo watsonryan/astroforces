@@ -24,6 +24,7 @@ Then one or more component columns:
 
 Current default components:
 - `drag_mps2`
+- `antenna_thrust_mps2`
 - `gravity_central_mps2` (if gravity file provided)
 - `gravity_sph_mps2` (if gravity file provided)
 - `gravity_tide_sun_mps2` (if gravity file + ephemeris provided)
