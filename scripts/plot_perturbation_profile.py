@@ -100,6 +100,10 @@ def load_csv(path: Path):
 def pretty_label(key: str) -> str:
     if key == "gravity_sph_tides_mps2":
         return "Gravity SPH + Tides"
+    if key == "gravity_tides_mps2":
+        return "Gravity Tides"
+    if key == "gravity_sph_mps2":
+        return "Gravity SPH"
     core = key.replace("_mps2", "")
     parts = core.split("_")
     acronyms = {"srp": "SRP", "earth_radiation": "Earth Radiation"}
@@ -161,24 +165,26 @@ def main() -> None:
     if "gravity_central_mps2" in series:
         del series["gravity_central_mps2"]
 
-    # Collapse gravity harmonics + tides into a single non-central gravity line
-    # to reduce clutter in comparative perturbation plots.
-    sph_key = "gravity_sph_mps2"
-    tide_sun_key = "gravity_tide_sun_mps2"
-    tide_moon_key = "gravity_tide_moon_mps2"
-    if sph_key in series:
-        sph_vals = series[sph_key]
-        sun_vals = series.get(tide_sun_key, [0.0] * len(sph_vals))
-        moon_vals = series.get(tide_moon_key, [0.0] * len(sph_vals))
-        if len(sun_vals) == len(sph_vals) and len(moon_vals) == len(sph_vals):
-            series["gravity_sph_tides_mps2"] = [
-                sv + tuv + tmv for sv, tuv, tmv in zip(sph_vals, sun_vals, moon_vals)
-            ]
-            del series[sph_key]
-            if tide_sun_key in series:
-                del series[tide_sun_key]
-            if tide_moon_key in series:
-                del series[tide_moon_key]
+    # Aggregate all gravity tide sub-terms into one "Gravity Tides" curve
+    # and suppress individual tide lines to reduce clutter.
+    tide_keys = [k for k in list(series.keys()) if k.startswith("gravity_tide_")]
+    if tide_keys:
+        n = len(alt_km)
+        vals = []
+        for i in range(n):
+            ss = 0.0
+            for key in tide_keys:
+                v = series[key][i]
+                if v > 0.0 and math.isfinite(v):
+                    ss += v * v
+            vals.append(math.sqrt(ss) if ss > 0.0 else float("nan"))
+        series["gravity_tides_mps2"] = vals
+        for key in tide_keys:
+            del series[key]
+        # Avoid double-counting: if SPH+tides is present, prefer that combined
+        # representation and suppress the separate aggregated tides curve.
+        if "gravity_sph_tides_mps2" in series:
+            del series["gravity_tides_mps2"]
 
     width_in, height_in = apply_ieee_style(args.column)
 
@@ -259,9 +265,17 @@ def main() -> None:
         vals_at_cross.sort(key=lambda t: t[2], reverse=True)
         cross_values.append((x_km, vals_at_cross))
 
+    # Sort legend entries by first (starting-altitude) acceleration magnitude.
+    # Largest starting acceleration appears first in the legend.
+    lines_for_legend = sorted(
+        lines,
+        key=lambda item: item[2][0] if (item[2] and math.isfinite(item[2][0])) else float("-inf"),
+        reverse=True,
+    )
+
     handles = []
     labels = []
-    for name, line, _, mk, _ in lines:
+    for name, line, _, mk, _ in lines_for_legend:
         handles.append(
             Line2D(
                 [0],
