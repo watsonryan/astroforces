@@ -66,18 +66,18 @@ target_include_directories(dragcpp_models_basic PUBLIC ${CMAKE_SOURCE_DIR}/libs/
 target_link_libraries(dragcpp_models_basic PUBLIC dragcpp_atmo_core)
 
 add_library(dragcpp_drag_core STATIC
-  libs/forces-core/src/drag_model.cpp
-  libs/forces-core/src/drag_perturbation.cpp
-  libs/forces-core/src/perturbation.cpp
-  libs/forces-core/src/gravity_sph_model.cpp
-  libs/forces-core/src/gravity_sph_perturbation.cpp
-  libs/forces-core/src/third_body.cpp
-  libs/forces-core/src/erp_model.cpp
-  libs/forces-core/src/erp_perturbation.cpp
-  libs/forces-core/src/relativity_model.cpp
-  libs/forces-core/src/relativity_perturbation.cpp
-  libs/forces-core/src/srp_model.cpp
-  libs/forces-core/src/srp_perturbation.cpp)
+  libs/forces-core/src/core/perturbation.cpp
+  libs/forces-core/src/gravity/gravity_sph_model.cpp
+  libs/forces-core/src/gravity/gravity_sph_perturbation.cpp
+  libs/forces-core/src/gravity/relativity_model.cpp
+  libs/forces-core/src/gravity/relativity_perturbation.cpp
+  libs/forces-core/src/gravity/third_body.cpp
+  libs/forces-core/src/surface/drag/drag_model.cpp
+  libs/forces-core/src/surface/drag/drag_perturbation.cpp
+  libs/forces-core/src/surface/erp/erp_model.cpp
+  libs/forces-core/src/surface/erp/erp_perturbation.cpp
+  libs/forces-core/src/surface/srp/srp_model.cpp
+  libs/forces-core/src/surface/srp/srp_perturbation.cpp)
 target_include_directories(dragcpp_drag_core PUBLIC ${CMAKE_SOURCE_DIR}/libs/forces-core/include)
 target_link_libraries(dragcpp_drag_core PUBLIC dragcpp_atmo_core dragcpp_sc_props)
 if(DRAGCPP_EIGEN_TARGET)
