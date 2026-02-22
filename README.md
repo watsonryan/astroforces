@@ -183,7 +183,7 @@ Perturbation-vs-altitude profiling:
   120
 python3 scripts/plot_perturbation_profile.py perturbation_profile.csv --output-stem perturbation_vs_altitude --column single
 ```
-This generates publication-ready IEEE-style PDF/PNG plots of acceleration magnitude by perturbation component versus altitude.
+This generates PDF/PNG plots of acceleration magnitude by perturbation component versus altitude.
 Output columns include:
 - `drag_mps2`
 - `antenna_thrust_mps2`
