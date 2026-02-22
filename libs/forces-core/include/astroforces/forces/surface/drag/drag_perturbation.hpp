@@ -12,8 +12,14 @@
 
 namespace astroforces::forces {
 
+/**
+ * @brief Perturbation-stack wrapper around DragAccelerationModel.
+ */
 class DragPerturbationModel final : public astroforces::forces::IPerturbationModel {
  public:
+  /**
+   * @brief Construct drag wrapper with provider references.
+   */
   DragPerturbationModel(const astroforces::core::ISpaceWeatherProvider& weather,
                         const astroforces::core::IAtmosphereModel& atmosphere,
                         const astroforces::core::IWindModel& wind,
@@ -21,6 +27,9 @@ class DragPerturbationModel final : public astroforces::forces::IPerturbationMod
                         std::string name = "drag")
       : drag_(weather, atmosphere, wind), default_spacecraft_(default_spacecraft), name_(std::move(name)) {}
 
+  /**
+   * @brief Evaluate drag contribution.
+   */
   [[nodiscard]] astroforces::forces::PerturbationContribution evaluate(
       const astroforces::forces::PerturbationRequest& request) const override;
 

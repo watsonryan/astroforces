@@ -19,17 +19,26 @@
 
 namespace astroforces::core {
 
+/**
+ * @brief Rotation matrix and its time derivative.
+ */
 struct RotationWithDerivative {
   Mat3 r{};
   Mat3 dr{};
 };
 
+/**
+ * @brief Cached GCRF/ITRF transform context for repeated transforms at one epoch.
+ */
 struct GcrfItrfTransformContext {
   Mat3 r{};
   Mat3 dr{};
   Mat3 rt{};
 };
 
+/**
+ * @brief Cached approximate GMST transform context.
+ */
 struct ApproxEciEcefContext {
   double gmst_rad{};
 };
@@ -38,6 +47,9 @@ inline Vec3 cross(const Vec3& a, const Vec3& b) {
   return vec_cross(a, b);
 }
 
+/**
+ * @brief Compute approximate geodetic point from ECEF assuming spherical Earth.
+ */
 inline GeodeticPoint spherical_geodetic_from_ecef(const Vec3& ecef_m) {
   const double r = norm(ecef_m);
   if (r <= 0.0) {
@@ -48,6 +60,9 @@ inline GeodeticPoint spherical_geodetic_from_ecef(const Vec3& ecef_m) {
   return GeodeticPoint{.lat_deg = lat, .lon_deg = lon, .alt_m = r - constants::kEarthRadiusWgs84M};
 }
 
+/**
+ * @brief Convert UTC seconds to compact `IYD` + seconds-of-day pair.
+ */
 inline std::pair<int, double> utc_seconds_to_iyd_sec(double utc_seconds) {
   const std::time_t tt = static_cast<std::time_t>(utc_seconds);
   std::tm tm_utc{};
@@ -63,6 +78,9 @@ inline std::pair<int, double> utc_seconds_to_iyd_sec(double utc_seconds) {
   return {iyd, sec};
 }
 
+/**
+ * @brief Compute local solar time in hours from UTC and longitude.
+ */
 inline double local_solar_time_hours(double utc_seconds, double lon_deg) {
   const auto iyd_sec = utc_seconds_to_iyd_sec(utc_seconds);
   const double ut_h = iyd_sec.second / 3600.0;
@@ -73,6 +91,9 @@ inline double local_solar_time_hours(double utc_seconds, double lon_deg) {
   return stl;
 }
 
+/**
+ * @brief Convert UTC seconds since Unix epoch to JD UTC.
+ */
 inline double utc_seconds_to_julian_date_utc(double utc_seconds) {
   return utc_seconds / constants::kSecondsPerDay + 2440587.5;
 }
@@ -93,6 +114,9 @@ inline double utc_seconds_to_julian_date_tt(const double utc_seconds) {
   return utc_seconds_to_julian_date_tai(utc_seconds) + 32.184 / constants::kSecondsPerDay;
 }
 
+/**
+ * @brief Convert UTC seconds since Unix epoch to JD TDB.
+ */
 inline double utc_seconds_to_julian_date_tdb(const double utc_seconds) {
   const double jd_tt = utc_seconds_to_julian_date_tt(utc_seconds);
   return jd_tt + sofa::dtdb_seconds_approx(jd_tt) / constants::kSecondsPerDay;
@@ -117,20 +141,32 @@ inline Vec3 rotate_z(double angle_rad, const Vec3& v) {
   return mat_vec(sofa::rot_z(angle_rad), v);
 }
 
+/**
+ * @brief Build context for approximate ECI/ECEF transforms.
+ */
 inline ApproxEciEcefContext build_approx_eci_ecef_context(double utc_seconds) {
   return ApproxEciEcefContext{
       .gmst_rad = gmst_rad_from_jd_utc(utc_seconds_to_julian_date_utc(utc_seconds)),
   };
 }
 
+/**
+ * @brief Approximate ECI->ECEF position transform using GMST-only rotation.
+ */
 inline Vec3 approx_eci_to_ecef_position(const Vec3& r_eci_m, const ApproxEciEcefContext& ctx) {
   return rotate_z(ctx.gmst_rad, r_eci_m);
 }
 
+/**
+ * @brief Approximate ECEF->ECI position transform using GMST-only rotation.
+ */
 inline Vec3 approx_ecef_to_eci_position(const Vec3& r_ecef_m, const ApproxEciEcefContext& ctx) {
   return rotate_z(-ctx.gmst_rad, r_ecef_m);
 }
 
+/**
+ * @brief Approximate ECI->ECEF velocity transform using GMST-only rotation + Earth rate.
+ */
 inline Vec3 approx_eci_to_ecef_velocity(const Vec3& r_eci_m, const Vec3& v_eci_mps, const ApproxEciEcefContext& ctx) {
   const Vec3 omega_cross_r_eci{-constants::kEarthRotationRateRadPerSec * r_eci_m.y,
                                 constants::kEarthRotationRateRadPerSec * r_eci_m.x,
@@ -138,6 +174,9 @@ inline Vec3 approx_eci_to_ecef_velocity(const Vec3& r_eci_m, const Vec3& v_eci_m
   return rotate_z(ctx.gmst_rad, v_eci_mps - omega_cross_r_eci);
 }
 
+/**
+ * @brief Approximate ECEF->ECI velocity transform using GMST-only rotation + Earth rate.
+ */
 inline Vec3 approx_ecef_to_eci_velocity(const Vec3& r_ecef_m, const Vec3& v_ecef_mps, const ApproxEciEcefContext& ctx) {
   const Vec3 r_eci_m = rotate_z(-ctx.gmst_rad, r_ecef_m);
   const Vec3 omega_cross_r_eci{-constants::kEarthRotationRateRadPerSec * r_eci_m.y,

@@ -13,13 +13,22 @@
 
 namespace astroforces::forces {
 
+/**
+ * @brief Perturbation-stack wrapper around SrpAccelerationModel.
+ */
 class SrpPerturbationModel final : public astroforces::forces::IPerturbationModel {
  public:
+  /**
+   * @brief Construct wrapper with owned SRP model.
+   */
   SrpPerturbationModel(std::unique_ptr<SrpAccelerationModel> srp,
                        const astroforces::sc::SpacecraftProperties* default_spacecraft = nullptr,
                        std::string name = "srp")
       : srp_(std::move(srp)), default_spacecraft_(default_spacecraft), name_(std::move(name)) {}
 
+  /**
+   * @brief Evaluate SRP contribution.
+   */
   [[nodiscard]] astroforces::forces::PerturbationContribution evaluate(
       const astroforces::forces::PerturbationRequest& request) const override;
 
@@ -30,4 +39,3 @@ class SrpPerturbationModel final : public astroforces::forces::IPerturbationMode
 };
 
 }  // namespace astroforces::forces
-

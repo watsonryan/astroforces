@@ -16,14 +16,26 @@ class Dtm2020Operational;
 
 namespace astroforces::adapters {
 
+/**
+ * @brief Atmosphere adapter backed by DTM2020 operational model.
+ */
 class Dtm2020AtmosphereAdapter final : public astroforces::core::IAtmosphereModel {
  public:
+  /**
+   * @brief Configuration for DTM2020 adapter construction.
+   */
   struct Config {
     std::filesystem::path coeff_file{};
   };
 
+  /**
+   * @brief Factory helper that loads model resources.
+   */
   static std::unique_ptr<Dtm2020AtmosphereAdapter> Create(const Config& config);
 
+  /**
+   * @brief Evaluate density/temperature using DTM2020.
+   */
   [[nodiscard]] astroforces::core::AtmosphereSample evaluate(const astroforces::core::StateVector& state,
                                                           const astroforces::core::WeatherIndices& weather) const override;
 

@@ -17,19 +17,33 @@
 
 namespace astroforces::core::eop {
 
+/**
+ * @brief One EOP sample at a specific MJD UTC.
+ */
 struct Record {
   double mjd_utc{};
   EarthOrientation eop{};
   bool predicted{};
 };
 
+/**
+ * @brief Interpolated EOP value and first derivative.
+ */
 struct Sample {
   EarthOrientation value{};
   EarthOrientationRate rate{};
 };
 
+/**
+ * @brief Time-ordered EOP series with interpolation helpers.
+ */
 class Series {
  public:
+  /**
+   * @brief Load EOP records from IERS finals-style file.
+   * @param path Path to IERS finals text file.
+   * @return Parsed EOP series (possibly empty on parse/open failure).
+   */
   static Series load_iers_finals(const std::filesystem::path& path) {
     Series series;
     std::ifstream in(path);
@@ -59,6 +73,9 @@ class Series {
   [[nodiscard]] std::size_t size() const noexcept { return records_.size(); }
   [[nodiscard]] const std::vector<Record>& records() const noexcept { return records_; }
 
+  /**
+   * @brief Interpolate EOP at MJD UTC.
+   */
   [[nodiscard]] std::optional<EarthOrientation> at_mjd_utc(double mjd_utc) const noexcept {
     if (records_.empty()) {
       return std::nullopt;
@@ -104,6 +121,9 @@ class Series {
     return out;
   }
 
+  /**
+   * @brief Interpolate EOP plus first derivative at MJD UTC.
+   */
   [[nodiscard]] std::optional<Sample> sample_at_mjd_utc(double mjd_utc) const noexcept {
     if (records_.empty()) {
       return std::nullopt;
@@ -180,14 +200,23 @@ class Series {
     return out;
   }
 
+  /**
+   * @brief Interpolate EOP at JD UTC.
+   */
   [[nodiscard]] std::optional<EarthOrientation> at_jd_utc(double jd_utc) const noexcept {
     return at_mjd_utc(jd_utc - 2400000.5);
   }
 
+  /**
+   * @brief Interpolate EOP at UTC seconds since Unix epoch.
+   */
   [[nodiscard]] std::optional<EarthOrientation> at_utc_seconds(double utc_seconds) const noexcept {
     return at_jd_utc(utc_seconds_to_julian_date_utc(utc_seconds));
   }
 
+  /**
+   * @brief Interpolate EOP plus first derivative at UTC seconds.
+   */
   [[nodiscard]] std::optional<Sample> sample_at_utc_seconds(double utc_seconds) const noexcept {
     return sample_at_mjd_utc(utc_seconds_to_julian_date_utc(utc_seconds) - 2400000.5);
   }

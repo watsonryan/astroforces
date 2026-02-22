@@ -15,6 +15,9 @@
 
 namespace astroforces::core::leap_seconds {
 
+/**
+ * @brief One leap-second step entry.
+ */
 struct Entry {
   double utc_epoch_s{};
   double tai_minus_utc_s{};
@@ -22,6 +25,9 @@ struct Entry {
 
 using Table = std::vector<Entry>;
 
+/**
+ * @brief Built-in deterministic leap-second table.
+ */
 inline const Table& default_table() {
   static const Table table = {
       {63072000.0, 10.0},     // 1972-01-01
@@ -66,6 +72,9 @@ inline std::string trim(std::string s) {
   return s;
 }
 
+/**
+ * @brief Load a leap-second table from text/CSV file.
+ */
 inline bool load_table_from_file(const std::string& path, Table* out) {
   if (out == nullptr) {
     return false;
@@ -106,11 +115,17 @@ inline bool load_table_from_file(const std::string& path, Table* out) {
   return true;
 }
 
+/**
+ * @brief Active leap-second table used by default conversion helpers.
+ */
 inline const Table& active_table() {
   static const Table table = default_table();
   return table;
 }
 
+/**
+ * @brief Lookup TAI-UTC offset using a specific leap-second table.
+ */
 inline double tai_minus_utc_seconds(const double utc_seconds, const Table& table) {
   double tai_utc = table.front().tai_minus_utc_s;
   for (const Entry& e : table) {
@@ -123,6 +138,9 @@ inline double tai_minus_utc_seconds(const double utc_seconds, const Table& table
   return tai_utc;
 }
 
+/**
+ * @brief Lookup TAI-UTC offset using the active leap-second table.
+ */
 inline double tai_minus_utc_seconds(const double utc_seconds) {
   return tai_minus_utc_seconds(utc_seconds, active_table());
 }

@@ -19,6 +19,9 @@ class Workspace;
 
 namespace astroforces::forces {
 
+/**
+ * @brief Output bundle for Earth radiation pressure evaluation.
+ */
 struct EarthRadiationResult {
   astroforces::core::Vec3 acceleration_mps2{};
   double earth_radiation_pressure_pa{};
@@ -32,8 +35,14 @@ struct EarthRadiationResult {
   astroforces::core::Status status{astroforces::core::Status::Ok};
 };
 
+/**
+ * @brief Earth radiation pressure acceleration model (albedo + IR).
+ */
 class EarthRadiationAccelerationModel final {
  public:
+  /**
+   * @brief Configuration for Earth radiation model construction.
+   */
   struct Config {
     // TODO(Watosn): Add configurable higher-order Earth radiance/BRDF modes
     // (e.g., zonal/maps) beyond the current Lambert-style albedo phase model.
@@ -48,11 +57,17 @@ class EarthRadiationAccelerationModel final {
     bool use_eclipse{true};
   };
 
+  /**
+   * @brief Factory helper that loads ephemeris resources.
+   */
   static std::unique_ptr<EarthRadiationAccelerationModel> Create(const Config& config);
 
   EarthRadiationAccelerationModel() = default;
   explicit EarthRadiationAccelerationModel(const Config& config);
 
+  /**
+   * @brief Evaluate Earth radiation acceleration for one state and spacecraft.
+   */
   [[nodiscard]] EarthRadiationResult evaluate(const astroforces::core::StateVector& state,
                                    const astroforces::sc::SpacecraftProperties& sc) const;
 

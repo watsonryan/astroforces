@@ -14,12 +14,18 @@
 
 namespace astroforces::forces {
 
+/**
+ * @brief Drag frame transform strategy for ECI/ECEF conversions.
+ */
 enum class DragFrameTransformMode : unsigned char {
   AutoPreferStrict,
   ApproxGmst,
   StrictGcrfItrf,
 };
 
+/**
+ * @brief Drag model output bundle.
+ */
 struct DragResult {
   astroforces::core::Vec3 acceleration_mps2{};
   astroforces::core::Vec3 relative_velocity_mps{};
@@ -33,8 +39,20 @@ struct DragResult {
   astroforces::core::Status status{astroforces::core::Status::Ok};
 };
 
+/**
+ * @brief Atmospheric drag acceleration model.
+ */
 class DragAccelerationModel {
  public:
+  /**
+   * @brief Construct drag model from weather/atmosphere/wind providers.
+   * @param weather Space weather provider.
+   * @param atmosphere Atmosphere model provider.
+   * @param wind Wind model provider.
+   * @param transform_mode ECI/ECEF transform strategy.
+   * @param eop_series Optional EOP series for strict transforms.
+   * @param cip_series Optional CIP series for strict transforms.
+   */
   DragAccelerationModel(const astroforces::core::ISpaceWeatherProvider& weather,
                         const astroforces::core::IAtmosphereModel& atmosphere,
                         const astroforces::core::IWindModel& wind,
@@ -48,6 +66,12 @@ class DragAccelerationModel {
         eop_series_(std::move(eop_series)),
         cip_series_(std::move(cip_series)) {}
 
+  /**
+   * @brief Evaluate drag acceleration for a spacecraft state.
+   * @param state State vector.
+   * @param sc Spacecraft aerodynamic properties.
+   * @return Drag output bundle with status and intermediate values.
+   */
   [[nodiscard]] DragResult evaluate(const astroforces::core::StateVector& state,
                                     const astroforces::sc::SpacecraftProperties& sc) const;
 

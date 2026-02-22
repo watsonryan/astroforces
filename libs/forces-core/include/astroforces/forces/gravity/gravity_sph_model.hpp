@@ -26,6 +26,9 @@ class Aod1bTideModel;
 
 namespace astroforces::forces {
 
+/**
+ * @brief Output decomposition for gravity + tides evaluation.
+ */
 struct GravitySphResult {
   astroforces::core::Vec3 acceleration_mps2{};
   astroforces::core::Vec3 central_mps2{};
@@ -41,12 +44,22 @@ struct GravitySphResult {
   astroforces::core::Status status{astroforces::core::Status::Ok};
 };
 
+/**
+ * @brief Full Earth gravity acceleration model with optional tide terms.
+ */
 class GravitySphAccelerationModel final {
  public:
+  /**
+   * @brief Configuration for gravity/tide model construction.
+   */
   struct Config {
+    /** @brief ICGEM-style gravity coefficient file (`gfc` records). */
     std::filesystem::path gravity_model_file{};
+    /** @brief JPL ephemeris file used by Sun/Moon tide terms. */
     std::filesystem::path ephemeris_file{};
+    /** @brief IERS finals EOP file for polar-motion/tide transforms. */
     std::filesystem::path eop_finals_file{};
+    /** @brief CIP X/Y/s table for strict GCRF/ITRF transforms. */
     std::filesystem::path cip_xys_file{};
     std::filesystem::path ocean_pole_tide_file{};
     std::filesystem::path aod_file{};
@@ -71,7 +84,15 @@ class GravitySphAccelerationModel final {
     double mu_moon_m3_s2{astroforces::core::constants::kMoonMuM3S2};
   };
 
+  /**
+   * @brief Factory helper that loads model coefficients/resources.
+   */
   static std::unique_ptr<GravitySphAccelerationModel> Create(const Config& config);
+  /**
+   * @brief Evaluate gravity acceleration for one state.
+   * @param state Input state (ECI/ECEF supported per model configuration).
+   * @return Gravity+tides decomposition and status.
+   */
   [[nodiscard]] GravitySphResult evaluate(const astroforces::core::StateVector& state) const;
 
  public:

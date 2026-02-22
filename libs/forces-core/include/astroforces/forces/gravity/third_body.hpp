@@ -18,8 +18,14 @@ class Workspace;
 
 namespace astroforces::forces {
 
+/**
+ * @brief Sun/Moon third-body perturbation model.
+ */
 class ThirdBodyPerturbationModel final : public IPerturbationModel {
  public:
+  /**
+   * @brief Configuration for third-body model construction.
+   */
   struct Config {
     std::filesystem::path ephemeris_file{};
     bool use_sun{true};
@@ -30,8 +36,14 @@ class ThirdBodyPerturbationModel final : public IPerturbationModel {
     std::string name{"third_body"};
   };
 
+  /**
+   * @brief Factory helper that loads ephemeris resources.
+   */
   static std::unique_ptr<ThirdBodyPerturbationModel> Create(const Config& config);
 
+  /**
+   * @brief Evaluate third-body perturbation contribution.
+   */
   [[nodiscard]] PerturbationContribution evaluate(const PerturbationRequest& request) const override;
 
  private:

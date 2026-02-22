@@ -16,14 +16,26 @@ class Model;
 
 namespace astroforces::adapters {
 
+/**
+ * @brief Wind adapter backed by HWM14.
+ */
 class Hwm14WindAdapter final : public astroforces::core::IWindModel {
  public:
+  /**
+   * @brief Configuration for HWM14 adapter construction.
+   */
   struct Config {
     std::filesystem::path data_dir{};
   };
 
+  /**
+   * @brief Factory helper that loads model resources.
+   */
   static std::unique_ptr<Hwm14WindAdapter> Create(const Config& config);
 
+  /**
+   * @brief Evaluate neutral wind using HWM14.
+   */
   [[nodiscard]] astroforces::core::WindSample evaluate(const astroforces::core::StateVector& state,
                                                     const astroforces::core::WeatherIndices& weather) const override;
 

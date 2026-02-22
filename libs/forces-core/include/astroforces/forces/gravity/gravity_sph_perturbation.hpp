@@ -13,11 +13,20 @@
 
 namespace astroforces::forces {
 
+/**
+ * @brief Perturbation-stack wrapper around GravitySphAccelerationModel.
+ */
 class GravitySphPerturbationModel final : public IPerturbationModel {
  public:
+  /**
+   * @brief Construct wrapper with owned gravity model.
+   */
   explicit GravitySphPerturbationModel(std::unique_ptr<GravitySphAccelerationModel> gravity, std::string name = "gravity_sph")
       : gravity_(std::move(gravity)), name_(std::move(name)) {}
 
+  /**
+   * @brief Evaluate gravity contribution.
+   */
   [[nodiscard]] PerturbationContribution evaluate(const PerturbationRequest& request) const override;
 
  private:

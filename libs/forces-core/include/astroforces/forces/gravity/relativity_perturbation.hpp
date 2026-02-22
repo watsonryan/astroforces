@@ -13,12 +13,21 @@
 
 namespace astroforces::forces {
 
+/**
+ * @brief Perturbation-stack wrapper around RelativityAccelerationModel.
+ */
 class RelativityPerturbationModel final : public IPerturbationModel {
  public:
+  /**
+   * @brief Construct wrapper with owned relativity model.
+   */
   explicit RelativityPerturbationModel(std::unique_ptr<RelativityAccelerationModel> relativity,
                                        std::string name = "relativity")
       : relativity_(std::move(relativity)), name_(std::move(name)) {}
 
+  /**
+   * @brief Evaluate relativity contribution.
+   */
   [[nodiscard]] PerturbationContribution evaluate(const PerturbationRequest& request) const override;
 
  private:
@@ -27,4 +36,3 @@ class RelativityPerturbationModel final : public IPerturbationModel {
 };
 
 }  // namespace astroforces::forces
-

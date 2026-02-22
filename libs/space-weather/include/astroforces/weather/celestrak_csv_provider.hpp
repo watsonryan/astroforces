@@ -14,8 +14,14 @@
 
 namespace astroforces::weather {
 
+/**
+ * @brief Space weather provider backed by CelesTrak daily CSV data.
+ */
 class CelesTrakCsvSpaceWeatherProvider final : public astroforces::core::ISpaceWeatherProvider {
  public:
+  /**
+   * @brief Normalized in-memory daily sample.
+   */
   struct DailySample {
     double day_start_utc_s{};
     double f107_obs{};
@@ -28,12 +34,21 @@ class CelesTrakCsvSpaceWeatherProvider final : public astroforces::core::ISpaceW
     bool geomagnetic_observed{true};
   };
 
+  /**
+   * @brief CSV provider configuration.
+   */
   struct Config {
     std::filesystem::path csv_file{};
   };
 
+  /**
+   * @brief Factory helper that parses and validates CSV input.
+   */
   static std::unique_ptr<CelesTrakCsvSpaceWeatherProvider> Create(const Config& config);
 
+  /**
+   * @brief Evaluate weather indices at an epoch via interpolation/selection.
+   */
   [[nodiscard]] astroforces::core::WeatherIndices at(const astroforces::core::Epoch& epoch) const override;
 
  private:

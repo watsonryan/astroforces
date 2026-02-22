@@ -11,6 +11,9 @@
 
 namespace astroforces::forces {
 
+/**
+ * @brief Shared scalar surface-force projection output.
+ */
 struct SurfaceForceResult {
   astroforces::core::Vec3 acceleration_mps2{};
   double area_m2{};
@@ -18,6 +21,9 @@ struct SurfaceForceResult {
   astroforces::core::Status status{astroforces::core::Status::Ok};
 };
 
+/**
+ * @brief Normalize a vector with optional returned norm.
+ */
 inline astroforces::core::Vec3 unit_direction(const astroforces::core::Vec3& v, double* norm_out = nullptr) {
   const double n = astroforces::core::norm(v);
   if (norm_out) {
@@ -29,6 +35,17 @@ inline astroforces::core::Vec3 unit_direction(const astroforces::core::Vec3& v, 
   return v / n;
 }
 
+/**
+ * @brief Evaluate a generic surface-pressure force model.
+ *
+ * @param sc Spacecraft properties.
+ * @param flow_dir_frame_unit Unit flow/flux direction in target frame.
+ * @param flow_dir_body_unit Unit flow/flux direction in BODY frame.
+ * @param pressure_pa Dynamic/radiation pressure scalar.
+ * @param reference_coeff Reference coefficient for non-surface mode.
+ * @param coeff_model Coefficient family used in surface aggregation.
+ * @param direction_sign Sign convention for resulting force direction.
+ */
 inline SurfaceForceResult evaluate_surface_force(const astroforces::sc::SpacecraftProperties& sc,
                                                  const astroforces::core::Vec3& flow_dir_frame_unit,
                                                  const astroforces::core::Vec3& flow_dir_body_unit,
@@ -55,4 +72,3 @@ inline SurfaceForceResult evaluate_surface_force(const astroforces::sc::Spacecra
 }
 
 }  // namespace astroforces::forces
-

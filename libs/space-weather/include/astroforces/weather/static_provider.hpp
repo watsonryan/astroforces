@@ -9,8 +9,15 @@
 
 namespace astroforces::weather {
 
+/**
+ * @brief Constant weather provider for testing and deterministic runs.
+ */
 class StaticSpaceWeatherProvider final : public astroforces::core::ISpaceWeatherProvider {
  public:
+  /**
+   * @brief Construct provider from fixed weather indices.
+   * @note History arrays and source metadata are populated automatically.
+   */
   explicit StaticSpaceWeatherProvider(astroforces::core::WeatherIndices indices) : indices_(indices) {
     indices_.source = astroforces::core::WeatherSource::StaticProvider;
     indices_.ap_3h_current = indices_.ap;
@@ -20,6 +27,9 @@ class StaticSpaceWeatherProvider final : public astroforces::core::ISpaceWeather
     indices_.ap_msis_history.fill(indices_.ap);
     indices_.has_ap_msis_history = true;
   }
+  /**
+   * @brief Return fixed weather values for any epoch.
+   */
   [[nodiscard]] astroforces::core::WeatherIndices at(const astroforces::core::Epoch& /*epoch*/) const override {
     return indices_;
   }

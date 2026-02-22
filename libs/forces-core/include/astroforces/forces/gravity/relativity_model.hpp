@@ -19,6 +19,9 @@ class Workspace;
 
 namespace astroforces::forces {
 
+/**
+ * @brief Relativistic acceleration decomposition output.
+ */
 struct RelativityResult {
   astroforces::core::Vec3 acceleration_mps2{};
   astroforces::core::Vec3 spherical_central_body_mps2{};
@@ -29,8 +32,14 @@ struct RelativityResult {
   astroforces::core::Status status{astroforces::core::Status::Ok};
 };
 
+/**
+ * @brief Post-Newtonian relativity acceleration model.
+ */
 class RelativityAccelerationModel final {
  public:
+  /**
+   * @brief Configuration for relativity model construction.
+   */
   struct Config {
     std::filesystem::path ephemeris_file{};
     bool use_spherical_central_body{true};
@@ -53,8 +62,14 @@ class RelativityAccelerationModel final {
     std::array<double, 3> earth_spin_unit{0.0, 0.0, 1.0};
   };
 
+  /**
+   * @brief Factory helper that loads ephemeris resources.
+   */
   static std::unique_ptr<RelativityAccelerationModel> Create(const Config& config);
 
+  /**
+   * @brief Evaluate relativistic acceleration terms at one state.
+   */
   [[nodiscard]] RelativityResult evaluate(const astroforces::core::StateVector& state) const;
 
  private:

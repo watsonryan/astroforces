@@ -19,6 +19,9 @@ class Workspace;
 
 namespace astroforces::forces {
 
+/**
+ * @brief Output bundle for SRP evaluation.
+ */
 struct SrpResult {
   astroforces::core::Vec3 acceleration_mps2{};
   double solar_pressure_pa{};
@@ -30,8 +33,14 @@ struct SrpResult {
   astroforces::core::Status status{astroforces::core::Status::Ok};
 };
 
+/**
+ * @brief Solar radiation pressure acceleration model.
+ */
 class SrpAccelerationModel final {
  public:
+  /**
+   * @brief Configuration for SRP model construction.
+   */
   struct Config {
     std::filesystem::path ephemeris_file{};
     double solar_pressure_1au_pa{astroforces::core::constants::kSolarRadiationPressureAt1AuPa};
@@ -39,8 +48,14 @@ class SrpAccelerationModel final {
     bool use_eclipse{false};
   };
 
+  /**
+   * @brief Factory helper that loads ephemeris resources.
+   */
   static std::unique_ptr<SrpAccelerationModel> Create(const Config& config);
 
+  /**
+   * @brief Evaluate SRP acceleration for one state and spacecraft.
+   */
   [[nodiscard]] SrpResult evaluate(const astroforces::core::StateVector& state,
                                    const astroforces::sc::SpacecraftProperties& sc) const;
 

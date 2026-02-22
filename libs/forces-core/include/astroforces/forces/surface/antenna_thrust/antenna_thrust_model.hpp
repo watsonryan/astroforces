@@ -13,8 +13,14 @@
 
 namespace astroforces::forces {
 
+/**
+ * @brief Direction strategy for antenna thrust vector.
+ */
 enum class AntennaThrustDirectionMode : std::uint8_t { Velocity, Nadir, CustomEci, BodyFixed };
 
+/**
+ * @brief Output bundle for antenna thrust evaluation.
+ */
 struct AntennaThrustResult {
   astroforces::core::Vec3 acceleration_mps2{};
   double thrust_n{};
@@ -24,8 +30,14 @@ struct AntennaThrustResult {
   astroforces::core::Status status{astroforces::core::Status::Ok};
 };
 
+/**
+ * @brief Antenna reaction-thrust acceleration model.
+ */
 class AntennaThrustAccelerationModel final {
  public:
+  /**
+   * @brief Configuration for antenna thrust model.
+   */
   struct Config {
     double transmit_power_w{20.0};
     double efficiency{1.0};
@@ -38,6 +50,9 @@ class AntennaThrustAccelerationModel final {
   AntennaThrustAccelerationModel() = default;
   explicit AntennaThrustAccelerationModel(const Config& config) : config_(config) {}
 
+  /**
+   * @brief Evaluate antenna thrust acceleration for one state and spacecraft.
+   */
   [[nodiscard]] AntennaThrustResult evaluate(const astroforces::core::StateVector& state,
                                              const astroforces::sc::SpacecraftProperties& sc) const;
 

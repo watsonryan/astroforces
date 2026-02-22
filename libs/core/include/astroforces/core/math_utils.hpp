@@ -11,12 +11,18 @@
 
 namespace astroforces::core {
 
+/**
+ * @brief Dense 3x3 matrix in row-major storage.
+ */
 struct Mat3 {
   std::array<double, 9> v{};
   [[nodiscard]] double& operator()(const int r, const int c) { return v[static_cast<std::size_t>(r * 3 + c)]; }
   [[nodiscard]] double operator()(const int r, const int c) const { return v[static_cast<std::size_t>(r * 3 + c)]; }
 };
 
+/**
+ * @brief Create identity 3x3 matrix.
+ */
 inline Mat3 mat_identity() {
   Mat3 m{};
   m(0, 0) = 1.0;
@@ -25,6 +31,9 @@ inline Mat3 mat_identity() {
   return m;
 }
 
+/**
+ * @brief Matrix-matrix multiplication.
+ */
 inline Mat3 mat_mul(const Mat3& a, const Mat3& b) {
   Mat3 c{};
   for (int r = 0; r < 3; ++r) {
@@ -35,6 +44,9 @@ inline Mat3 mat_mul(const Mat3& a, const Mat3& b) {
   return c;
 }
 
+/**
+ * @brief Matrix transpose.
+ */
 inline Mat3 mat_transpose(const Mat3& m) {
   Mat3 t{};
   for (int r = 0; r < 3; ++r) {
@@ -45,6 +57,9 @@ inline Mat3 mat_transpose(const Mat3& m) {
   return t;
 }
 
+/**
+ * @brief Matrix-vector multiplication.
+ */
 inline Vec3 mat_vec(const Mat3& m, const Vec3& x) {
   return Vec3{
       m(0, 0) * x.x + m(0, 1) * x.y + m(0, 2) * x.z,
@@ -53,6 +68,9 @@ inline Vec3 mat_vec(const Mat3& m, const Vec3& x) {
   };
 }
 
+/**
+ * @brief Vector cross product.
+ */
 inline Vec3 vec_cross(const Vec3& a, const Vec3& b) {
   return Vec3{
       a.y * b.z - a.z * b.y,

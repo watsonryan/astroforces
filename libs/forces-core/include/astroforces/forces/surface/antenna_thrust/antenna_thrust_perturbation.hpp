@@ -12,13 +12,22 @@
 
 namespace astroforces::forces {
 
+/**
+ * @brief Perturbation-stack wrapper around AntennaThrustAccelerationModel.
+ */
 class AntennaThrustPerturbationModel final : public astroforces::forces::IPerturbationModel {
  public:
+  /**
+   * @brief Construct wrapper with antenna thrust model.
+   */
   AntennaThrustPerturbationModel(AntennaThrustAccelerationModel antenna_thrust = AntennaThrustAccelerationModel{},
                                  const astroforces::sc::SpacecraftProperties* default_spacecraft = nullptr,
                                  std::string name = "antenna_thrust")
       : antenna_thrust_(antenna_thrust), default_spacecraft_(default_spacecraft), name_(std::move(name)) {}
 
+  /**
+   * @brief Evaluate antenna-thrust contribution.
+   */
   [[nodiscard]] astroforces::forces::PerturbationContribution evaluate(
       const astroforces::forces::PerturbationRequest& request) const override;
 
@@ -29,4 +38,3 @@ class AntennaThrustPerturbationModel final : public astroforces::forces::IPertur
 };
 
 }  // namespace astroforces::forces
-
