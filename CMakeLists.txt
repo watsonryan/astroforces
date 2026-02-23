@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.25)
 project(astroforces VERSION 0.1.0 LANGUAGES CXX)
 
 option(ASTROFORCES_BUILD_TESTS "Build tests" ON)
+option(ASTROFORCES_BUILD_CLI "Build CLI tools" ON)
 option(ASTROFORCES_WARNINGS_AS_ERRORS "Treat warnings as errors" ON)
 option(ASTROFORCES_TEST_REQUIRE_EXTERNAL_DATA "Fail tests when required external ephemeris data is missing" OFF)
 
@@ -72,89 +73,117 @@ target_link_libraries(astroforces_adapters PUBLIC
 
 target_link_libraries(astroforces_forces_core PRIVATE jpl::eph)
 
-add_executable(drag_cli apps/forces-cli/drag_cli.cpp)
-target_link_libraries(drag_cli PRIVATE
-  astroforces_core
+if(ASTROFORCES_BUILD_CLI)
+  add_executable(drag_cli apps/forces-cli/drag_cli.cpp)
+  target_link_libraries(drag_cli PRIVATE
+    astroforces_core
+    astroforces_space_weather
+    astroforces_adapters
+    astroforces_models_basic
+    astroforces_forces_core)
+
+  add_executable(drag_batch_cli apps/forces-cli/drag_batch_cli.cpp)
+  target_link_libraries(drag_batch_cli PRIVATE
+    astroforces_core
+    astroforces_space_weather
+    astroforces_adapters
+    astroforces_models_basic
+    astroforces_forces_core)
+
+  add_executable(perturbation_profile_cli apps/forces-cli/perturbation_profile_cli.cpp)
+  target_link_libraries(perturbation_profile_cli PRIVATE
+    astroforces_core
+    astroforces_space_weather
+    astroforces_adapters
+    astroforces_models_basic
+    astroforces_forces_core)
+
+  add_executable(third_body_cli apps/forces-cli/third_body_cli.cpp)
+  target_link_libraries(third_body_cli PRIVATE
+    astroforces_core
+    astroforces_forces_core)
+
+  add_executable(third_body_batch_cli apps/forces-cli/third_body_batch_cli.cpp)
+  target_link_libraries(third_body_batch_cli PRIVATE
+    astroforces_core
+    astroforces_forces_core)
+
+  add_executable(srp_cli apps/forces-cli/srp_cli.cpp)
+  target_link_libraries(srp_cli PRIVATE
+    astroforces_core
+    astroforces_forces_core)
+
+  add_executable(srp_batch_cli apps/forces-cli/srp_batch_cli.cpp)
+  target_link_libraries(srp_batch_cli PRIVATE
+    astroforces_core
+    astroforces_forces_core)
+
+  add_executable(earth_radiation_cli apps/forces-cli/earth_radiation_cli.cpp)
+  target_link_libraries(earth_radiation_cli PRIVATE
+    astroforces_core
+    astroforces_forces_core)
+
+  add_executable(earth_radiation_batch_cli apps/forces-cli/earth_radiation_batch_cli.cpp)
+  target_link_libraries(earth_radiation_batch_cli PRIVATE
+    astroforces_core
+    astroforces_forces_core)
+
+  add_executable(antenna_thrust_cli apps/forces-cli/antenna_thrust_cli.cpp)
+  target_link_libraries(antenna_thrust_cli PRIVATE
+    astroforces_core
+    astroforces_forces_core)
+
+  add_executable(antenna_thrust_batch_cli apps/forces-cli/antenna_thrust_batch_cli.cpp)
+  target_link_libraries(antenna_thrust_batch_cli PRIVATE
+    astroforces_core
+    astroforces_forces_core)
+
+  add_executable(relativity_cli apps/forces-cli/relativity_cli.cpp)
+  target_link_libraries(relativity_cli PRIVATE
+    astroforces_core
+    astroforces_forces_core)
+
+  add_executable(gravity_sph_cli apps/forces-cli/gravity_sph_cli.cpp)
+  target_link_libraries(gravity_sph_cli PRIVATE
+    astroforces_core
+    astroforces_forces_core)
+
+  add_executable(frame_transform_cli apps/forces-cli/frame_transform_cli.cpp)
+  target_link_libraries(frame_transform_cli PRIVATE
+    astroforces_core)
+
+  add_executable(transform_profile_cli apps/forces-cli/transform_profile_cli.cpp)
+  target_link_libraries(transform_profile_cli PRIVATE
+    astroforces_core)
+endif()
+
+set(ASTROFORCES_WARNING_TARGETS
   astroforces_space_weather
-  astroforces_adapters
+  astroforces_sc_props
   astroforces_models_basic
-  astroforces_forces_core)
+  astroforces_forces_core
+  astroforces_adapters)
 
-add_executable(drag_batch_cli apps/forces-cli/drag_batch_cli.cpp)
-target_link_libraries(drag_batch_cli PRIVATE
-  astroforces_core
-  astroforces_space_weather
-  astroforces_adapters
-  astroforces_models_basic
-  astroforces_forces_core)
+if(ASTROFORCES_BUILD_CLI)
+  list(APPEND ASTROFORCES_WARNING_TARGETS
+    drag_cli
+    drag_batch_cli
+    perturbation_profile_cli
+    third_body_cli
+    third_body_batch_cli
+    srp_cli
+    srp_batch_cli
+    earth_radiation_cli
+    earth_radiation_batch_cli
+    antenna_thrust_cli
+    antenna_thrust_batch_cli
+    relativity_cli
+    gravity_sph_cli
+    frame_transform_cli
+    transform_profile_cli)
+endif()
 
-add_executable(perturbation_profile_cli apps/forces-cli/perturbation_profile_cli.cpp)
-target_link_libraries(perturbation_profile_cli PRIVATE
-  astroforces_core
-  astroforces_space_weather
-  astroforces_adapters
-  astroforces_models_basic
-  astroforces_forces_core)
-
-add_executable(third_body_cli apps/forces-cli/third_body_cli.cpp)
-target_link_libraries(third_body_cli PRIVATE
-  astroforces_core
-  astroforces_forces_core)
-
-add_executable(third_body_batch_cli apps/forces-cli/third_body_batch_cli.cpp)
-target_link_libraries(third_body_batch_cli PRIVATE
-  astroforces_core
-  astroforces_forces_core)
-
-add_executable(srp_cli apps/forces-cli/srp_cli.cpp)
-target_link_libraries(srp_cli PRIVATE
-  astroforces_core
-  astroforces_forces_core)
-
-add_executable(srp_batch_cli apps/forces-cli/srp_batch_cli.cpp)
-target_link_libraries(srp_batch_cli PRIVATE
-  astroforces_core
-  astroforces_forces_core)
-
-add_executable(earth_radiation_cli apps/forces-cli/earth_radiation_cli.cpp)
-target_link_libraries(earth_radiation_cli PRIVATE
-  astroforces_core
-  astroforces_forces_core)
-
-add_executable(earth_radiation_batch_cli apps/forces-cli/earth_radiation_batch_cli.cpp)
-target_link_libraries(earth_radiation_batch_cli PRIVATE
-  astroforces_core
-  astroforces_forces_core)
-
-add_executable(antenna_thrust_cli apps/forces-cli/antenna_thrust_cli.cpp)
-target_link_libraries(antenna_thrust_cli PRIVATE
-  astroforces_core
-  astroforces_forces_core)
-
-add_executable(antenna_thrust_batch_cli apps/forces-cli/antenna_thrust_batch_cli.cpp)
-target_link_libraries(antenna_thrust_batch_cli PRIVATE
-  astroforces_core
-  astroforces_forces_core)
-
-add_executable(relativity_cli apps/forces-cli/relativity_cli.cpp)
-target_link_libraries(relativity_cli PRIVATE
-  astroforces_core
-  astroforces_forces_core)
-
-add_executable(gravity_sph_cli apps/forces-cli/gravity_sph_cli.cpp)
-target_link_libraries(gravity_sph_cli PRIVATE
-  astroforces_core
-  astroforces_forces_core)
-
-add_executable(frame_transform_cli apps/forces-cli/frame_transform_cli.cpp)
-target_link_libraries(frame_transform_cli PRIVATE
-  astroforces_core)
-
-add_executable(transform_profile_cli apps/forces-cli/transform_profile_cli.cpp)
-target_link_libraries(transform_profile_cli PRIVATE
-  astroforces_core)
-
-foreach(tgt astroforces_space_weather astroforces_sc_props astroforces_models_basic astroforces_forces_core astroforces_adapters drag_cli drag_batch_cli perturbation_profile_cli third_body_cli third_body_batch_cli srp_cli srp_batch_cli earth_radiation_cli earth_radiation_batch_cli antenna_thrust_cli antenna_thrust_batch_cli relativity_cli gravity_sph_cli frame_transform_cli transform_profile_cli)
+foreach(tgt IN LISTS ASTROFORCES_WARNING_TARGETS)
   if(MSVC)
     target_compile_options(${tgt} PRIVATE /W4)
     if(ASTROFORCES_WARNINGS_AS_ERRORS)
