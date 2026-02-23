@@ -10,27 +10,27 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-include(${CMAKE_SOURCE_DIR}/cmake/dependencies.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies.cmake)
 
 add_library(astroforces_core INTERFACE)
-target_include_directories(astroforces_core INTERFACE ${CMAKE_SOURCE_DIR}/libs/core/include)
+target_include_directories(astroforces_core INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/libs/core/include)
 target_link_libraries(astroforces_core INTERFACE fmt::fmt spdlog::spdlog)
 
 add_library(astroforces_space_weather STATIC
   libs/space-weather/src/static_provider.cpp
   libs/space-weather/src/celestrak_csv_provider.cpp)
-target_include_directories(astroforces_space_weather PUBLIC ${CMAKE_SOURCE_DIR}/libs/space-weather/include)
+target_include_directories(astroforces_space_weather PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/libs/space-weather/include)
 target_link_libraries(astroforces_space_weather PUBLIC astroforces_core)
 
 add_library(astroforces_sc_props STATIC
   libs/sc-props/src/spacecraft.cpp)
-target_include_directories(astroforces_sc_props PUBLIC ${CMAKE_SOURCE_DIR}/libs/sc-props/include)
+target_include_directories(astroforces_sc_props PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/libs/sc-props/include)
 target_link_libraries(astroforces_sc_props PUBLIC astroforces_core)
 
 add_library(astroforces_models_basic STATIC
   libs/models-basic/src/exponential_atmosphere.cpp
   libs/models-basic/src/zero_wind.cpp)
-target_include_directories(astroforces_models_basic PUBLIC ${CMAKE_SOURCE_DIR}/libs/models-basic/include)
+target_include_directories(astroforces_models_basic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/libs/models-basic/include)
 target_link_libraries(astroforces_models_basic PUBLIC astroforces_core)
 
 add_library(astroforces_forces_core STATIC
@@ -53,7 +53,7 @@ add_library(astroforces_forces_core STATIC
   libs/forces-core/src/surface/earth_radiation/earth_radiation_perturbation.cpp
   libs/forces-core/src/surface/srp/srp_model.cpp
   libs/forces-core/src/surface/srp/srp_perturbation.cpp)
-target_include_directories(astroforces_forces_core PUBLIC ${CMAKE_SOURCE_DIR}/libs/forces-core/include)
+target_include_directories(astroforces_forces_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/libs/forces-core/include)
 target_link_libraries(astroforces_forces_core PUBLIC astroforces_core astroforces_sc_props)
 if(ASTROFORCES_EIGEN_TARGET)
   target_link_libraries(astroforces_forces_core PRIVATE ${ASTROFORCES_EIGEN_TARGET})
@@ -63,7 +63,7 @@ add_library(astroforces_adapters STATIC
   libs/adapters/src/nrlmsis21_adapter.cpp
   libs/adapters/src/dtm2020_adapter.cpp
   libs/adapters/src/hwm14_adapter.cpp)
-target_include_directories(astroforces_adapters PUBLIC ${CMAKE_SOURCE_DIR}/libs/adapters/include)
+target_include_directories(astroforces_adapters PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/libs/adapters/include)
 target_link_libraries(astroforces_adapters PUBLIC
   astroforces_core
   msis21::msis21
@@ -210,7 +210,7 @@ if(ASTROFORCES_BUILD_TESTS)
     astroforces_core
     astroforces_space_weather)
   target_compile_definitions(astroforces_test_space_weather_real_snippet PRIVATE
-    ASTROFORCES_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+    ASTROFORCES_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
   add_test(NAME SpaceWeatherCelesTrakRealSnippet COMMAND astroforces_test_space_weather_real_snippet)
 
   add_executable(astroforces_test_perturbation_stack tests/test_perturbation_stack.cpp)
@@ -234,7 +234,7 @@ if(ASTROFORCES_BUILD_TESTS)
     astroforces_forces_core)
   target_compile_definitions(astroforces_test_third_body PRIVATE
     ASTROFORCES_JPL_EPH_SOURCE_DIR="${jpl_eph_ext_SOURCE_DIR}"
-    ASTROFORCES_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+    ASTROFORCES_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
     $<$<BOOL:${ASTROFORCES_TEST_REQUIRE_EXTERNAL_DATA}>:ASTROFORCES_TEST_REQUIRE_EXTERNAL_DATA=1>)
   add_test(NAME ThirdBody COMMAND astroforces_test_third_body)
 
@@ -244,7 +244,7 @@ if(ASTROFORCES_BUILD_TESTS)
     astroforces_forces_core)
   target_compile_definitions(astroforces_test_srp PRIVATE
     ASTROFORCES_JPL_EPH_SOURCE_DIR="${jpl_eph_ext_SOURCE_DIR}"
-    ASTROFORCES_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+    ASTROFORCES_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
     $<$<BOOL:${ASTROFORCES_TEST_REQUIRE_EXTERNAL_DATA}>:ASTROFORCES_TEST_REQUIRE_EXTERNAL_DATA=1>)
   add_test(NAME SRP COMMAND astroforces_test_srp)
 
@@ -266,7 +266,7 @@ if(ASTROFORCES_BUILD_TESTS)
     astroforces_forces_core)
   target_compile_definitions(astroforces_test_relativity PRIVATE
     ASTROFORCES_JPL_EPH_SOURCE_DIR="${jpl_eph_ext_SOURCE_DIR}"
-    ASTROFORCES_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+    ASTROFORCES_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
     $<$<BOOL:${ASTROFORCES_TEST_REQUIRE_EXTERNAL_DATA}>:ASTROFORCES_TEST_REQUIRE_EXTERNAL_DATA=1>)
   add_test(NAME Relativity COMMAND astroforces_test_relativity)
 
@@ -276,7 +276,7 @@ if(ASTROFORCES_BUILD_TESTS)
     astroforces_forces_core)
   target_compile_definitions(astroforces_test_gravity_sph PRIVATE
     ASTROFORCES_JPL_EPH_SOURCE_DIR="${jpl_eph_ext_SOURCE_DIR}"
-    ASTROFORCES_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+    ASTROFORCES_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
     $<$<BOOL:${ASTROFORCES_TEST_REQUIRE_EXTERNAL_DATA}>:ASTROFORCES_TEST_REQUIRE_EXTERNAL_DATA=1>)
   add_test(NAME GravitySph COMMAND astroforces_test_gravity_sph)
 
@@ -289,7 +289,7 @@ if(ASTROFORCES_BUILD_TESTS)
   target_link_libraries(astroforces_test_eop_reader PRIVATE
     astroforces_core)
   target_compile_definitions(astroforces_test_eop_reader PRIVATE
-    ASTROFORCES_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+    ASTROFORCES_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
   add_test(NAME EopReader COMMAND astroforces_test_eop_reader)
 
   add_executable(astroforces_test_cip_reader tests/test_cip_reader.cpp)
