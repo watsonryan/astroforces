@@ -99,7 +99,7 @@ def load_csv(path: Path):
 
 def pretty_label(key: str) -> str:
     if key == "gravity_sph_tides_mps2":
-        return "Gravity SPH + Tides"
+        return "Gravity SPH + Tides (no central)"
     if key == "gravity_tides_mps2":
         return "Gravity Tides"
     if key == "gravity_sph_mps2":
@@ -231,6 +231,16 @@ def main() -> None:
         ax.set_xlabel("Altitude [km]")
     else:
         ax.set_xlabel("Altitude [km]")
+    ax.text(
+        0.01,
+        0.98,
+        "Comparative terms; central gravity excluded",
+        transform=ax.transAxes,
+        ha="left",
+        va="top",
+        fontsize=6.2,
+        color="0.2",
+    )
     ax.set_ylabel("Acceleration Magnitude [m/s$^2$]")
     ax.grid(True, which="major", linestyle="-", linewidth=0.4, alpha=0.35)
     ax.grid(True, which="minor", linestyle=":", linewidth=0.3, alpha=0.25)
