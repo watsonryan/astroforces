@@ -139,6 +139,21 @@ int main(int argc, char** argv) {
   }
   std::unique_ptr<astroforces::forces::GravitySphAccelerationModel> gravity{};
   if (!gravity_gfc_file.empty()) {
+    const bool has_ephem = !eph_file.empty();
+    const bool has_eop = !eop_finals_file.empty();
+    const bool has_cip = !cip_xys_file.empty();
+    const bool has_eop_cip = has_eop && has_cip;
+    const bool enable_lunisolar_tides = has_ephem && has_eop_cip;
+    const bool enable_tide2 = has_eop_cip;
+    const bool enable_pole_tides = has_eop_cip;
+    const bool enable_ocean_tide = has_eop_cip && !ocean_tide_file.empty();
+    const bool enable_atmos_tide = has_eop_cip && !atmos_tide_file.empty();
+    const bool enable_aod = has_eop_cip && !aod_file.empty();
+    if (has_ephem && !has_eop_cip) {
+      spdlog::warn(
+          "gravity profile: ephemeris provided but EOP/CIP missing; disabling Sun/Moon "
+          "and tide terms that require EOP/CIP");
+    }
     gravity = astroforces::forces::GravitySphAccelerationModel::Create(
         {.gravity_model_file = gravity_gfc_file,
          .ephemeris_file = std::filesystem::path(eph_file),
@@ -151,15 +166,15 @@ int main(int argc, char** argv) {
          .max_degree = gravity_max_degree,
          .use_central = true,
          .use_sph = true,
-         .use_solid_earth_tides = true,
-         .use_sun_tide = !eph_file.empty(),
-         .use_moon_tide = !eph_file.empty(),
-         .use_solid_earth_tide2 = true,
-         .use_pole_tide_solid = !eop_finals_file.empty(),
-         .use_pole_tide_ocean = !eop_finals_file.empty(),
-         .use_ocean_tide = !ocean_tide_file.empty(),
-         .use_atmos_tide = !atmos_tide_file.empty(),
-         .use_aod = !aod_file.empty()});
+         .use_solid_earth_tides = enable_lunisolar_tides || enable_tide2,
+         .use_sun_tide = enable_lunisolar_tides,
+         .use_moon_tide = enable_lunisolar_tides,
+         .use_solid_earth_tide2 = enable_tide2,
+         .use_pole_tide_solid = enable_pole_tides,
+         .use_pole_tide_ocean = enable_pole_tides,
+         .use_ocean_tide = enable_ocean_tide,
+         .use_atmos_tide = enable_atmos_tide,
+         .use_aod = enable_aod});
   }
 
   struct ComponentModel {
@@ -266,7 +281,7 @@ int main(int argc, char** argv) {
 
     std::vector<double> gravity_mags{};
     if (gravity) {
-      gravity_mags.reserve(10);
+      gravity_mags.assign(10, std::numeric_limits<double>::quiet_NaN());
     }
     std::vector<double> comp_mags{};
     comp_mags.reserve(components.size());
@@ -284,16 +299,16 @@ int main(int argc, char** argv) {
       const double g_aod = magnitude(g.aod_mps2);
       const double g_to = magnitude(g.ocean_tide_mps2);
       const double g_ta = magnitude(g.atmos_tide_mps2);
-      gravity_mags.push_back(g_c);
-      gravity_mags.push_back(g_sph);
-      gravity_mags.push_back(g_tss);
-      gravity_mags.push_back(g_tsm);
-      gravity_mags.push_back(g_tsf);
-      gravity_mags.push_back(g_tps);
-      gravity_mags.push_back(g_tpo);
-      gravity_mags.push_back(g_aod);
-      gravity_mags.push_back(g_to);
-      gravity_mags.push_back(g_ta);
+      gravity_mags[0] = g_c;
+      gravity_mags[1] = g_sph;
+      gravity_mags[2] = g_tss;
+      gravity_mags[3] = g_tsm;
+      gravity_mags[4] = g_tsf;
+      gravity_mags[5] = g_tps;
+      gravity_mags[6] = g_tpo;
+      gravity_mags[7] = g_aod;
+      gravity_mags[8] = g_to;
+      gravity_mags[9] = g_ta;
       rss_sum += g_c * g_c + g_sph * g_sph + g_tss * g_tss + g_tsm * g_tsm + g_tsf * g_tsf + g_tps * g_tps + g_tpo * g_tpo
                  + g_aod * g_aod + g_to * g_to + g_ta * g_ta;
       if (status == astroforces::core::Status::Ok && g.status != astroforces::core::Status::Ok) {
