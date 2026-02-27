@@ -160,6 +160,7 @@ def interpolate_y(alt_km: list[float], vals: list[float], x_km: float) -> float 
 def main() -> None:
     args = parse_args()
     alt_km, series, total = load_csv(args.input_csv)
+    series_raw = {k: list(v) for k, v in series.items()}
 
     # Omit central gravity from comparative perturbation plots to keep scale readable.
     if "gravity_central_mps2" in series:
@@ -251,17 +252,28 @@ def main() -> None:
                 y_max = auto_max if y_max is None else y_max
         if y_min is not None and y_max is not None and y_min > 0.0 and y_max > y_min:
             ax.set_ylim(y_min, y_max)
+    color_by_label = {label: line.get_color() for label, line, _, _, _ in lines}
+    readout_series = {
+        k: v for k, v in series_raw.items() if k != "gravity_central_mps2"
+    }
     cross_values: list[tuple[float, list[tuple[str, str, float]]]] = []
     for x_km in args.cross_alt_km:
         if x_km < alt_km[0] or x_km > alt_km[-1]:
             continue
         vals_at_cross: list[tuple[str, str, float]] = []
+        # Marker overlay on plotted curves.
         for _, line, vals, mk, axis in lines:
             y = interpolate_y(alt_km, vals, x_km)
             if y is None:
                 continue
             axis.plot([x_km], [y], marker=mk, markersize=3.0, color=line.get_color(), linestyle="None")
-            vals_at_cross.append((line.get_label(), line.get_color(), y))
+        # Numeric readout from raw components (exclude central gravity).
+        for key, vals in readout_series.items():
+            y = interpolate_y(alt_km, vals, x_km)
+            if y is None:
+                continue
+            label = pretty_label(key)
+            vals_at_cross.append((label, color_by_label.get(label, "black"), y))
         vals_at_cross.sort(key=lambda t: t[2], reverse=True)
         cross_values.append((x_km, vals_at_cross))
 
