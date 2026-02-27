@@ -181,7 +181,7 @@ Perturbation-vs-altitude profiling:
   1000000000 \
   data/required/EIGEN-6S4.gfc \
   120
-python3 scripts/plot_perturbation_profile.py perturbation_profile.csv --output-stem perturbation_vs_altitude --column single
+python3 scripts/plot_perturbation_profile.py perturbation_profile.csv --output-stem perturbation_vs_altitude --column single --cross-alt-km 500
 ```
 This generates PDF/PNG plots of acceleration magnitude by perturbation component versus altitude.
 
