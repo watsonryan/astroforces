@@ -74,6 +74,24 @@ target_link_libraries(astroforces_adapters PUBLIC
 target_link_libraries(astroforces_forces_core PRIVATE jpl::eph)
 
 if(ASTROFORCES_BUILD_CLI)
+  set(ASTROFORCES_CLI_TARGETS
+    drag_cli
+    drag_batch_cli
+    perturbation_profile_cli
+    third_body_cli
+    third_body_batch_cli
+    srp_cli
+    srp_batch_cli
+    earth_radiation_cli
+    earth_radiation_batch_cli
+    antenna_thrust_cli
+    antenna_thrust_batch_cli
+    relativity_cli
+    gravity_sph_cli
+    frame_transform_cli
+    orbital_elements_cli
+    transform_profile_cli)
+
   add_executable(drag_cli apps/forces-cli/drag_cli.cpp)
   target_link_libraries(drag_cli PRIVATE
     astroforces_core
@@ -152,9 +170,18 @@ if(ASTROFORCES_BUILD_CLI)
   target_link_libraries(frame_transform_cli PRIVATE
     astroforces_core)
 
+  add_executable(orbital_elements_cli apps/forces-cli/orbital_elements_cli.cpp)
+  target_link_libraries(orbital_elements_cli PRIVATE
+    astroforces_core
+    ${ASTROFORCES_CLI11_TARGET})
+
   add_executable(transform_profile_cli apps/forces-cli/transform_profile_cli.cpp)
   target_link_libraries(transform_profile_cli PRIVATE
     astroforces_core)
+
+  foreach(tgt IN LISTS ASTROFORCES_CLI_TARGETS)
+    target_link_libraries(${tgt} PRIVATE ${ASTROFORCES_CLI11_TARGET})
+  endforeach()
 endif()
 
 set(ASTROFORCES_WARNING_TARGETS
@@ -180,6 +207,7 @@ if(ASTROFORCES_BUILD_CLI)
     relativity_cli
     gravity_sph_cli
     frame_transform_cli
+    orbital_elements_cli
     transform_profile_cli)
 endif()
 
@@ -313,6 +341,11 @@ if(ASTROFORCES_BUILD_TESTS)
   target_link_libraries(astroforces_test_core_transforms PRIVATE
     astroforces_core)
   add_test(NAME CoreTransforms COMMAND astroforces_test_core_transforms)
+
+  add_executable(astroforces_test_orbital_elements tests/test_orbital_elements.cpp)
+  target_link_libraries(astroforces_test_orbital_elements PRIVATE
+    astroforces_core)
+  add_test(NAME OrbitalElements COMMAND astroforces_test_orbital_elements)
 
   add_executable(astroforces_test_eop_reader tests/test_eop_reader.cpp)
   target_link_libraries(astroforces_test_eop_reader PRIVATE

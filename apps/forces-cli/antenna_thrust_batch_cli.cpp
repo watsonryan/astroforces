@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+#include <CLI/CLI.hpp>
 #include <fmt/format.h>
 #include <spdlog/spdlog.h>
 
@@ -74,19 +75,30 @@ astroforces::forces::AntennaThrustDirectionMode parse_mode(const std::string& s,
 }  // namespace
 
 int main(int argc, char** argv) {
-  if (argc < 3 || argc > 10) {
-    spdlog::error(
-        "usage: antenna_thrust_batch_cli <input_csv> <output_csv> [mass_kg] [transmit_power_w] [efficiency] [mode:velocity|nadir|custom_eci|body_fixed] [dir_x] [dir_y] [dir_z]");
-    spdlog::error("input row: epoch_utc_s,x_eci_m,y_eci_m,z_eci_m,vx_eci_mps,vy_eci_mps,vz_eci_mps");
-    return 1;
-  }
+  std::filesystem::path input_csv{};
+  std::filesystem::path output_csv{};
+  double mass_kg{600.0};
+  double power_w{20.0};
+  double efficiency{1.0};
+  std::string mode_s{"velocity"};
+  double dir_x{1.0};
+  double dir_y{0.0};
+  double dir_z{0.0};
 
-  const std::filesystem::path input_csv = argv[1];
-  const std::filesystem::path output_csv = argv[2];
-  const double mass_kg = (argc >= 4) ? std::atof(argv[3]) : 600.0;
-  const double power_w = (argc >= 5) ? std::atof(argv[4]) : 20.0;
-  const double efficiency = (argc >= 6) ? std::atof(argv[5]) : 1.0;
-  const std::string mode_s = (argc >= 7) ? argv[6] : "velocity";
+  CLI::App app{"Batch antenna thrust perturbation CLI"};
+  app.add_option("input_csv", input_csv)->required();
+  app.add_option("output_csv", output_csv)->required();
+  app.add_option("mass_kg", mass_kg)->capture_default_str();
+  app.add_option("transmit_power_w", power_w)->capture_default_str();
+  app.add_option("efficiency", efficiency)->capture_default_str();
+  app.add_option("mode", mode_s)
+      ->check(CLI::IsMember({"velocity", "nadir", "custom_eci", "body_fixed"}))
+      ->capture_default_str();
+  app.add_option("dir_x", dir_x)->capture_default_str();
+  app.add_option("dir_y", dir_y)->capture_default_str();
+  app.add_option("dir_z", dir_z)->capture_default_str();
+  app.footer("input row: epoch_utc_s,x_eci_m,y_eci_m,z_eci_m,vx_eci_mps,vy_eci_mps,vz_eci_mps");
+  CLI11_PARSE(app, argc, argv);
 
   bool mode_ok = false;
   const auto mode = parse_mode(mode_s, &mode_ok);
@@ -95,11 +107,7 @@ int main(int argc, char** argv) {
     return 2;
   }
 
-  const auto dir = astroforces::core::Vec3{
-      (argc >= 8) ? std::atof(argv[7]) : 1.0,
-      (argc >= 9) ? std::atof(argv[8]) : 0.0,
-      (argc >= 10) ? std::atof(argv[9]) : 0.0,
-  };
+  const auto dir = astroforces::core::Vec3{dir_x, dir_y, dir_z};
 
   std::ifstream in(input_csv);
   if (!in) {

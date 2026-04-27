@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 
+#include <CLI/CLI.hpp>
 #include <fmt/format.h>
 #include <spdlog/spdlog.h>
 
@@ -48,28 +49,41 @@ double magnitude(const astroforces::core::Vec3& v) { return astroforces::core::n
 }  // namespace
 
 int main(int argc, char** argv) {
-  if (argc < 7 || argc > 17) {
-    spdlog::error(
-        "usage: perturbation_profile_cli <output_csv> <alt_min_km> <alt_max_km> <samples> <dtm_coeff_file> <space_weather_csv> [jpl_ephemeris_file] [epoch_utc_s] [gravity_gfc_file] [gravity_max_degree] [eop_finals_file] [ocean_tide_file] [atmos_tide_file] [ocean_pole_tide_file] [aod_file] [cip_xys_file]");
-    return 1;
-  }
+  std::filesystem::path out_csv{};
+  double alt_min_km{};
+  double alt_max_km{};
+  int samples{};
+  std::filesystem::path dtm_coeff_file{};
+  std::filesystem::path space_weather_csv{};
+  std::string eph_file{};
+  double epoch_utc_s = 1.0e9;
+  std::filesystem::path gravity_gfc_file{};
+  int gravity_max_degree = 120;
+  std::filesystem::path eop_finals_file{};
+  std::filesystem::path ocean_tide_file{};
+  std::filesystem::path atmos_tide_file{};
+  std::filesystem::path ocean_pole_tide_file{};
+  std::filesystem::path aod_file{};
+  std::filesystem::path cip_xys_file{};
 
-  const std::filesystem::path out_csv = argv[1];
-  const double alt_min_km = std::atof(argv[2]);
-  const double alt_max_km = std::atof(argv[3]);
-  const int samples = std::atoi(argv[4]);
-  const std::filesystem::path dtm_coeff_file = argv[5];
-  const std::filesystem::path space_weather_csv = argv[6];
-  const std::string eph_file = (argc >= 8) ? argv[7] : "";
-  const double epoch_utc_s = (argc >= 9) ? std::atof(argv[8]) : 1.0e9;
-  const std::filesystem::path gravity_gfc_file = (argc >= 10) ? std::filesystem::path(argv[9]) : std::filesystem::path{};
-  const int gravity_max_degree = (argc >= 11) ? std::atoi(argv[10]) : 120;
-  const std::filesystem::path eop_finals_file = (argc >= 12) ? std::filesystem::path(argv[11]) : std::filesystem::path{};
-  const std::filesystem::path ocean_tide_file = (argc >= 13) ? std::filesystem::path(argv[12]) : std::filesystem::path{};
-  const std::filesystem::path atmos_tide_file = (argc >= 14) ? std::filesystem::path(argv[13]) : std::filesystem::path{};
-  const std::filesystem::path ocean_pole_tide_file = (argc >= 15) ? std::filesystem::path(argv[14]) : std::filesystem::path{};
-  const std::filesystem::path aod_file = (argc >= 16) ? std::filesystem::path(argv[15]) : std::filesystem::path{};
-  const std::filesystem::path cip_xys_file = (argc >= 17) ? std::filesystem::path(argv[16]) : std::filesystem::path{};
+  CLI::App app{"Altitude sweep utility for perturbation-acceleration profiling"};
+  app.add_option("output_csv", out_csv)->required();
+  app.add_option("alt_min_km", alt_min_km)->required();
+  app.add_option("alt_max_km", alt_max_km)->required();
+  app.add_option("samples", samples)->required();
+  app.add_option("dtm_coeff_file", dtm_coeff_file)->required();
+  app.add_option("space_weather_csv", space_weather_csv)->required();
+  app.add_option("jpl_ephemeris_file", eph_file)->capture_default_str();
+  app.add_option("epoch_utc_s", epoch_utc_s)->capture_default_str();
+  app.add_option("gravity_gfc_file", gravity_gfc_file)->capture_default_str();
+  app.add_option("gravity_max_degree", gravity_max_degree)->capture_default_str();
+  app.add_option("eop_finals_file", eop_finals_file)->capture_default_str();
+  app.add_option("ocean_tide_file", ocean_tide_file)->capture_default_str();
+  app.add_option("atmos_tide_file", atmos_tide_file)->capture_default_str();
+  app.add_option("ocean_pole_tide_file", ocean_pole_tide_file)->capture_default_str();
+  app.add_option("aod_file", aod_file)->capture_default_str();
+  app.add_option("cip_xys_file", cip_xys_file)->capture_default_str();
+  CLI11_PARSE(app, argc, argv);
 
   if (!(alt_min_km >= 0.0) || !(alt_max_km > alt_min_km) || samples < 2) {
     spdlog::error("invalid sweep parameters: require alt_min>=0, alt_max>alt_min, samples>=2");

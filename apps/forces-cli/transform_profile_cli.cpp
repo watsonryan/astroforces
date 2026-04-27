@@ -6,34 +6,21 @@
 
 #include <chrono>
 #include <cstdint>
-#include <cstdlib>
 
+#include <CLI/CLI.hpp>
 #include <fmt/format.h>
 
 #include "astroforces/core/constants.hpp"
 #include "astroforces/core/transforms.hpp"
 
-namespace {
-
-double parse_or(const char* s, const double fallback) {
-  if (s == nullptr) {
-    return fallback;
-  }
-  return std::strtod(s, nullptr);
-}
-
-std::uint64_t parse_or_u64(const char* s, const std::uint64_t fallback) {
-  if (s == nullptr) {
-    return fallback;
-  }
-  return static_cast<std::uint64_t>(std::strtoull(s, nullptr, 10));
-}
-
-}  // namespace
-
 int main(int argc, char** argv) {
-  const std::uint64_t iters = (argc >= 2) ? parse_or_u64(argv[1], 2000000ULL) : 2000000ULL;
-  const double utc_seconds = (argc >= 3) ? parse_or(argv[2], 1000000000.0) : 1000000000.0;
+  std::uint64_t iters = 2000000ULL;
+  double utc_seconds = 1000000000.0;
+
+  CLI::App app{"Micro-benchmark for rigorous GCRF<->ITRF transforms"};
+  app.add_option("iters", iters)->capture_default_str();
+  app.add_option("utc_seconds", utc_seconds)->capture_default_str();
+  CLI11_PARSE(app, argc, argv);
 
   const double jd_utc = astroforces::core::utc_seconds_to_julian_date_utc(utc_seconds);
   const double jd_tt = astroforces::core::utc_seconds_to_julian_date_tt(utc_seconds);

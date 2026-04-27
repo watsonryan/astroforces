@@ -8,6 +8,7 @@
 #include <filesystem>
 #include <string>
 
+#include <CLI/CLI.hpp>
 #include <fmt/format.h>
 #include <spdlog/spdlog.h>
 
@@ -20,25 +21,44 @@ double magnitude(const astroforces::core::Vec3& v) { return astroforces::core::n
 }  // namespace
 
 int main(int argc, char** argv) {
-  if (argc < 9 || argc > 13) {
-    spdlog::error(
-        "usage: gravity_sph_cli <x_m> <y_m> <z_m> <vx_mps> <vy_mps> <vz_mps> <epoch_utc_s> <gravity_gfc_file> [max_degree] [frame:eci|ecef] [jpl_ephemeris_file] [use_tides:0|1]");
-    return 1;
-  }
+  double x_m{};
+  double y_m{};
+  double z_m{};
+  double vx_mps{};
+  double vy_mps{};
+  double vz_mps{};
+  double epoch_utc_s{};
+  std::filesystem::path gravity_file{};
+  int max_degree{360};
+  std::string frame{"eci"};
+  std::filesystem::path eph_file{};
+  int use_tides_flag{0};
 
+  CLI::App app{"Single-state full SPH gravity CLI"};
+  app.add_option("x_m", x_m)->required();
+  app.add_option("y_m", y_m)->required();
+  app.add_option("z_m", z_m)->required();
+  app.add_option("vx_mps", vx_mps)->required();
+  app.add_option("vy_mps", vy_mps)->required();
+  app.add_option("vz_mps", vz_mps)->required();
+  app.add_option("epoch_utc_s", epoch_utc_s)->required();
+  app.add_option("gravity_gfc_file", gravity_file)->required();
+  app.add_option("max_degree", max_degree)->capture_default_str();
+  app.add_option("frame", frame)->check(CLI::IsMember({"eci", "ecef"}))->capture_default_str();
+  app.add_option("jpl_ephemeris_file", eph_file)->capture_default_str();
+  app.add_option("use_tides", use_tides_flag)->check(CLI::Range(0, 1))->capture_default_str();
+  CLI11_PARSE(app, argc, argv);
+
+  const bool use_tides = (use_tides_flag != 0);
   astroforces::core::StateVector state{};
-  state.position_m = astroforces::core::Vec3{std::atof(argv[1]), std::atof(argv[2]), std::atof(argv[3])};
-  state.velocity_mps = astroforces::core::Vec3{std::atof(argv[4]), std::atof(argv[5]), std::atof(argv[6])};
-  state.epoch.utc_seconds = std::atof(argv[7]);
-
-  const std::filesystem::path gravity_file = argv[8];
+  state.position_m = astroforces::core::Vec3{x_m, y_m, z_m};
+  state.velocity_mps = astroforces::core::Vec3{vx_mps, vy_mps, vz_mps};
+  state.epoch.utc_seconds = epoch_utc_s;
   if (!std::filesystem::exists(gravity_file)) {
     spdlog::error("gravity coefficient file not found: {}", gravity_file.string());
     return 2;
   }
 
-  const int max_degree = (argc >= 10) ? std::atoi(argv[9]) : 360;
-  const std::string frame = (argc >= 11) ? std::string(argv[10]) : "eci";
   if (frame == "ecef") {
     state.frame = astroforces::core::Frame::ECEF;
   } else if (frame == "eci") {
@@ -48,8 +68,6 @@ int main(int argc, char** argv) {
     return 3;
   }
 
-  const std::filesystem::path eph_file = (argc >= 12) ? std::filesystem::path(argv[11]) : std::filesystem::path{};
-  const bool use_tides = (argc >= 13) ? (std::atoi(argv[12]) != 0) : false;
   if (use_tides && (eph_file.empty() || !std::filesystem::exists(eph_file))) {
     spdlog::error("tides requested but ephemeris file not found: {}", eph_file.string());
     return 4;

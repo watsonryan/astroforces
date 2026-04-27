@@ -13,6 +13,7 @@
 #include <ctime>
 #include <vector>
 
+#include <CLI/CLI.hpp>
 #include <spdlog/spdlog.h>
 
 #include "astroforces/adapters/dtm2020_adapter.hpp"
@@ -87,20 +88,27 @@ bool parse_sample_row(const std::string& line, SampleRow& out) {
 }  // namespace
 
 int main(int argc, char** argv) {
-  if (argc < 4 || argc > 9) {
-    spdlog::error("usage: drag_batch_cli <input_csv> <output_file> <format:csv|json> [model] [model_data] [wind] [wind_data] [weather_csv]");
-    spdlog::error("input row: epoch_utc_s,x_m,y_m,z_m,vx_mps,vy_mps,vz_mps");
-    return 1;
-  }
+  std::filesystem::path input_path{};
+  std::filesystem::path output_path{};
+  std::string format{};
+  std::string model_name{"basic"};
+  std::string model_data{};
+  std::string wind_name{"zero"};
+  std::string wind_data{};
+  std::string weather_csv{};
 
-  const std::filesystem::path input_path = argv[1];
-  const std::filesystem::path output_path = argv[2];
-  const std::string format = argv[3];
-  const std::string model_name = (argc >= 5) ? argv[4] : "basic";
-  const std::string model_data = (argc >= 6) ? argv[5] : "";
-  const std::string wind_name = (argc >= 7) ? argv[6] : "zero";
-  const std::string wind_data = (argc >= 8) ? argv[7] : "";
-  const std::string weather_csv = (argc >= 9) ? argv[8] : "";
+  CLI::App app{"Batch drag profile runner with CSV/JSON outputs"};
+  app.add_option("input_csv", input_path)->required();
+  app.add_option("output_file", output_path)->required();
+  app.add_option("format", format)->required()->check(CLI::IsMember({"csv", "json"}));
+  app.add_option("model", model_name)->check(CLI::IsMember({"basic", "nrlmsis", "dtm2020"}))->capture_default_str();
+  app.add_option("model_data", model_data)->capture_default_str();
+  app.add_option("wind", wind_name)->check(CLI::IsMember({"zero", "hwm14"}))->capture_default_str();
+  app.add_option("wind_data", wind_data)->capture_default_str();
+  app.add_option("weather_csv", weather_csv)->capture_default_str();
+  app.footer("input row: epoch_utc_s,x_m,y_m,z_m,vx_mps,vy_mps,vz_mps");
+  CLI11_PARSE(app, argc, argv);
+
   if (format != "csv" && format != "json") {
     spdlog::error("format must be csv or json");
     return 4;

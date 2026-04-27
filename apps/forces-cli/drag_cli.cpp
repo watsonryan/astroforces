@@ -8,6 +8,7 @@
 #include <memory>
 #include <string>
 
+#include <CLI/CLI.hpp>
 #include <fmt/format.h>
 #include <spdlog/spdlog.h>
 
@@ -21,25 +22,39 @@
 #include "astroforces/weather/static_provider.hpp"
 
 int main(int argc, char** argv) {
-  if (argc < 8 || argc > 13) {
-    spdlog::error("usage: drag_cli <x_m> <y_m> <z_m> <vx_mps> <vy_mps> <vz_mps> <epoch_utc_s> [model] [model_data] [wind] [wind_data] [weather_csv]");
-    spdlog::error("models: basic | nrlmsis | dtm2020");
-    spdlog::error("wind: zero | hwm14");
-    spdlog::error("weather_csv: CelesTrak SW-Last5Years.csv (optional)");
-    return 1;
-  }
+  double x_m{};
+  double y_m{};
+  double z_m{};
+  double vx_mps{};
+  double vy_mps{};
+  double vz_mps{};
+  double epoch_utc_s{};
+  std::string model_name{"basic"};
+  std::string model_data{};
+  std::string wind_name{"zero"};
+  std::string wind_data{};
+  std::string weather_csv{};
+
+  CLI::App app{"astroforces drag command-line entrypoint"};
+  app.add_option("x_m", x_m)->required();
+  app.add_option("y_m", y_m)->required();
+  app.add_option("z_m", z_m)->required();
+  app.add_option("vx_mps", vx_mps)->required();
+  app.add_option("vy_mps", vy_mps)->required();
+  app.add_option("vz_mps", vz_mps)->required();
+  app.add_option("epoch_utc_s", epoch_utc_s)->required();
+  app.add_option("model", model_name)->check(CLI::IsMember({"basic", "nrlmsis", "dtm2020"}))->capture_default_str();
+  app.add_option("model_data", model_data)->capture_default_str();
+  app.add_option("wind", wind_name)->check(CLI::IsMember({"zero", "hwm14"}))->capture_default_str();
+  app.add_option("wind_data", wind_data)->capture_default_str();
+  app.add_option("weather_csv", weather_csv)->capture_default_str();
+  CLI11_PARSE(app, argc, argv);
 
   astroforces::core::StateVector state{};
-  state.position_m = astroforces::core::Vec3{std::atof(argv[1]), std::atof(argv[2]), std::atof(argv[3])};
-  state.velocity_mps = astroforces::core::Vec3{std::atof(argv[4]), std::atof(argv[5]), std::atof(argv[6])};
-  state.epoch.utc_seconds = std::atof(argv[7]);
+  state.position_m = astroforces::core::Vec3{x_m, y_m, z_m};
+  state.velocity_mps = astroforces::core::Vec3{vx_mps, vy_mps, vz_mps};
+  state.epoch.utc_seconds = epoch_utc_s;
   state.frame = astroforces::core::Frame::ECEF;
-
-  const std::string weather_csv = (argc >= 13) ? argv[12] : "";
-  const std::string model_name = (argc >= 9) ? argv[8] : "basic";
-  const std::string model_data = (argc >= 10) ? argv[9] : "";
-  const std::string wind_name = (argc >= 11) ? argv[10] : "zero";
-const std::string wind_data = (argc >= 12) ? argv[11] : "";
 
   std::unique_ptr<astroforces::core::ISpaceWeatherProvider> weather{};
   if (!weather_csv.empty()) {

@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <filesystem>
 
+#include <CLI/CLI.hpp>
 #include <fmt/format.h>
 #include <spdlog/spdlog.h>
 
@@ -19,26 +20,42 @@ double magnitude(const astroforces::core::Vec3& v) { return astroforces::core::n
 }  // namespace
 
 int main(int argc, char** argv) {
-  if (argc < 9 || argc > 11) {
-    spdlog::error(
-        "usage: third_body_cli <x_eci_m> <y_eci_m> <z_eci_m> <vx_eci_mps> <vy_eci_mps> <vz_eci_mps> <epoch_utc_s> <jpl_ephemeris_file> [use_sun:0|1] [use_moon:0|1]");
-    return 1;
-  }
+  double x_eci_m{};
+  double y_eci_m{};
+  double z_eci_m{};
+  double vx_eci_mps{};
+  double vy_eci_mps{};
+  double vz_eci_mps{};
+  double epoch_utc_s{};
+  std::filesystem::path eph_file{};
+  int use_sun_flag{1};
+  int use_moon_flag{1};
 
+  CLI::App app{"Single-state third-body perturbation CLI"};
+  app.add_option("x_eci_m", x_eci_m)->required();
+  app.add_option("y_eci_m", y_eci_m)->required();
+  app.add_option("z_eci_m", z_eci_m)->required();
+  app.add_option("vx_eci_mps", vx_eci_mps)->required();
+  app.add_option("vy_eci_mps", vy_eci_mps)->required();
+  app.add_option("vz_eci_mps", vz_eci_mps)->required();
+  app.add_option("epoch_utc_s", epoch_utc_s)->required();
+  app.add_option("jpl_ephemeris_file", eph_file)->required();
+  app.add_option("use_sun", use_sun_flag)->check(CLI::Range(0, 1))->capture_default_str();
+  app.add_option("use_moon", use_moon_flag)->check(CLI::Range(0, 1))->capture_default_str();
+  CLI11_PARSE(app, argc, argv);
+
+  const bool use_sun = (use_sun_flag != 0);
+  const bool use_moon = (use_moon_flag != 0);
   astroforces::core::StateVector state{};
-  state.position_m = astroforces::core::Vec3{std::atof(argv[1]), std::atof(argv[2]), std::atof(argv[3])};
-  state.velocity_mps = astroforces::core::Vec3{std::atof(argv[4]), std::atof(argv[5]), std::atof(argv[6])};
-  state.epoch.utc_seconds = std::atof(argv[7]);
+  state.position_m = astroforces::core::Vec3{x_eci_m, y_eci_m, z_eci_m};
+  state.velocity_mps = astroforces::core::Vec3{vx_eci_mps, vy_eci_mps, vz_eci_mps};
+  state.epoch.utc_seconds = epoch_utc_s;
   state.frame = astroforces::core::Frame::ECI;
 
-  const std::filesystem::path eph_file = argv[8];
   if (!std::filesystem::exists(eph_file)) {
     spdlog::error("ephemeris file not found: {}", eph_file.string());
     return 2;
   }
-
-  const bool use_sun = (argc >= 10) ? (std::atoi(argv[9]) != 0) : true;
-  const bool use_moon = (argc >= 11) ? (std::atoi(argv[10]) != 0) : true;
 
   const auto sun = astroforces::forces::ThirdBodyPerturbationModel::Create(
       {.ephemeris_file = eph_file, .use_sun = use_sun, .use_moon = false, .name = "third_body_sun"});
@@ -68,4 +85,3 @@ int main(int argc, char** argv) {
 
   return 0;
 }
-

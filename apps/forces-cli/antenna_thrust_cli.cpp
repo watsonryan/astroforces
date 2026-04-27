@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <string>
 
+#include <CLI/CLI.hpp>
 #include <fmt/format.h>
 #include <spdlog/spdlog.h>
 
@@ -40,22 +41,45 @@ astroforces::forces::AntennaThrustDirectionMode parse_mode(const std::string& s,
 }  // namespace
 
 int main(int argc, char** argv) {
-  if (argc < 8 || argc > 15) {
-    spdlog::error(
-        "usage: antenna_thrust_cli <x_eci_m> <y_eci_m> <z_eci_m> <vx_eci_mps> <vy_eci_mps> <vz_eci_mps> <epoch_utc_s> [mass_kg] [transmit_power_w] [efficiency] [mode:velocity|nadir|custom_eci|body_fixed] [dir_x] [dir_y] [dir_z]");
-    return 1;
-  }
+  double x_eci_m{};
+  double y_eci_m{};
+  double z_eci_m{};
+  double vx_eci_mps{};
+  double vy_eci_mps{};
+  double vz_eci_mps{};
+  double epoch_utc_s{};
+  double mass_kg{600.0};
+  double power_w{20.0};
+  double efficiency{1.0};
+  std::string mode_s{"velocity"};
+  double dir_x{1.0};
+  double dir_y{0.0};
+  double dir_z{0.0};
+
+  CLI::App app{"Single-state antenna thrust perturbation CLI"};
+  app.add_option("x_eci_m", x_eci_m)->required();
+  app.add_option("y_eci_m", y_eci_m)->required();
+  app.add_option("z_eci_m", z_eci_m)->required();
+  app.add_option("vx_eci_mps", vx_eci_mps)->required();
+  app.add_option("vy_eci_mps", vy_eci_mps)->required();
+  app.add_option("vz_eci_mps", vz_eci_mps)->required();
+  app.add_option("epoch_utc_s", epoch_utc_s)->required();
+  app.add_option("mass_kg", mass_kg)->capture_default_str();
+  app.add_option("transmit_power_w", power_w)->capture_default_str();
+  app.add_option("efficiency", efficiency)->capture_default_str();
+  app.add_option("mode", mode_s)
+      ->check(CLI::IsMember({"velocity", "nadir", "custom_eci", "body_fixed"}))
+      ->capture_default_str();
+  app.add_option("dir_x", dir_x)->capture_default_str();
+  app.add_option("dir_y", dir_y)->capture_default_str();
+  app.add_option("dir_z", dir_z)->capture_default_str();
+  CLI11_PARSE(app, argc, argv);
 
   astroforces::core::StateVector state{};
-  state.position_m = astroforces::core::Vec3{std::atof(argv[1]), std::atof(argv[2]), std::atof(argv[3])};
-  state.velocity_mps = astroforces::core::Vec3{std::atof(argv[4]), std::atof(argv[5]), std::atof(argv[6])};
-  state.epoch.utc_seconds = std::atof(argv[7]);
+  state.position_m = astroforces::core::Vec3{x_eci_m, y_eci_m, z_eci_m};
+  state.velocity_mps = astroforces::core::Vec3{vx_eci_mps, vy_eci_mps, vz_eci_mps};
+  state.epoch.utc_seconds = epoch_utc_s;
   state.frame = astroforces::core::Frame::ECI;
-
-  const double mass_kg = (argc >= 9) ? std::atof(argv[8]) : 600.0;
-  const double power_w = (argc >= 10) ? std::atof(argv[9]) : 20.0;
-  const double efficiency = (argc >= 11) ? std::atof(argv[10]) : 1.0;
-  const std::string mode_s = (argc >= 12) ? argv[11] : "velocity";
 
   bool mode_ok = false;
   const auto mode = parse_mode(mode_s, &mode_ok);
@@ -64,11 +88,7 @@ int main(int argc, char** argv) {
     return 2;
   }
 
-  const auto dir = astroforces::core::Vec3{
-      (argc >= 13) ? std::atof(argv[12]) : 1.0,
-      (argc >= 14) ? std::atof(argv[13]) : 0.0,
-      (argc >= 15) ? std::atof(argv[14]) : 0.0,
-  };
+  const auto dir = astroforces::core::Vec3{dir_x, dir_y, dir_z};
 
   astroforces::sc::SpacecraftProperties sc{
       .mass_kg = mass_kg, .reference_area_m2 = 4.0, .cd = 2.2, .cr = 1.3, .use_surface_model = false, .surfaces = {}};

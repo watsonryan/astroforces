@@ -10,16 +10,37 @@ set(ASTROFORCES_EXTERNAL_MODELS_TAG "main" CACHE STRING "Branch/tag for external
 
 set(ASTROFORCES_EIGEN_REPO "https://gitlab.com/libeigen/eigen.git" CACHE STRING "Eigen repository URL")
 set(ASTROFORCES_EIGEN_TAG "5.0.0" CACHE STRING "Eigen git tag")
+set(ASTROFORCES_CLI11_REPO "https://github.com/CLIUtils/CLI11.git" CACHE STRING "CLI11 repository URL")
+set(ASTROFORCES_CLI11_TAG "v2.6.1" CACHE STRING "CLI11 git tag")
 
 CPMAddPackage(
   NAME eigen
   GIT_REPOSITORY ${ASTROFORCES_EIGEN_REPO}
   GIT_TAG ${ASTROFORCES_EIGEN_TAG}
 )
+find_package(fmt CONFIG QUIET)
+if(NOT TARGET fmt::fmt)
+  CPMAddPackage(
+    NAME fmt
+    URL https://github.com/fmtlib/fmt/archive/refs/tags/12.1.0.tar.gz
+    OPTIONS
+      "FMT_DOC OFF"
+      "FMT_TEST OFF"
+      "FMT_FUZZ OFF"
+  )
+endif()
+if(TARGET fmt AND NOT TARGET fmt::fmt)
+  add_library(fmt::fmt ALIAS fmt)
+endif()
+
 CPMAddPackage(
-  NAME fmt
-  GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-  GIT_TAG 10.2.1
+  NAME cli11
+  GIT_REPOSITORY ${ASTROFORCES_CLI11_REPO}
+  GIT_TAG ${ASTROFORCES_CLI11_TAG}
+  OPTIONS
+    "CLI11_BUILD_TESTS OFF"
+    "CLI11_BUILD_EXAMPLES OFF"
+    "CLI11_BUILD_DOCS OFF"
 )
 CPMAddPackage(
   NAME spdlog
@@ -28,6 +49,9 @@ CPMAddPackage(
   OPTIONS
     "SPDLOG_FMT_EXTERNAL ON"
 )
+if(TARGET spdlog AND NOT TARGET spdlog::spdlog)
+  add_library(spdlog::spdlog ALIAS spdlog)
+endif()
 
 CPMAddPackage(
   NAME nrlmsis21_ext
@@ -71,4 +95,9 @@ if(TARGET Eigen3::Eigen)
   set(ASTROFORCES_EIGEN_TARGET Eigen3::Eigen)
 elseif(TARGET eigen)
   set(ASTROFORCES_EIGEN_TARGET eigen)
+endif()
+
+set(ASTROFORCES_CLI11_TARGET "")
+if(TARGET CLI11::CLI11)
+  set(ASTROFORCES_CLI11_TARGET CLI11::CLI11)
 endif()

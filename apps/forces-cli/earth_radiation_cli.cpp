@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <string>
 
+#include <CLI/CLI.hpp>
 #include <fmt/format.h>
 #include <spdlog/spdlog.h>
 
@@ -19,22 +20,37 @@ double magnitude(const astroforces::core::Vec3& v) { return astroforces::core::n
 }  // namespace
 
 int main(int argc, char** argv) {
-  if (argc < 8 || argc > 12) {
-    spdlog::error(
-        "usage: earth_radiation_cli <x_frame_m> <y_frame_m> <z_frame_m> <vx_frame_mps> <vy_frame_mps> <vz_frame_mps> <epoch_utc_s> [mass_kg] [area_m2] [cr] [jpl_ephemeris_file]");
-    return 1;
-  }
+  double x_frame_m{};
+  double y_frame_m{};
+  double z_frame_m{};
+  double vx_frame_mps{};
+  double vy_frame_mps{};
+  double vz_frame_mps{};
+  double epoch_utc_s{};
+  double mass_kg{600.0};
+  double area_m2{4.0};
+  double cr{1.3};
+  std::string eph_file{};
+
+  CLI::App app{"Single-state Earth radiation pressure perturbation CLI"};
+  app.add_option("x_frame_m", x_frame_m)->required();
+  app.add_option("y_frame_m", y_frame_m)->required();
+  app.add_option("z_frame_m", z_frame_m)->required();
+  app.add_option("vx_frame_mps", vx_frame_mps)->required();
+  app.add_option("vy_frame_mps", vy_frame_mps)->required();
+  app.add_option("vz_frame_mps", vz_frame_mps)->required();
+  app.add_option("epoch_utc_s", epoch_utc_s)->required();
+  app.add_option("mass_kg", mass_kg)->capture_default_str();
+  app.add_option("area_m2", area_m2)->capture_default_str();
+  app.add_option("cr", cr)->capture_default_str();
+  app.add_option("jpl_ephemeris_file", eph_file)->capture_default_str();
+  CLI11_PARSE(app, argc, argv);
 
   astroforces::core::StateVector state{};
-  state.position_m = astroforces::core::Vec3{std::atof(argv[1]), std::atof(argv[2]), std::atof(argv[3])};
-  state.velocity_mps = astroforces::core::Vec3{std::atof(argv[4]), std::atof(argv[5]), std::atof(argv[6])};
-  state.epoch.utc_seconds = std::atof(argv[7]);
+  state.position_m = astroforces::core::Vec3{x_frame_m, y_frame_m, z_frame_m};
+  state.velocity_mps = astroforces::core::Vec3{vx_frame_mps, vy_frame_mps, vz_frame_mps};
+  state.epoch.utc_seconds = epoch_utc_s;
   state.frame = astroforces::core::Frame::ECI;
-
-  const double mass_kg = (argc >= 9) ? std::atof(argv[8]) : 600.0;
-  const double area_m2 = (argc >= 10) ? std::atof(argv[9]) : 4.0;
-  const double cr = (argc >= 11) ? std::atof(argv[10]) : 1.3;
-  const std::string eph_file = (argc >= 12) ? argv[11] : "";
 
   astroforces::sc::SpacecraftProperties sc{
       .mass_kg = mass_kg, .reference_area_m2 = area_m2, .cd = 2.2, .cr = cr, .use_surface_model = false, .surfaces = {}};

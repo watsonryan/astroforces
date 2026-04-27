@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+#include <CLI/CLI.hpp>
 #include <fmt/format.h>
 #include <spdlog/spdlog.h>
 
@@ -53,18 +54,22 @@ double magnitude(const astroforces::core::Vec3& v) { return astroforces::core::n
 }  // namespace
 
 int main(int argc, char** argv) {
-  if (argc < 3 || argc > 7) {
-    spdlog::error("usage: earth_radiation_batch_cli <input_csv> <output_csv> [mass_kg] [area_m2] [cr] [jpl_ephemeris_file]");
-    spdlog::error("input row: epoch_utc_s,x_eci_m,y_eci_m,z_eci_m,vx_eci_mps,vy_eci_mps,vz_eci_mps");
-    return 1;
-  }
+  std::filesystem::path input_csv{};
+  std::filesystem::path output_csv{};
+  double mass_kg{600.0};
+  double area_m2{4.0};
+  double cr{1.3};
+  std::string eph_file{};
 
-  const std::filesystem::path input_csv = argv[1];
-  const std::filesystem::path output_csv = argv[2];
-  const double mass_kg = (argc >= 4) ? std::atof(argv[3]) : 600.0;
-  const double area_m2 = (argc >= 5) ? std::atof(argv[4]) : 4.0;
-  const double cr = (argc >= 6) ? std::atof(argv[5]) : 1.3;
-  const std::string eph_file = (argc >= 7) ? argv[6] : "";
+  CLI::App app{"Batch Earth radiation pressure perturbation CLI"};
+  app.add_option("input_csv", input_csv)->required();
+  app.add_option("output_csv", output_csv)->required();
+  app.add_option("mass_kg", mass_kg)->capture_default_str();
+  app.add_option("area_m2", area_m2)->capture_default_str();
+  app.add_option("cr", cr)->capture_default_str();
+  app.add_option("jpl_ephemeris_file", eph_file)->capture_default_str();
+  app.footer("input row: epoch_utc_s,x_eci_m,y_eci_m,z_eci_m,vx_eci_mps,vy_eci_mps,vz_eci_mps");
+  CLI11_PARSE(app, argc, argv);
 
   std::ifstream in(input_csv);
   if (!in) {
