@@ -1,7 +1,7 @@
 /**
  * @file frame_transform_cli.cpp
  * @brief Frame transform utility for external cross-validation (e.g., Astropy).
- * @author Watosn
+ * @author Watson
  */
 
 #include <cstdlib>

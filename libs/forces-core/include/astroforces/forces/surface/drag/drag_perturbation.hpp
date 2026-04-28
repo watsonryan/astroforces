@@ -1,7 +1,7 @@
 /**
  * @file drag_perturbation.hpp
  * @brief Drag perturbation model adapter for the generic force interface.
- * @author Watosn
+ * @author Watson
  */
 #pragma once
 

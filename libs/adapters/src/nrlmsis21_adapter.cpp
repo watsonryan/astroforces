@@ -1,7 +1,7 @@
 /**
  * @file nrlmsis21_adapter.cpp
  * @brief NRLMSIS 2.1 adapter implementation.
- * @author Watosn
+ * @author Watson
  */
 
 #include "astroforces/adapters/nrlmsis21_adapter.hpp"

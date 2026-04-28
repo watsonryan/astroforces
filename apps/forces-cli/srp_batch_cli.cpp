@@ -1,7 +1,7 @@
 /**
  * @file srp_batch_cli.cpp
  * @brief Batch SRP perturbation CLI.
- * @author Watosn
+ * @author Watson
  */
 
 #include <cstdlib>

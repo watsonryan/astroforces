@@ -1,7 +1,7 @@
 /**
  * @file cip.hpp
  * @brief CIP (X, Y, s) loading and interpolation for rigorous GCRF/ITRF transforms.
- * @author Watosn
+ * @author Watson
  */
 #pragma once
 

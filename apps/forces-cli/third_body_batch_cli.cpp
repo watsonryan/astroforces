@@ -1,7 +1,7 @@
 /**
  * @file third_body_batch_cli.cpp
  * @brief Batch third-body perturbation CLI.
- * @author Watosn
+ * @author Watson
  */
 
 #include <cstdlib>

@@ -1,7 +1,7 @@
 /**
  * @file test_antenna_thrust.cpp
  * @brief Antenna thrust model unit/integration checks.
- * @author Watosn
+ * @author Watson
  */
 
 #include <cmath>
@@ -129,4 +129,3 @@ int main() {
 
   return 0;
 }
-

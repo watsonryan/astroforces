@@ -1,7 +1,7 @@
 /**
  * @file test_eop_reader.cpp
  * @brief EOP finals parser/interpolation tests.
- * @author Watosn
+ * @author Watson
  */
 
 #include <cmath>

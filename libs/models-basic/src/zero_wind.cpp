@@ -1,7 +1,7 @@
 /**
  * @file zero_wind.cpp
  * @brief Zero neutral wind model implementation.
- * @author Watosn
+ * @author Watson
  */
 
 #include "astroforces/models/exponential_atmosphere.hpp"

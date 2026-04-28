@@ -1,7 +1,7 @@
 /**
  * @file test_cip_reader.cpp
  * @brief CIP X/Y/s parser/interpolation tests.
- * @author Watosn
+ * @author Watson
  */
 
 #include <cmath>

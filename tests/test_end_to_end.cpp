@@ -1,7 +1,7 @@
 /**
  * @file test_end_to_end.cpp
  * @brief End-to-end drag pipeline smoke test.
- * @author Watosn
+ * @author Watson
  */
 
 #include <spdlog/spdlog.h>

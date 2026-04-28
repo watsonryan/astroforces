@@ -1,7 +1,7 @@
 /**
  * @file gravity_sph_cli.cpp
  * @brief Single-state full SPH gravity CLI.
- * @author Watosn
+ * @author Watson
  */
 
 #include <cstdlib>

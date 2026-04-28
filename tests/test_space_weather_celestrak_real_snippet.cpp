@@ -1,7 +1,7 @@
 /**
  * @file test_space_weather_celestrak_real_snippet.cpp
  * @brief Regression test from CelesTrak published format example row.
- * @author Watosn
+ * @author Watson
  */
 
 #include <cmath>

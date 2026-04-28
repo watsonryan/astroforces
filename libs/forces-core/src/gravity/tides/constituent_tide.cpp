@@ -1,7 +1,7 @@
 /**
  * @file constituent_tide.cpp
  * @brief Constituent ocean/atmospheric tide SH correction model.
- * @author Watosn
+ * @author Watson
  */
 
 #include "astroforces/forces/gravity/tides/constituent_tide.hpp"

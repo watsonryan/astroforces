@@ -1,7 +1,7 @@
 /**
  * @file gravity_sph_perturbation.hpp
  * @brief Gravity perturbation wrapper for the force stack.
- * @author Watosn
+ * @author Watson
  */
 #pragma once
 

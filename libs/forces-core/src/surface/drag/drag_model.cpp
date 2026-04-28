@@ -1,7 +1,7 @@
 /**
  * @file drag_model.cpp
  * @brief Drag acceleration pipeline implementation.
- * @author Watosn
+ * @author Watson
  */
 
 #include "astroforces/forces/surface/drag/drag_model.hpp"

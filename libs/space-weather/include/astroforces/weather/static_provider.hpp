@@ -1,7 +1,7 @@
 /**
  * @file static_provider.hpp
  * @brief Constant-value weather provider.
- * @author Watosn
+ * @author Watson
  */
 #pragma once
 

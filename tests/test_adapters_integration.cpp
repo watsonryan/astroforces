@@ -1,7 +1,7 @@
 /**
  * @file test_adapters_integration.cpp
  * @brief Adapter-backed integration tests across NRLMSIS, DTM2020, and HWM14.
- * @author Watosn
+ * @author Watson
  */
 
 #include <cmath>

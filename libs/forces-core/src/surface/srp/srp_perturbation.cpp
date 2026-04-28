@@ -1,7 +1,7 @@
 /**
  * @file srp_perturbation.cpp
  * @brief SRP perturbation wrapper implementation.
- * @author Watosn
+ * @author Watson
  */
 
 #include "astroforces/forces/surface/srp/srp_perturbation.hpp"
@@ -32,4 +32,3 @@ astroforces::forces::PerturbationContribution SrpPerturbationModel::evaluate(
 }
 
 }  // namespace astroforces::forces
-

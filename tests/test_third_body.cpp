@@ -1,7 +1,7 @@
 /**
  * @file test_third_body.cpp
  * @brief Third-body perturbation integration tests.
- * @author Watosn
+ * @author Watson
  */
 
 #include <cmath>

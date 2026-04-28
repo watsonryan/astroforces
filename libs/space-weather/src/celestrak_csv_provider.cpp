@@ -1,7 +1,7 @@
 /**
  * @file celestrak_csv_provider.cpp
  * @brief CelesTrak SW-Last5Years CSV provider implementation.
- * @author Watosn
+ * @author Watson
  */
 
 #include "astroforces/weather/celestrak_csv_provider.hpp"

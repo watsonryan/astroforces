@@ -1,7 +1,7 @@
 /**
  * @file test_leap_seconds.cpp
  * @brief Leap-second provider parse/fallback tests.
- * @author Watosn
+ * @author Watson
  */
 
 #include <cmath>

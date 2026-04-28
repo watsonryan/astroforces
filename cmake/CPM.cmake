@@ -1,4 +1,4 @@
-# Author: Watosn
+# Author: Watson
 if(NOT CPM_VERSION)
   set(CPM_VERSION 0.40.2)
 endif()

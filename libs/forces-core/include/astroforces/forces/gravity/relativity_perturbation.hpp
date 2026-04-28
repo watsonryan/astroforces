@@ -1,7 +1,7 @@
 /**
  * @file relativity_perturbation.hpp
  * @brief Relativity perturbation wrapper for generic force stack.
- * @author Watosn
+ * @author Watson
  */
 #pragma once
 

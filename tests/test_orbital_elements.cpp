@@ -1,7 +1,7 @@
 /**
  * @file test_orbital_elements.cpp
  * @brief Classical orbital-element regression tests.
- * @author Watosn
+ * @author Watson
  */
 
 #include <cmath>

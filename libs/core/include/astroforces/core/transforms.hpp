@@ -1,7 +1,7 @@
 /**
  * @file transforms.hpp
  * @brief Shared time and coordinate transform helpers.
- * @author Watosn
+ * @author Watson
  */
 #pragma once
 

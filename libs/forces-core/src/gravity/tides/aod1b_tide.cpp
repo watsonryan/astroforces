@@ -1,7 +1,7 @@
 /**
  * @file aod1b_tide.cpp
  * @brief AOD1B gravity de-aliasing SH correction model.
- * @author Watosn
+ * @author Watson
  */
 
 #include "astroforces/forces/gravity/tides/aod1b_tide.hpp"

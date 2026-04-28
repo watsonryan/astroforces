@@ -1,7 +1,7 @@
 /**
  * @file relativity_perturbation.cpp
  * @brief Relativity perturbation wrapper implementation.
- * @author Watosn
+ * @author Watson
  */
 
 #include "astroforces/forces/gravity/relativity_perturbation.hpp"
@@ -25,4 +25,3 @@ PerturbationContribution RelativityPerturbationModel::evaluate(const Perturbatio
 }
 
 }  // namespace astroforces::forces
-

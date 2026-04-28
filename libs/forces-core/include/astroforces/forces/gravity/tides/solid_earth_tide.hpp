@@ -1,7 +1,7 @@
 /**
  * @file solid_earth_tide.hpp
  * @brief Solid Earth tide contribution helpers for gravity SH models.
- * @author Watosn
+ * @author Watson
  */
 #pragma once
 

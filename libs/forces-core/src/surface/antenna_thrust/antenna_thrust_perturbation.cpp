@@ -1,7 +1,7 @@
 /**
  * @file antenna_thrust_perturbation.cpp
  * @brief Antenna thrust perturbation wrapper implementation.
- * @author Watosn
+ * @author Watson
  */
 
 #include "astroforces/forces/surface/antenna_thrust/antenna_thrust_perturbation.hpp"
@@ -27,4 +27,3 @@ astroforces::forces::PerturbationContribution AntennaThrustPerturbationModel::ev
 }
 
 }  // namespace astroforces::forces
-

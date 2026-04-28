@@ -1,4 +1,4 @@
-# Author: Watosn
+# Author: Watson
 cmake_minimum_required(VERSION 3.25)
 project(astroforces VERSION 0.1.0 LANGUAGES CXX)
 

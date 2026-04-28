@@ -1,7 +1,7 @@
 /**
  * @file drag_perturbation.cpp
  * @brief Drag perturbation model implementation.
- * @author Watosn
+ * @author Watson
  */
 
 #include "astroforces/forces/surface/drag/drag_perturbation.hpp"

@@ -1,7 +1,7 @@
 /**
  * @file pole_tide.cpp
  * @brief Pole tide correction helpers for gravity SH models.
- * @author Watosn
+ * @author Watson
  */
 
 #include "astroforces/forces/gravity/tides/pole_tide.hpp"

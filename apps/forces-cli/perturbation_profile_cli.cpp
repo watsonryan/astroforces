@@ -1,7 +1,7 @@
 /**
  * @file perturbation_profile_cli.cpp
  * @brief Altitude sweep utility for perturbation-acceleration profiling.
- * @author Watosn
+ * @author Watson
  */
 
 #include <cmath>

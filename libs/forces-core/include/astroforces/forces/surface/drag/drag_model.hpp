@@ -1,7 +1,7 @@
 /**
  * @file drag_model.hpp
  * @brief Drag acceleration pipeline.
- * @author Watosn
+ * @author Watson
  */
 #pragma once
 

@@ -1,7 +1,7 @@
 /**
  * @file test_earth_radiation.cpp
  * @brief Earth Radiation model unit/integration checks.
- * @author Watosn
+ * @author Watson
  */
 
 #include <cmath>

@@ -1,7 +1,7 @@
 /**
  * @file earth_radiation_model.hpp
  * @brief Earth radiation pressure acceleration model.
- * @author Watosn
+ * @author Watson
  */
 #pragma once
 
@@ -44,7 +44,7 @@ class EarthRadiationAccelerationModel final {
    * @brief Configuration for Earth radiation model construction.
    */
   struct Config {
-    // TODO(Watosn): Add configurable higher-order Earth radiance/BRDF modes
+    // TODO(Watson): Add configurable higher-order Earth radiance/BRDF modes
     // (e.g., zonal/maps) beyond the current Lambert-style albedo phase model.
     std::filesystem::path ephemeris_file{};
     double earth_reference_radius_m{astroforces::core::constants::kEarthRadiusWgs84M};

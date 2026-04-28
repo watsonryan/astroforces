@@ -1,7 +1,7 @@
 /**
  * @file relativity_cli.cpp
  * @brief Single-state relativistic perturbation CLI.
- * @author Watosn
+ * @author Watson
  */
 
 #include <cstdlib>

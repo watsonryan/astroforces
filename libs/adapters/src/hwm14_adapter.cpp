@@ -1,7 +1,7 @@
 /**
  * @file hwm14_adapter.cpp
  * @brief HWM14 adapter implementation.
- * @author Watosn
+ * @author Watson
  */
 
 #include "astroforces/adapters/hwm14_adapter.hpp"

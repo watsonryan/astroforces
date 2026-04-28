@@ -1,7 +1,7 @@
 /**
  * @file orbital_elements_cli.cpp
  * @brief ECI/osculating-orbital-element conversion utility.
- * @author Watosn
+ * @author Watson
  */
 
 #include <algorithm>

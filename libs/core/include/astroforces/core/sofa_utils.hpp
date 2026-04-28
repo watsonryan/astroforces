@@ -1,7 +1,7 @@
 /**
  * @file sofa_utils.hpp
  * @brief SOFA-style Earth orientation building blocks (modern C++ implementation).
- * @author Watosn
+ * @author Watson
  */
 #pragma once
 

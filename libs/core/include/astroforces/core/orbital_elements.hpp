@@ -1,7 +1,7 @@
 /**
  * @file orbital_elements.hpp
  * @brief Classical orbital-element utilities.
- * @author Watosn
+ * @author Watson
  */
 #pragma once
 

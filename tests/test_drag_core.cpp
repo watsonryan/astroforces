@@ -1,7 +1,7 @@
 /**
  * @file test_drag_core.cpp
  * @brief Core drag equation tests.
- * @author Watosn
+ * @author Watson
  */
 
 #include <cmath>

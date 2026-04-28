@@ -1,7 +1,7 @@
 /**
  * @file srp_perturbation.hpp
  * @brief SRP perturbation wrapper for generic force stack.
- * @author Watosn
+ * @author Watson
  */
 #pragma once
 

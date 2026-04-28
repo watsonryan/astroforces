@@ -1,7 +1,7 @@
 /**
  * @file nrlmsis21_adapter.hpp
  * @brief Adapter between astroforces atmosphere interface and NRLMSIS 2.1 model.
- * @author Watosn
+ * @author Watson
  */
 #pragma once
 

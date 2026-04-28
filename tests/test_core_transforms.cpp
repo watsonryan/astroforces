@@ -1,7 +1,7 @@
 /**
  * @file test_core_transforms.cpp
  * @brief Core frame transform regression tests.
- * @author Watosn
+ * @author Watson
  */
 
 #include <cmath>

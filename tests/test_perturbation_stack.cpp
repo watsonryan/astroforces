@@ -1,7 +1,7 @@
 /**
  * @file test_perturbation_stack.cpp
  * @brief Generic perturbation interface tests.
- * @author Watosn
+ * @author Watson
  */
 
 #include <cmath>

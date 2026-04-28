@@ -1,7 +1,7 @@
 /**
  * @file srp_model.hpp
  * @brief Solar radiation pressure acceleration model.
- * @author Watosn
+ * @author Watson
  */
 #pragma once
 

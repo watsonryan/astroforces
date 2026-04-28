@@ -1,7 +1,7 @@
 /**
  * @file antenna_thrust_batch_cli.cpp
  * @brief Batch antenna thrust perturbation CLI.
- * @author Watosn
+ * @author Watson
  */
 
 #include <cstdlib>

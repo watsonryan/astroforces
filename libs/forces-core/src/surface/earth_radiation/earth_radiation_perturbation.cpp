@@ -1,7 +1,7 @@
 /**
  * @file earth_radiation_perturbation.cpp
  * @brief Earth Radiation perturbation wrapper implementation.
- * @author Watosn
+ * @author Watson
  */
 
 #include "astroforces/forces/surface/earth_radiation/earth_radiation_perturbation.hpp"

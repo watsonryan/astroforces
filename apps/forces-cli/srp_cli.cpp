@@ -1,7 +1,7 @@
 /**
  * @file srp_cli.cpp
  * @brief Single-state SRP perturbation CLI.
- * @author Watosn
+ * @author Watson
  */
 
 #include <cstdlib>

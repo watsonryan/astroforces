@@ -1,7 +1,7 @@
 /**
  * @file srp_model.cpp
  * @brief Solar radiation pressure acceleration model implementation.
- * @author Watosn
+ * @author Watson
  */
 
 #include "astroforces/forces/surface/srp/srp_model.hpp"

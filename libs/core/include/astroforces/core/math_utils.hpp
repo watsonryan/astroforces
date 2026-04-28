@@ -1,7 +1,7 @@
 /**
  * @file math_utils.hpp
  * @brief Shared vector/matrix math helpers.
- * @author Watosn
+ * @author Watson
  */
 #pragma once
 

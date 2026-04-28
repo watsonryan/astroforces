@@ -1,7 +1,7 @@
 /**
  * @file earth_radiation_cli.cpp
  * @brief Single-state Earth radiation pressure perturbation CLI.
- * @author Watosn
+ * @author Watson
  */
 
 #include <cstdlib>

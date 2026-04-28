@@ -1,7 +1,7 @@
 /**
  * @file perturbation.hpp
  * @brief Generic perturbation model interfaces and aggregation utilities.
- * @author Watosn
+ * @author Watson
  */
 #pragma once
 

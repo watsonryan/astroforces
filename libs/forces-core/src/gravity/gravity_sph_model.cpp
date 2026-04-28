@@ -1,7 +1,7 @@
 /**
  * @file gravity_sph_model.cpp
  * @brief Full spherical harmonic gravity model implementation.
- * @author Watosn
+ * @author Watson
  */
 
 #include "astroforces/forces/gravity/gravity_sph_model.hpp"

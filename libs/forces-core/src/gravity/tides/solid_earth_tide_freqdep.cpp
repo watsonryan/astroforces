@@ -1,7 +1,7 @@
 /**
  * @file solid_earth_tide_freqdep.cpp
  * @brief Frequency-dependent solid Earth tide (IERS2010 6.5 style) helpers.
- * @author Watosn
+ * @author Watson
  */
 
 #include "astroforces/forces/gravity/tides/solid_earth_tide_freqdep.hpp"

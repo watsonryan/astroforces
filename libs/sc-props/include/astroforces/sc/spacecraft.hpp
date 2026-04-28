@@ -1,7 +1,7 @@
 /**
  * @file spacecraft.hpp
  * @brief Spacecraft geometry and drag-relevant properties.
- * @author Watosn
+ * @author Watson
  */
 #pragma once
 

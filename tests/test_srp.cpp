@@ -1,7 +1,7 @@
 /**
  * @file test_srp.cpp
  * @brief SRP model integration test.
- * @author Watosn
+ * @author Watson
  */
 
 #include <cmath>

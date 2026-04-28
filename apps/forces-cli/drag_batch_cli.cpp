@@ -1,7 +1,7 @@
 /**
  * @file drag_batch_cli.cpp
  * @brief Batch drag profile runner with CSV/JSON outputs.
- * @author Watosn
+ * @author Watson
  */
 
 #include <cstdlib>

@@ -1,7 +1,7 @@
 /**
  * @file constituent_tide.hpp
  * @brief Constituent ocean/atmospheric tide SH correction model.
- * @author Watosn
+ * @author Watson
  */
 #pragma once
 

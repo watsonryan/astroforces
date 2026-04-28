@@ -1,7 +1,7 @@
 /**
  * @file earth_radiation_perturbation.hpp
  * @brief Earth Radiation perturbation wrapper for generic force stack.
- * @author Watosn
+ * @author Watson
  */
 #pragma once
 

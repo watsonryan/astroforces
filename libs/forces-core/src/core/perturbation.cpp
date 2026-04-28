@@ -1,7 +1,7 @@
 /**
  * @file perturbation.cpp
  * @brief Generic perturbation model aggregation implementation.
- * @author Watosn
+ * @author Watson
  */
 
 #include "astroforces/forces/core/perturbation.hpp"

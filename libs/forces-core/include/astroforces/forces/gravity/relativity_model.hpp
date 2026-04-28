@@ -1,7 +1,7 @@
 /**
  * @file relativity_model.hpp
  * @brief Post-Newtonian relativistic acceleration model (Eq. 25 decomposition).
- * @author Watosn
+ * @author Watson
  */
 #pragma once
 

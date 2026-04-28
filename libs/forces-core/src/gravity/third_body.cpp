@@ -1,7 +1,7 @@
 /**
  * @file third_body.cpp
  * @brief Third-body perturbation model implementation.
- * @author Watosn
+ * @author Watson
  */
 
 #include "astroforces/forces/gravity/third_body.hpp"

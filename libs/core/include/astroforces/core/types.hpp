@@ -1,7 +1,7 @@
 /**
  * @file types.hpp
  * @brief Core domain types for astroforces.
- * @author Watosn
+ * @author Watson
  */
 #pragma once
 

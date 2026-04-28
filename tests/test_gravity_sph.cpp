@@ -1,7 +1,7 @@
 /**
  * @file test_gravity_sph.cpp
  * @brief Full SPH gravity model tests.
- * @author Watosn
+ * @author Watson
  */
 
 #include <cmath>

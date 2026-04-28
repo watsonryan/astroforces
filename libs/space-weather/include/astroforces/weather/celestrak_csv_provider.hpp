@@ -1,7 +1,7 @@
 /**
  * @file celestrak_csv_provider.hpp
  * @brief Space weather provider backed by CelesTrak SW-Last5Years CSV.
- * @author Watosn
+ * @author Watson
  */
 #pragma once
 

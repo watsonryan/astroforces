@@ -1,7 +1,7 @@
 /**
  * @file drag_perf_benchmark.cpp
  * @brief Drag performance benchmark for single-point and batch throughput.
- * @author Watosn
+ * @author Watson
  */
 
 #include <chrono>

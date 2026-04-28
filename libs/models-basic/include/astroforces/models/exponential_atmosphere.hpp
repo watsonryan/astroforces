@@ -1,7 +1,7 @@
 /**
  * @file exponential_atmosphere.hpp
  * @brief Basic exponential atmosphere model for integration testing.
- * @author Watosn
+ * @author Watson
  */
 #pragma once
 

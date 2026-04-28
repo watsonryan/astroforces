@@ -1,7 +1,7 @@
 /**
  * @file test_relativity.cpp
  * @brief Relativistic acceleration model tests.
- * @author Watosn
+ * @author Watson
  */
 
 #include <cmath>

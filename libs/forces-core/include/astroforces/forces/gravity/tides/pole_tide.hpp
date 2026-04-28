@@ -1,7 +1,7 @@
 /**
  * @file pole_tide.hpp
  * @brief Pole tide correction helpers for gravity SH models.
- * @author Watosn
+ * @author Watson
  */
 #pragma once
 

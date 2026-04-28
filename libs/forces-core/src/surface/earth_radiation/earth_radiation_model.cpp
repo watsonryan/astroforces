@@ -1,7 +1,7 @@
 /**
  * @file earth_radiation_model.cpp
  * @brief Earth radiation pressure acceleration model implementation.
- * @author Watosn
+ * @author Watson
  */
 
 #include "astroforces/forces/surface/earth_radiation/earth_radiation_model.hpp"

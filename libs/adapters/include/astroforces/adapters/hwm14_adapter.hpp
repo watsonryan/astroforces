@@ -1,7 +1,7 @@
 /**
  * @file hwm14_adapter.hpp
  * @brief Adapter between astroforces wind interface and HWM14 model.
- * @author Watosn
+ * @author Watson
  */
 #pragma once
 

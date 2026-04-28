@@ -1,7 +1,7 @@
 /**
  * @file earth_radiation_batch_cli.cpp
  * @brief Batch Earth radiation pressure perturbation CLI.
- * @author Watosn
+ * @author Watson
  */
 
 #include <cstdlib>

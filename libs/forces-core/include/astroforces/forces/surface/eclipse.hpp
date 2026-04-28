@@ -1,7 +1,7 @@
 /**
  * @file eclipse.hpp
  * @brief Eclipse/visibility helpers for solar-dependent surface forces.
- * @author Watosn
+ * @author Watson
  */
 #pragma once
 

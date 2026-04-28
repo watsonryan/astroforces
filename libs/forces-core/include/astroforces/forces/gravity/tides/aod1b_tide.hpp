@@ -1,7 +1,7 @@
 /**
  * @file aod1b_tide.hpp
  * @brief AOD1B gravity de-aliasing SH correction model.
- * @author Watosn
+ * @author Watson
  */
 #pragma once
 

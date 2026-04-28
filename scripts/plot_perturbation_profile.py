@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Publication-ready perturbation profile plotter (IEEE styling).
-Author: Watosn
+Author: Watson
 """
 
 from __future__ import annotations

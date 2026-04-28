@@ -1,7 +1,7 @@
 /**
  * @file transform_profile_cli.cpp
  * @brief Micro-benchmark for rigorous GCRF<->ITRF transforms.
- * @author Watosn
+ * @author Watson
  */
 
 #include <chrono>

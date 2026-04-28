@@ -1,7 +1,7 @@
 /**
  * @file third_body_cli.cpp
  * @brief Single-state third-body perturbation CLI.
- * @author Watosn
+ * @author Watson
  */
 
 #include <cstdlib>

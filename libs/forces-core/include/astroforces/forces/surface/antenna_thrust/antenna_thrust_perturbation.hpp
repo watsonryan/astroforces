@@ -1,7 +1,7 @@
 /**
  * @file antenna_thrust_perturbation.hpp
  * @brief Antenna thrust perturbation wrapper for generic force stack.
- * @author Watosn
+ * @author Watson
  */
 #pragma once
 

@@ -1,7 +1,7 @@
 /**
  * @file leap_seconds.hpp
  * @brief Leap-second table loading and UTC->TAI offset utilities.
- * @author Watosn
+ * @author Watson
  */
 #pragma once
 

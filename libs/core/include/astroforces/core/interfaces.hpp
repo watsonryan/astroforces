@@ -1,7 +1,7 @@
 /**
  * @file interfaces.hpp
  * @brief Core model interfaces for atmosphere/wind/weather.
- * @author Watosn
+ * @author Watson
  */
 #pragma once
 

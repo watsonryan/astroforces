@@ -1,7 +1,7 @@
 /**
  * @file third_body.hpp
  * @brief Third-body perturbation model using JPL ephemerides.
- * @author Watosn
+ * @author Watson
  */
 #pragma once
 

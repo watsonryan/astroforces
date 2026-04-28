@@ -1,7 +1,7 @@
 /**
  * @file relativity_model.cpp
  * @brief Post-Newtonian relativistic acceleration model implementation.
- * @author Watosn
+ * @author Watson
  */
 
 #include "astroforces/forces/gravity/relativity_model.hpp"

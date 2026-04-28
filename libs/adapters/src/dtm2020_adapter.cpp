@@ -1,7 +1,7 @@
 /**
  * @file dtm2020_adapter.cpp
  * @brief DTM2020 adapter implementation.
- * @author Watosn
+ * @author Watson
  */
 
 #include "astroforces/adapters/dtm2020_adapter.hpp"

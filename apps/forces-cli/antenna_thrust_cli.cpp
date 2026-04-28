@@ -1,7 +1,7 @@
 /**
  * @file antenna_thrust_cli.cpp
  * @brief Single-state antenna thrust perturbation CLI.
- * @author Watosn
+ * @author Watson
  */
 
 #include <cstdlib>

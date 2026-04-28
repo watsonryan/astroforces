@@ -1,7 +1,7 @@
 /**
  * @file spacecraft.cpp
  * @brief Spacecraft geometry helper implementation.
- * @author Watosn
+ * @author Watson
  */
 
 #include "astroforces/sc/spacecraft.hpp"

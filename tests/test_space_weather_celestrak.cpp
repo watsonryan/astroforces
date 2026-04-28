@@ -1,7 +1,7 @@
 /**
  * @file test_space_weather_celestrak.cpp
  * @brief CelesTrak CSV weather provider tests.
- * @author Watosn
+ * @author Watson
  */
 
 #include <cmath>

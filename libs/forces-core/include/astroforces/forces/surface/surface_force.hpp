@@ -1,7 +1,7 @@
 /**
  * @file surface_force.hpp
  * @brief Shared surface-force kernel used by drag and SRP models.
- * @author Watosn
+ * @author Watson
  */
 #pragma once
 

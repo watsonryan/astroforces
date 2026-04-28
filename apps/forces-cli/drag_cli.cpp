@@ -1,7 +1,7 @@
 /**
  * @file drag_cli.cpp
  * @brief astroforces drag command-line entrypoint.
- * @author Watosn
+ * @author Watson
  */
 
 #include <cstdlib>

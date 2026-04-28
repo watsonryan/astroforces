@@ -1,7 +1,7 @@
 /**
  * @file constants.hpp
  * @brief Shared physical constants for astrodynamics models.
- * @author Watosn
+ * @author Watson
  */
 #pragma once
 

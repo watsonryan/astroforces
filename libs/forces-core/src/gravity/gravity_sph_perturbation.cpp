@@ -1,7 +1,7 @@
 /**
  * @file gravity_sph_perturbation.cpp
  * @brief Gravity perturbation wrapper implementation.
- * @author Watosn
+ * @author Watson
  */
 
 #include "astroforces/forces/gravity/gravity_sph_perturbation.hpp"

@@ -1,7 +1,7 @@
 /**
  * @file eop.hpp
  * @brief IERS EOP loading and interpolation for frame transforms.
- * @author Watosn
+ * @author Watson
  */
 #pragma once
 

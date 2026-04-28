@@ -1,7 +1,7 @@
 /**
  * @file gravity_sph_model.hpp
  * @brief Full spherical harmonic gravity model (Cnm/Snm) with optional solid Earth tides.
- * @author Watosn
+ * @author Watson
  */
 #pragma once
 

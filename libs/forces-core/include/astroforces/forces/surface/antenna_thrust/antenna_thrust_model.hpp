@@ -1,7 +1,7 @@
 /**
  * @file antenna_thrust_model.hpp
  * @brief Antenna thrust acceleration model.
- * @author Watosn
+ * @author Watson
  */
 #pragma once
 

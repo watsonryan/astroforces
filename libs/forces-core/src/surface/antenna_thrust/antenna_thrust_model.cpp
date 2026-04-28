@@ -1,7 +1,7 @@
 /**
  * @file antenna_thrust_model.cpp
  * @brief Antenna thrust acceleration model implementation.
- * @author Watosn
+ * @author Watson
  */
 
 #include "astroforces/forces/surface/antenna_thrust/antenna_thrust_model.hpp"
